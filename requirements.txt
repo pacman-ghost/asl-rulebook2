@@ -1,0 +1,4 @@
+# python 3.8.7
+
+pdfminer.six==20201018
+click==7.1.2

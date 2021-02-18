@@ -1,0 +1,10 @@
+_work_/
+
+.vscode
+.venv*
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+*.swp
+*.swo

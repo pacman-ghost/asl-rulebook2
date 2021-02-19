@@ -40,4 +40,7 @@ setup(
     data_files = [
         ( "asl-rulebook2", ["LICENSE.txt"] ),
     ],
+    entry_points = {
+        "console_scripts": "dump-pdf = bin.dump_pdf:main",
+    }
 )

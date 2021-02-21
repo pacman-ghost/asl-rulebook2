@@ -4,7 +4,7 @@ import re
 
 # ---------------------------------------------------------------------
 
-def parse_page_numbers( val ):
+def parse_page_numbers( val, offset=0 ):
     """Parse a list of page numbers.
 
     We recognize a list of page numbers, and/or ranges e.g. 1,2,5-9,13.
@@ -17,4 +17,4 @@ def parse_page_numbers( val ):
                 vals.update( range( int(mo.group(1)), int(mo.group(2))+1 ) )
             else:
                 vals.add( int(v) )
-    return vals
+    return [ v+offset for v in vals ]

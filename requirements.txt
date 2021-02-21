@@ -1,4 +1,5 @@
 # python 3.8.7
 
 pdfminer.six==20201018
+pikepdf==2.5.2
 click==7.1.2

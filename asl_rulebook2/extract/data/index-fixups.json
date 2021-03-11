@@ -1,0 +1,288 @@
+{
+
+"AirSupport": {
+    "new_title": "Air Support",
+    "old_content": "E7,[BRT:TCG6][ChineseDYO:G18.83][ENEMY: S8.9][cannotbeusedvsanyLocationinFog:E3.313][inRB,German AirSupportisalwaysaStukaM42:SSRRB9][JapaneseDYO: G1.6621][inKGP,NAifMistDensity>Light,Night,orOvercast:SSR KGP3][Napalm:G17.4][NightNA:E7.2][OvercastNA:E3.55][during SeaborneAssault/Evacuation:G14.34][SeaborneAssaultDYO: G14.262][TarawaNavalGunfire: TCG3.3]",
+    "new_content": "E7, [BRT: TCG6] [Chinese DYO: G18.83] [ENEMY: S8.9] [cannot be used vs any Location in Fog: E3.313] [in RB, German Air Support is always a Stuka M42: SSR RB9] [Japanese DYO: G1.6621] [in KGP, NA if Mist Density > Light, Night, or Overcast: SSR KGP3] [Napalm: G17.4] [Night NA: E7.2] [Overcast NA: E3.55] [during Seaborne Assault/Evacuation: G14.34] [Seaborne Assault DYO: G14.262] [Tarawa Naval Gunfire: TCG3.3]"
+},
+
+"Ambush": {
+    "old_content": "A11.4[attacksfirstinCC:A11.32][ATTACKERadds+1 drm to Ambush dr in jungle, kunai, or bamboo Location: G.6] [Banks: G8.212][keeping \"?\" during CC: A12.14] [Dummies are eliminated BEFORE the Ambush dr, and do not qualify for the -2 drm: ASOP 8.11B] [Hand-to-Hand CC: J2.31] [Night: E1.77] [Panic Action: S6.213] [Panjis: G9.21] [in Rubble: SSR RB8] [Street Fighting: A11.8] [T-H Heroes are created after Ambush determination: G1.421]",
+    "new_content": "A11.4 [attacks first in CC: A11.32] [ATTACKER adds +1 drm to Ambush dr in jungle, kunai, or bamboo Location: G.6] [Banks: G8.212] [keeping \"?\" during CC: A12.14] [Dummies are eliminated BEFORE the Ambush dr, and do not qualify for the -2 drm: ASOP 8.11B] [Hand-to-Hand CC: J2.31] [Night: E1.77] [Panic Action: S6.213] [Panjis: G9.21] [in Rubble: SSR RB8] [Street Fighting: A11.8] [T-H Heroes are created after Ambush determination: G1.421]"
+},
+
+"American": {
+    "old_content": "A25.3[EarlyArmy:G17.2][OBAAccuracy:C1.3] [Paramarine:G17.111][Raider:G17.111][RifleCompany:S18.5][U.S. Marine Corps: G17.1]",
+    "new_content": "A25.3 [Early Army: G17.2] [OBA Accuracy: C1.3] [Paramarine: G17.111] [Raider: G17.111] [Rifle Company: S18.5] [U.S. Marine Corps: G17.1]"
+},
+
+"AmmoPP Reduction": {
+    "new_title": "Ammo PP Reduction"
+},
+
+"APCR": {
+    "new_title": "APCR/APDS",
+    "old_content": "(Armor Piercing Composite Rigid)/",
+    "new_content": "(Armor Piercing Composite Rigid/Discarding Sabot): C8.1-.2 [EXC German 28LL, 40LL: C4.3, C7.32] [vs Guns: C11.52] [HE Equivalency: C8.31] [TH# Modification: C4.3] [To Kill Table: C7.32] [Residual FP NA: C8.31]"
+},
+"APDS": {
+    "old_content": "(Armor Piercing Discarding Sabot): C8.1-.2 [EXC German 28LL, 40LL: C4.3, C7.32] [vs Guns: C11.52] [HE Equivalency: C8.31] [TH# Modification: C4.3] [To Kill Table: C7.32] [Residual FP NA: C8.31]",
+    "new_content": null
+},
+
+"Broken Units": {
+    "replace": [
+        [ "[Pin NA: A7.8(EXCInterdiction and Huts)]", "[Pin NA (EXC Interdiction and Huts): A7.8]" ]
+    ]
+},
+
+"Cellars": {
+    "replace": [
+        [ "RBCellars", "RB Cellars" ]
+    ]
+},
+
+"DC": {
+    "replace": [
+        [ "[Thrown from: (Halftrack: D6.63) (Sidecar: D15.6)]", "[Thrown from Halftrack: D6.63] [Thrown from Sidecar: D15.6]" ]
+    ]
+},
+
+"Direct Fire": {
+    "old_content": "(Any fireattackrequiringaLOSfromthe firerwhichdoesnotuseIndirectFire):C.1,C9.1[InterveningUnits:A6.6][LC: G12.61-.62, G12.671]",
+    "new_content": "(Any fire attack requiring a LOS from the firer which does not use Indirect Fire): C.1, C9.1 [Intervening Units: A6.6] [LC: G12.61-.62, G12.671]"
+},
+
+"Dogfight": {
+    "old_content": "(AerialCombat):E7.22",
+    "new_content": "(Aerial Combat): E7.22"
+},
+
+"Elite": {
+    "replace": [
+        [ "[German (Africa, 1942-43: F.6) (prior to 1944: A25.1) (SS: A25.11)]", "[German (Africa, 1942-43): F.6] [German (prior to 1944): A25.1] [German (SS): A25.11]" ]
+    ]
+},
+
+"End of Scenario": {
+    "replace": [
+        [ "[in ABtF: R9.4 CG4]", "[in ABtF: R9.4, CG4]" ],
+        [ "[in KGP: P8.4 CG23]", "[in KGP: P8.4, CG23]" ],
+        [ "[in PB: Q9.4 CG19 (-1 drm for any Night Scenario and +1 drm for Day II scenario: Turn Record Track)]", "[in PB (-1 drm for any Night Scenario and +1 drm for Day II scenario: Turn Record Track): Q9.4, CG19]" ],
+        [ "[in RB: O11.4 CG4]", "[in RB: O11.4, CG4]" ]
+    ]
+},
+
+"EX": {
+    "old_content": "ExampleEXC: Exception",
+    "new_content": "Example",
+    "_comment_": "The code manually inserts an entry for EXC: Exception"
+},
+
+"Fortification": {
+    "replace": [
+        [ "[in BRT: SSR1 (BRT Sand: T3.2) (NA in Betio Piers: T9.2)]", "[in BRT: SSR1 (BRT Sand): T3.2] [in BRT: SSR1 (NA in Betio Piers): T9.2]" ]
+    ]
+},
+
+"Hazardous Movement": {
+    "replace": [
+        [ "[Clearance of: (Debris: O1.5) (Fire: B24.72) (Jungle Path: G2.7) (Roadblock: B24.76) (Rubble: B24.71)]", "[Clearance of  Debris: O1.5] [Clearance of Fire: B24.72] [Clearance of Jungle Path: G2.7] [Clearance of Roadblock: B24.76] [Clearance of Rubble: B24.71]" ]
+    ]
+},
+
+"Hedges": {
+    "replace": [
+        [ "[TEM NA for Ground Support: E7.4; for PRC: B9.3]", "[TEM NA for Ground Support: E7.4] [TEM NA for PRC: B9.3]" ]
+    ]
+},
+
+"Immobilization": {
+    "replace": [
+        [ "[LC: G12.602; LC Passengers NA: G12.13]", "[LC: G12.602] [LC Passengers NA: G12.13]" ],
+        [ "[TC: D5.5; TC in BRT: SSR12]", "[TC: D5.5] [TC in BRT: SSR12]" ]
+    ]
+},
+
+"Jungle": {
+    "replace": [
+        [ "G.2G.6", "G.2-G.6" ]
+    ]
+},
+
+"Kunai": {
+    "replace": [
+        [ "G.2G.6", "G.2-G.6" ]
+    ]
+},
+
+"Leadership": {
+    "replace": [
+        [ "[Battle Hardening: A15.3, Finns: A25.71, Japanese: G1.41]", "[Battle Hardening: A15.3] [Battle Hardening (Finns): A25.71] [Battle Hardening (Japanese): G1.41]" ]
+    ]
+},
+
+"MG": {
+    "replace": [
+        [ "[Vehicular: (see Vehicular MG: D3.5-.54)]", "[Vehicular MG: D3.5-.54]" ],
+        [ "[Aerial: E7.41, vs AFV: C7.22]", "[Aerial: E7.41] [Aerial (vs AFV): C7.22]" ]
+    ]
+},
+
+"Minefield": {
+    "replace": [
+        [ "[fully-tracked A FV T B: B 8.61]", "[fully-tracked AFV TB: B8.61]" ]
+    ]
+},
+
+"Morale": {
+    "replace": [
+        [ "[Gain:", "Gain:" ],
+        [ "FFE]", "FFE" ]
+    ]
+},
+
+"Movement, Vehicle": {
+    "replace": [
+        [ "(see Amphibians: D16)", "(see Amphibians)" ]
+    ]
+},
+
+"OBA": {
+    "replace": [
+        [ "USOrdnance", "US Ordnance" ]
+    ]
+},
+
+"Optional Rules": {
+    "replace": [
+        [ "A12.16 (see footnote A18)", "A12.16, footnote A18" ]
+    ]
+},
+
+"PAATC": {
+    "old_content": "(Pre-AFVAdvance/AttackTaskCheck;NAtoberserk/Fanatic/Japanese/SMC): A11.6, G1.62 [vs Armored Cupola: O.7] [DC Placement: A23.3] [ENEMY Advance into CC/Melee: S11.4] [1PAATC: Chinese, NonElite Italians, Inexperienced, Allied/Axis Minors] [OVR vs \"?\": A12.41] [CC Reaction Fire: D7.21]",
+    "new_content": "(Pre-AFV Advance/Attack Task Check; NA to berserk/Fanatic/Japanese/SMC): A11.6, G1.62 [vs Armored Cupola: O.7] [DC Placement: A23.3] [ENEMY Advance into CC/Melee: S11.4] [1PAATC: Chinese, Non-Elite Italians, Inexperienced, Allied/Axis Minors] [OVR vs \"?\": A12.41] [CC Reaction Fire: D7.21]"
+},
+
+"PBF": {
+    "replace": [
+        [ "A11.l", "A11.1" ]
+    ]
+},
+
+"Pillbox": {
+    "replace": [
+        [ "[Control: B30.91; in BRT: TCG15]", "[Control: B30.91] [Control (in BRT): TCG15]" ]
+    ]
+},
+
+"Pin": {
+    "replace": [
+        [ "D6.23.24", "D6.23-.24" ],
+        [ "[Fire Lanes: A9.22; Cancellation: A9.223]", "[Fire Lanes: A9.22] [Fire Lanes (Cancellation): A9.223]" ]
+    ]
+},
+
+"PRC": {
+    "replace": [
+        [ "[disembarking in Panji: G9.423; embarking: G9.51]", "[disembarking in Panji: G9.423] [embarking in Panji: G9.51]" ]
+    ]
+},
+
+"RMG": {
+    "replace": [
+        [ "D1.81 (hull) & D1.82 (turret)", "Hull: D1.81; Turret: D1.82" ]
+    ]
+},
+
+"Radio": {
+    "replace": [
+        [ "[in KGP: P8.4 CG15]", "[in KGP: P8.4, CG15]" ],
+        [ "[in RB: O11.4 CG6]", "[in RB: O11.4, CG6]" ]
+    ]
+},
+
+"Range": {
+    "replace": [
+        [ "see Firing Within Hex", "A7.21" ]
+    ]
+},
+
+"Roadblock": {
+    "replace": [
+        [ "[TEM NA for Ground Support: E7.4; for PRC: B9.3]", "[TEM NA for Ground Support: E7.4] [TEM NA for PRC: B9.3]" ]
+    ]
+},
+
+"Rubble": {
+    "replace": [
+        [ "; Stone Blaze:", "] [RePh, Stone Blaze:" ]
+    ]
+},
+
+"Scrounging": {
+    "replace": [
+        [ "RBCG7", "RB CG7" ]
+    ]
+},
+
+"Stacking Limits": {
+    "replace": [
+        [ "[Inspecting: see Right of Inspection: (Before Play: A2.9) (During Play: A12.16) (Pillboxes: B30.7)]", "[Inspecting: see Right of Inspection (Before Play): A2.9] [Inspecting: see Right of Inspection (During Play): A12.16] [Inspecting: see Right of Inspection (Pillboxes): B30.7]" ]
+    ]
+},
+
+"Stall": {
+    "old_content": "(Rules are givenin a ChapterH Vehicle Note ifa nationality's AFV are subject to Stall; for example, German Multi-Applicable Vehicle Note H): [Platoon Movement: D14.22]",
+    "new_content": "(Rules are given in a Chapter H Vehicle Note if a nationality's AFV are subject to Stall; for example, German Multi-Applicable Vehicle Note H): [Platoon Movement: D14.22]"
+},
+
+"Target Size": {
+    "replace": [
+        [ "[Vehicular: D1.7, Concealment: D1.76]", "[Vehicular: D1.7] [Vehicular (Concealment): D1.76]" ]
+    ]
+},
+
+"Uncon irmed Kill": {
+    "new_title": "Unconfirmed Kill"
+},
+
+"Unarmored Vehicles": {
+    "replace": [
+        [ "[AFV (vs A-P mines: B28.42) (vs A-T mines: B28.52)]", "[AFV (vs A-P mines): B28.42] [AFV (vs A-T mines): B28.52]" ]
+    ]
+},
+
+"Unit": {
+    "replace": [
+        [ "[but not horses],", "(but not horses)," ]
+    ]
+},
+
+"Voluntary Break": {
+    "replace": [
+        [ "[Japanese: G1.13, SMC NA: G1.4]", "[Japanese: G1.13] [Japanese (SMC NA): G1.4]" ]
+    ]
+},
+
+"Walls": {
+    "replace": [
+        [ "[Bypass LOS across: (Infantry: A4.34) (Vehicle: D2.37)]", "[Bypass LOS across Infantry: A4.34] [Bypass LOS across Vehicle: D2.37]" ],
+        [ "; for PRC", "] [TEM NA for PRC" ]
+    ]
+},
+
+"Winter Camouflage": {
+    "replace": [
+        [ "OBA Observer: C 1.6", "OBA Observer: C1.6" ]
+    ]
+},
+
+"Wreck Blaze": {
+    "replace": [
+        [ "[Creation: (AFV C7.6) (Unarmored: A7.308)]", "[Creation (AFV): C7.6] [Creation (Unarmored): A7.308]" ]
+    ]
+}
+
+}

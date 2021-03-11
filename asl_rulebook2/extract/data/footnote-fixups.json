@@ -1,0 +1,209 @@
+{
+
+"A": {
+
+    "10A": [
+        [ "OneHalfFP", "One-Half FP" ],
+        [ "firstappearedintheASLAnnual'89.(In1998,bothwerereprintedin Classic ASL.)", "first appeared in the ASL Annual '89. (In 1998, both were reprinted in Classic ASL.)" ],
+        [ "One of the several criticisms", "<p> One of the several criticisms" ]
+    ],
+    "12": [ [ "TEMto", "TEM to" ] ],
+    "14": [
+        [ "bipodmounted", "bipod-mounted" ],
+        [ "volume o f fire", "volume of fire" ]
+    ],
+    "17": [ [ "adistinct", "a distinct" ] ],
+    "19" : [ [ "wellsited", "well-sited" ] ],
+    "32": [ [ "HWunits", "HW units" ] ],
+    "33": [ [ "multiLocation", "multi-Location" ] ],
+    "35": [ [ "The original printing", "<p> The original printing" ] ],
+    "37": [
+        [ "- Winter War (vs Soviet Union) 30 November 1939 - 13 March 1940- Continuation War (vs Soviet Union) 25 June 1941 - 4 September 1944- Lapland War (vs Germany) 15 September 1944 - 27 April 1945", " <ul> <li> <b>Winter War</b> (vs Soviet Union) 30 November 1939 - 13 March 1940 <li> <b>Continuation War</b> (vs Soviet Union) 25 June 1941 - 4 September 1944 <li> <b>Lapland War</b> (vs Germany) 15 Se  ptember 1944 - 27 April 1945 </ul>" ]
+    ],
+    "38": [
+        [ "Romania: Romania,", " <p> <b>Romania</b>: Romania," ],
+        [ "Hungary: A traditional", " <p> <b>Hungary</b>: A traditional" ],
+        [ "Slovakia: Urged on", "<p> <b>Slovakia</b>: Urged on" ],
+        [ "German-Croatian units in Russia:", " <p> <b>German-Croatian units in Russia</b>:" ],
+        [ "Italian-Croatian units in Russia:", " <p> <b>Italian-Croatian units in Russia</b>:" ],
+        [ "Croatian units in Yugoslavia:", " <p> <b>Croatian units in Yugoslavia</b>:" ],
+        [ "CroatianArmyunitswereengagedprimarilyinanti-partisanactivities,fightingmostly", "Croatian Army units were engaged primarily in anti-partisan activities, fighting mostly" ],
+        [ "Bulgaria: Bulgaria", "<p> <b>Bulgaria</b>: Bulgaria" ],
+        [ "WhiletheriflecompanydidnothaveaninherentHeavyWeapons(HW)platoon,it", "While the rifle company did not have an inherent Heavy Weapons (HW) platoon, it"]
+    ],
+    "39": [ [ "generallyapply", "generally apply" ] ],
+    "41": [ [ "ViceAdmiral", "Vice-Admiral" ] ],
+    "43": [
+        [ "ALLIEDMINORS", "ALLIED MINORS" ],
+        [ "BARrather", "BAR rather" ]
+    ]
+
+},
+
+"B": {
+
+    "3B": [ [ "LOWERLEVELLOCATIONS", "LOWER LEVEL LOCATIONS" ] ],
+    "6": [ [ "The Village Terrain rules", "<p> The Village Terrain rules" ] ],
+    "13": [ [ "U6U7 U8 U9W6W7W8W9V6 V7 V8Y6 Y7Y8Y9 X6X7X8", "" ] ]
+
+},
+
+"C": {
+
+    "1": [ [ "ac tually", "actually" ] ],
+    "8": [ [ "rep resents", "represents" ] ],
+    "13": [ [ "0o", "0&deg;" ] ],
+    "20": [ [ "predetermined", "pre-determined" ] ],
+    "21": [ [ "p roneto", "prone to" ] ],
+    "26": [
+        [ "Mortarsof76-107mm", "Mortars of 76-107mm" ],
+        [ "areexempted", "are exempted" ],
+        [ "frommanyof", "from many of" ],
+        [ "normalGun", "normal Gun" ],
+        [ "thantowed", "than towed" ]
+    ],
+    "32": [ [ "PF counters were removed", "<p> PF counters were removed" ] ],
+    "38": [ [ "U. S. Army", "U.S. Army" ] ]
+
+},
+
+"D": {
+
+    "8": [ [ "massproduced", "mass-produced" ] ]
+
+},
+
+"E": {
+
+    "3": [
+        [ "flexibilityis", "flexibility is" ],
+        [ "for gottenby", "forgotten by" ]
+    ],
+    "4": [ [ "Th e most", "The most" ] ],
+    "11": [
+        [ "Another problem",  "<p> Another problem" ],
+        [ "A Fire cast",  "<p> A Fire cast" ],
+        [ "Finally, to add",  "<p> Finally, to add" ]
+    ],
+    "14B": [ [ "infantrypulled", "infantry-pulled" ] ],
+    "15": [ [ "shallowdraught", "shallow draught" ] ],
+    "18": [
+        [ "reallife", "real-life" ],
+        [ "the g eneric", "the generic" ]
+    ],
+    "20": {
+        "captions": [ [ "E7.51", "LIGHT AA" ], [ "E7.52", "HEAVY AA" ] ],
+        "replace": [
+            [ "& 7.52 AA FIRE:", "" ]
+        ]
+    },
+    "24": {
+        "captions": [ [ "E9.2", "DRIFT" ], [ "E9.4", "LANDING" ] ],
+        "replace": [
+            [ "DRIFT & 9.4 LANDING:", "" ]
+        ]
+    }
+},
+
+"F": {
+
+    "12": [ [ "non- entrenched", "non-entrenched" ] ],
+    "19": [
+        [ "Inthewinternight,thenear-freezingtemperaturecauseddewtoform.", "In the winter night, the near-freezing temperature caused dew to form. " ],
+        [ "Thenextmorningathickmistoftenformedasthesun evaporateditagain.", "The next morning a thick mist often formed as the sun evaporated it again. " ],
+        [ "Thiscouldhappeneveninthesummertimeundertheproperenvironmentalconditions,", "This could happen even in the summertime under the proper environmental conditions, " ],
+        [ "butsincethiswasamuchlessfrequentoccurrenceithasbeen ignored.", "but since this was a much less frequent occurrence it has been ignored." ]
+    ],
+    "21": [
+        [ "Playerswillprobablyfinditmoreconvenienttoinstead", "Players will probably find it more convenient to instead" ],
+        [ "addathird,different-coloreddietothisTH/IFTDR,", "add a third, different-colored die to this TH/IFT DR, " ],
+        [ "usingittodeterminetheDust DRM.", "using it to determine the Dust DRM." ],
+        [ "Thefamiliarterm\"subsequentdr\"wasusedintherulebecauseitobviates theneed", "The familiar term \"subsequent dr\" was used in the rule because it obviates the need" ],
+        [ "a\"new\"concept", "a \"new\" concept" ],
+        [ "thatof rolling athird diesimultaneously", "that of rolling a third die simultaneously" ]
+    ],
+    "22": [
+        [ "theDustcounter\"follows\"thevehicleasit movesfromhex to hex", "the Dust counter \"follows\" the vehicle as it moves from hex to hex" ],
+        [ "itexpends", "it expends " ],
+        [ "two MPeach timeitdoesso", " two MP each time it does so" ]
+    ],
+    "23": [
+        [ "Anotherwind-relatedaspectoftheNorthAfricanenvironmentisthedesertsandstorm,", "Another wind-related aspect of the North African environment is the desert sandstorm, " ],
+        [ "orkhamsininArabic.", "or khamsin in Arabic. " ],
+        [ "ChapterFincludesnospecial rulesforitbecause,", "Chapter F includes no special rules for it because, " ],
+        [ "withvisibilitycutbythestormtoaslittleasthreeyards,", "with visibility cut by the storm to as little as three yards, " ],
+        [ "allactivitiesgenerallywerereducedtoseekingcoverfromthesandblastingwindandchoking dust.", "all activities generally were reduced to seeking cover from the sandblasting wind and choking dust. " ],
+        [ "However,thegamedoesnotignorethepossibilityofakhamsin'soccurrence.", "However, the game does not ignore the possibility of a khamsin's occurrence. " ],
+        [ "The propercombinationofWeather,EC,WindandGustsinaDYOscenariocancreateits effects,", "The proper combination of Weather, EC, Wind and Gusts in a DYO scenario can create its effects, " ],
+        [ "andtheprobabilityofitsoccurrenceisgreatestinascenariosetinspringor summer", "and the probability of its occurrence is greatest in a scenario set in spring or summer" ],
+        [ "thetimewhen khamsinsoccurred mostfrequently.", "the time when khamsins occurred most frequently." ]
+    ],
+    "24": [
+        [ "Thisoverlay isused in aHOLLOW LEGIONS scenario.", "This overlay is used in a HOLLOW LEGIONS scenario." ]
+    ],
+    "25": [
+        [ "ThefamousNorthAfricanescarpmentsaresimilarto cliffs,", "The famous North African escarpments are similar to cliffs, " ],
+        [ "butwithlesssteep(andveryeroded)slopes.", "but with less steep (and very eroded) slopes. " ],
+        [ "Somearesixhundredfeethigh", "Some are six hundred feet high" ],
+        [ "thoughgenerallytheirheightsrangefromonehundredtotwohundredfeet.", "though generally their heights range from one hundred to two hundred feet. " ],
+        [ "Theirsignificanceinthedesertwarlaymainlyinthattheywerecommandingheights,", "Their significance in the desert war lay mainly in that they were commanding heights, " ] ,
+        [ "defensivepositionsforinfantry,", "defensive positions for infantry, " ],
+        [ "andgreatlyrestrictedvehicularmovementacrossthem", "and greatly restricted vehicular movement across them" ],
+        [ "Hencetheywereoftenthesceneofheavyfighting,", "Hence they were often the scene of heavy fighting, " ],
+        [ "especiallywherecrossedbya road", "especially where crossed by a road" ]
+    ]
+},
+
+"G": {
+
+    "4": [ [ "It's also interesting", "<p> It's also interesting" ] ],
+    "8": [ [ "miniDC,", "mini-DC," ] ],
+    "33": [ [ "closein", "close-in" ] ],
+    "45": [
+        [ "Guomindang(akaKuomintang", "Guomindang (aka Kuomintang" ],
+        [ "XForce", "X-Force" ],
+        [ "The two-tone color", "<p> The two-tone color" ]
+    ],
+    "47" : [ [ "against-allodds", "against-all-odds"  ] ],
+    "48": [ [ "trained-andequipped", "trained-and-equipped" ] ]
+
+},
+
+"W": {
+
+    "2": [
+        [ "Korean National Defense Constabulary:", "<ul> <li> <em>Korean National Defense Constabulary</em>: " ],
+        [ "ROK Army:", "<li> <em>ROK Army</em>: " ],
+        [ "Korean Marine Corps:", "<li> <em>Korean Marine Corps</em>: " ],
+        [ "United States - Army:", "<li> <em>United States</em> <ul> <li> Army:" ],
+        [ "- Army Airborne:", "<li> Army Airborne:" ],
+        [ "- Army Rangers:", "<li> Army Rangers:" ],
+        [ "- KATUSA:", "<li> KATUSA:" ],
+        [ "- Marine Corps:", "<li> Marine Corps:" ],
+        [ "British Commonwealth:",  "</ul> <li> <em>British Commonwealth</em>: " ],
+        [ "- 41 Independent Commando, Royal Marines: 9/50-12/51", "<ul> <li> 41 Independent Commando, Royal Marines: 9/50-12/51 </ul>" ],
+        [ "Other United Nations Command:", "<li> <em>Other United Nations Command</em>: " ],
+        [ "10/50-7/53", "10/50-7/53 </ul>" ]
+    ],
+    "3": [
+        [ "Korean People's Army:", "<ul> <li> <em>Korean People's Army</em>: " ],
+        [ "Communist Guerillas:", "<li> <em>Communist Guerillas</em>: " ],
+        [ "Chinese People's Volunteer Army:10/50-7/53", "<li> <em>Chinese People's Volunteer Army</em>: 10/50-7/53 </ul>" ]
+    ],
+    "9": [ [ "T34/85", "T-34/85" ] ],
+    "16": [
+        [ "3 1/3 PP", "3&frac13; PP" ],
+        [ "24-8 HS", "2-4-8 HS" ]
+    ],
+    "18": [ [ "The first unit",  "<p> The first unit" ] ],
+    "29" : [ [ "RAT KILLERin which", "RAT KILLER in which" ] ],
+    "30": [
+        [ "G.M.D in", "G.M.D. in" ],
+        [ "as. sumed", "assumed" ]
+    ],
+    "49": [ [ "SUP-PORT", "SUPPORT" ] ],
+    "50": [ [ "Speciallytrained", "Specially-trained" ] ]
+}
+
+}
+

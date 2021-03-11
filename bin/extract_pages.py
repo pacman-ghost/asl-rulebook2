@@ -18,8 +18,8 @@ def main( pdf_file, output_fname, pages ):
 
     # NOTE: This extracts pages from the eASLRB, so we can work on specific parts of it without having to load
     # the entire document each time. In particular, it maintains the internal PDF strucuture of each page.
-    # The files as small as you might expect (e.g. extracting a single page results in a file only about half
-    # the size), but processing them are significantly faster.
+    # The files are not as small as you might expect (e.g. extracting a single page results in a file only
+    # about half the size), but processing them is significantly faster.
 
     # process the command-line arguments
     pages = parse_page_numbers( pages, offset=-1 )
@@ -34,7 +34,7 @@ def main( pdf_file, output_fname, pages ):
                 del outline.root[-1]
 
         # extract the specified pages
-        print( "Extracting pages:", ", ".join( str(p) for p in sorted(pages) ) )
+        print( "Extracting pages:", ", ".join( str(1+p) for p in sorted(pages) ) )
         for page_no in range( len(pdf.pages)-1, -1, -1 ):
             if page_no not in pages:
                 del pdf.pages[ page_no ]

@@ -41,6 +41,9 @@ setup(
         ( "asl-rulebook2", ["LICENSE.txt"] ),
     ],
     entry_points = {
-        "console_scripts": "dump-pdf = bin.dump_pdf:main",
+        "console_scripts": [
+            "dump-pdf = bin.dump_pdf:main",
+            "extract-all = asl_rulebook2.extract.all:main"
+        ],
     }
 )

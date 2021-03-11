@@ -1,0 +1,40 @@
+{
+
+"chapters": [ "H", "O", "P", "Q", "R", "S", "T" ],
+
+"strings": [
+    "see appropriate Vehicle Notes",
+    "Chapter H",
+    "derived by cross-indexing Target Type & Range on To Hit Table",
+    "Basic TH# plus any modifications for Gun and Ammo Types",
+    "Number beneath Gun Caliber & Length on applicable To Kill Table",
+    "Basic TK# plus applicable To Kill Modifications (Cases A-D)",
+    "The Modified TK# minus the AF of the Target Facing hit",
+    "FP-Range",
+    "Morale-Leadership",
+    "FP-Range-Morale",
+    "abbr. for Bow Flamethrower",
+    "HE NA", "AP NA",
+    "Chinese, Non-Elite Italians, Inexperienced, Allied/Axis Minors"
+],
+
+"regexes": [
+    "^ASOP .+$",
+    "^(RB )?OCG[0-9.]+$",
+    "^PCG[0-9.]+[a-e]?$",
+    "^(PB )?QCG[0-9.]+$",
+    "^RCG[0-9.]+$",
+    "^TCG[0-9.]+[a-e]?$",
+    "^SSR[0-9.]+$",
+    "^(RB CG )?SSR .+$",
+    "^(RB )?CG[0-9.]+$",
+    "^(SSR |SSRs )?(ABtF|KGP|PB|RB|BRT)[0-9.]+$",
+    "Chapter [A-Z] [Ii]ntroduction",
+    "Chapter [A-Z] [Dd]ivider",
+    "^footnote [A-Z]\\d+",
+    "^.+ [Oo]verlay$",
+    " Multi-Applicable Note ",
+    " (Vehicle|Ordnance) Note "
+]
+
+}

@@ -5,7 +5,6 @@ import os
 import json
 import re
 import math
-from collections import defaultdict
 
 import click
 from pdfminer.layout import LTChar
@@ -333,9 +332,10 @@ class ExtractContent( ExtractBase ):
                 # NOTE: A simple search-and-replace is, by far, the most common fixup, so we provide
                 # a simplified way of specifying these in the fixup file
                 fixups = { "replace": [ ( sr[0], sr[1] ) for sr in fixups ] }
-            errors = defaultdict( list )
+            errors = []
             # do any search-replace's
             if "replace" in fixups:
+                failed_sr = []
                 for sr in fixups["replace"]:
                     prev_content = content
                     content = content.replace( sr[0], sr[1] )
@@ -343,8 +343,11 @@ class ExtractContent( ExtractBase ):
                         self.log_msg( "warning", "Footnote fixup for \"{}:{}\" had no effect: {}",
                             self._curr_chapter, footnote_id, sr[0]
                         )
-                        errors["replace"].append( sr )
-                del fixups["replace"]
+                        failed_sr.append( sr )
+                if failed_sr:
+                    fixups["replace"] = failed_sr
+                else:
+                    del fixups["replace"]
             # replace the captions
             if "captions" in fixups:
                 captions = fixups.pop( "captions" )

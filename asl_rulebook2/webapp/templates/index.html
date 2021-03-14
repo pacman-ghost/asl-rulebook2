@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+<title> {{APP_NAME}} </title>
+<link rel="shortcut icon" href="{{url_for('static', filename='images/favicon.ico')}}">
+<link rel="stylesheet" type="text/css" href="{{ url_for( 'static',
+    filename = 'jquery-ui/jquery-ui' + WEB_DEBUG_MIN + '.css'
+) }}" />
+</head>
+
+<body>
+    <div id="main-app"></div>
+</body>
+
+{%if WEB_DEBUG%}
+    <script src="{{ url_for( 'static', filename='vue/vue.global.js' ) }}"></script>
+{%else%}
+    <script src="{{ url_for( 'static', filename='vue/vue.global.prod.js' ) }}"></script>
+{%endif%}
+<script src="{{ url_for( 'static',
+    filename = 'jquery/jquery-3.6.0' + WEB_DEBUG_MIN + '.js'
+) }}"></script>
+<script src="{{ url_for( 'static',
+    filename = 'jquery-ui/jquery-ui' + WEB_DEBUG_MIN + '.js'
+) }}"></script>
+
+<script>
+    // create the main application
+    gMainApp = Vue.createApp( {
+        template: "<main-app />",
+    } ) ;
+</script>
+<script src="{{url_for('static',filename='src/MainApp.js')}}"></script>
+<script> gMainApp.mount( "#main-app" ) ; </script>
+
+</html>

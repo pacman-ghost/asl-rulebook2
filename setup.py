@@ -27,7 +27,7 @@ def parse_requirements( fname ):
 
 setup(
     name = "asl_rulebook2",
-    version = "0.1",
+    version = "0.1", # nb: also update constants.py
     description = "Search engine for the eASLRB.",
     license = "AGPLv3",
     url = "https://github.com/pacman-ghost/asl-rulebook2",

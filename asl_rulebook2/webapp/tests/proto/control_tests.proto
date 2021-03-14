@@ -1,0 +1,11 @@
+syntax = "proto3" ;
+
+import "google/protobuf/empty.proto" ;
+
+// --------------------------------------------------------------------
+
+service ControlTests
+{
+    rpc startTests( google.protobuf.Empty ) returns ( google.protobuf.Empty ) ;
+    rpc endTests( google.protobuf.Empty ) returns ( google.protobuf.Empty ) ;
+}

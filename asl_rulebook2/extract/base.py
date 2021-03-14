@@ -1,4 +1,4 @@
-""" Base class for the extraction tools. """
+""" Base class for the extraction classes. """
 
 import sys
 
@@ -7,6 +7,7 @@ import click
 # ---------------------------------------------------------------------
 
 class ExtractBase:
+    """Base class for the extraction classes."""
 
     def __init__( self, args, default_args, log ):
         self._args = args
@@ -43,7 +44,7 @@ class ExtractBase:
         """Check if an element is using a bold font."""
         return elem.fontname.endswith( ( "-Bold", ",Bold", "-BoldMT" ) )
 
-    def _log_msg( self, msg_type, msg, *args, **kwargs ):
+    def log_msg( self, msg_type, msg, *args, **kwargs ):
         """Log a message."""
         if not self._log:
             return

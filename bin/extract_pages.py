@@ -2,9 +2,8 @@
 """ Extract pages from a PDF. """
 
 import click
-from pikepdf import Pdf, Page, OutlineItem, Encryption, make_page_destination
+from pikepdf import Pdf
 
-from asl_rulebook2.pdf import PdfDoc
 from asl_rulebook2.utils import parse_page_numbers
 
 # ---------------------------------------------------------------------

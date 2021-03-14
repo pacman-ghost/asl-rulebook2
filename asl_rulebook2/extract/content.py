@@ -46,8 +46,10 @@ class ExtractContent( ExtractBase ):
 
     def __init__( self, args, log=None ):
         super().__init__( args, _DEFAULT_ARGS, log )
-        self._targets = {}
+        self.targets = {}
         self._footnotes = {}
+        self._curr_chapter = self._curr_footnote = self._curr_pageid = None
+        self._prev_elem = self._top_left_elem = None
         # prepare to fixup problems in the content
         fname2 = os.path.join( os.path.dirname(__file__), "data/target-fixups.json" )
         with open( fname2, "r", encoding="utf-8" ) as fp:
@@ -83,13 +85,13 @@ class ExtractContent( ExtractBase ):
         #   the start of a footnote by a bold number near the start of the line.
 
         # process each page
-        for page_no, page, lt_page in PageIterator( pdf ):
+        for page_no, _, lt_page in PageIterator( pdf ):
 
             # prepare to process the next page
             if page_no > max( page_index.keys() ):
                 break
             if page_no not in page_index:
-                self._log_msg( "progress", "- Skipping page {}.", page_no )
+                self.log_msg( "progress", "- Skipping page {}.", page_no )
                 continue
             if not self._curr_chapter or self._curr_chapter != page_index[page_no]:
                 # we've found the start of a new chapter
@@ -98,17 +100,17 @@ class ExtractContent( ExtractBase ):
                 curr_chapter_pageno = 1
             else:
                 curr_chapter_pageno += 1
-            self._curr_pageid = "{}{}".format(  # nb: this is the ASL page# (e.g. "A42"), not the PDF page#
+            self._curr_pageid = "{}{}".format( # nb: this is the ASL page# (e.g. "A42"), not the PDF page#
                 self._curr_chapter, curr_chapter_pageno
             )
-            self._log_msg( "progress", "- Processing page {} ({})...", page_no, self._curr_pageid )
+            self.log_msg( "progress", "- Processing page {} ({})...", page_no, self._curr_pageid )
 
             # process each element on the page
             curr_caption = None
             self._top_left_elem = self._prev_elem = None
             elem_filter = lambda e: isinstance( e, LTChar )
             sort_elems = self._curr_pageid not in disable_sort_items
-            for depth, elem in PageElemIterator( lt_page, elem_filter=elem_filter, sort_elems=sort_elems ):
+            for _, elem in PageElemIterator( lt_page, elem_filter=elem_filter, sort_elems=sort_elems ):
 
                 # keep track of the top-left-most bold element
                 if self._is_bold( elem ):
@@ -128,7 +130,8 @@ class ExtractContent( ExtractBase ):
 
                 # figure out what we've got
                 is_bold = self._is_bold( elem )
-                if is_bold and curr_caption and curr_caption[0].isdigit() and 1 < elem.y1 - self._prev_elem.y0 < elem.height/2:
+                ch = curr_caption[0] if curr_caption else None #pylint: disable=unsubscriptable-object
+                if is_bold and ch and ch.isdigit() and 1 < elem.y1 - self._prev_elem.y0 < elem.height/2:
                     # the previous bold character looks like a footnote superscript - ignore it
                     curr_caption = None
                 if curr_caption and elem.get_text() == " ":
@@ -149,9 +152,11 @@ class ExtractContent( ExtractBase ):
                             # continue collecting the caption
                             if self._prev_elem.y0 - elem.y0 > 1:
                                 # nb: we just started a new line
-                                curr_caption[0] = append_text( curr_caption[0], elem.get_text() )
+                                curr_caption[0] = append_text( #pylint: disable=unsupported-assignment-operation
+                                    curr_caption[0], elem.get_text() #pylint: disable=unsubscriptable-object
+                                )
                             else:
-                                curr_caption[0] += elem.get_text()
+                                curr_caption[0] += elem.get_text() #pylint: disable=unsupported-assignment-operation
                     else:
                         # check if this is the first character of the line
                         if self._is_start_of_line( elem, lt_page ):
@@ -174,9 +179,9 @@ class ExtractContent( ExtractBase ):
 
         # check for unused fixups
         if self._target_fixups:
-            self._log_msg( "warning", "Unused fixups: {}", self._target_fixups )
+            self.log_msg( "warning", "Unused fixups: {}", self._target_fixups )
         if self._footnote_fixups:
-            self._log_msg( "warning", "Unused fixups: {}", self._footnote_fixups )
+            self.log_msg( "warning", "Unused fixups: {}", self._footnote_fixups )
 
     def _save_target( self, caption, page_no, lt_page, elem ):
         """Save a parsed target."""
@@ -233,14 +238,14 @@ class ExtractContent( ExtractBase ):
         # save the new target
         if not ruleid.startswith( self._curr_chapter ):
             ruleid = self._curr_chapter + ruleid
-        if ruleid in self._targets:
-            self._log_msg( "warning", "Ignoring duplicate ruleid: {} (from \"{}\").",
+        if ruleid in self.targets:
+            self.log_msg( "warning", "Ignoring duplicate ruleid: {} (from \"{}\").",
                 ruleid, caption[0]
             )
             return
         if caption_text == "\u2014":
             caption_text = "-" # nb: for A7.306 :-/
-        self._targets[ ruleid ] = {
+        self.targets[ ruleid ] = {
             "caption": fixup_text(caption_text), "page_no": page_no, "pos": caption[1],
             "raw_caption": orig_caption
         }
@@ -292,7 +297,7 @@ class ExtractContent( ExtractBase ):
                 self._curr_footnote[0] = parts[0]
                 self._curr_footnote[1] = parts[1].strip() + " " + self._curr_footnote[1].strip()
             else:
-                self._log_msg( "warning", "Couldn't split Chapter F footnote caption: {}", self._curr_footnote[0] )
+                self.log_msg( "warning", "Couldn't split Chapter F footnote caption: {}", self._curr_footnote[0] )
         footnote_id = remove_trailing( self._curr_footnote[0].strip(), "." )
         content = self._curr_footnote[1].strip()
         mo = re.search( r"^(F\.1B|W\.\d+[AB]|[A-Z]?[0-9.]+)", content )
@@ -335,7 +340,7 @@ class ExtractContent( ExtractBase ):
                     prev_content = content
                     content = content.replace( sr[0], sr[1] )
                     if content == prev_content:
-                        self._log_msg( "warning", "Footnote fixup for \"{}:{}\" had no effect: {}",
+                        self.log_msg( "warning", "Footnote fixup for \"{}:{}\" had no effect: {}",
                             self._curr_chapter, footnote_id, sr[0]
                         )
                         errors["replace"].append( sr )
@@ -361,7 +366,7 @@ class ExtractContent( ExtractBase ):
                 captions.append( ( ruleid, content[:pos] ) )
                 content = content[pos+1:].strip()
             else:
-                self._log_msg( "warning", "Can't extract footnote caption: {}:{} - {}",
+                self.log_msg( "warning", "Can't extract footnote caption: {}:{} - {}",
                     self._curr_chapter, footnote_id, content
                 )
 
@@ -404,7 +409,7 @@ class ExtractContent( ExtractBase ):
 
         # save the targets
         curr_page_no = None
-        for ruleid, target in self._targets.items():
+        for ruleid, target in self.targets.items():
             if target["page_no"] != curr_page_no:
                 if curr_page_no:
                     print( file=targets_out )
@@ -448,7 +453,7 @@ class ExtractContent( ExtractBase ):
 
         # save the targets
         targets, curr_chapter = [], None
-        for ruleid, target in self._targets.items():
+        for ruleid, target in self.targets.items():
             xpos, ypos = self._get_target_pos( target )
             targets.append( "{}: {{ \"caption\": {}, \"page_no\": {}, \"pos\": [{},{}] }}".format(
                 jsonval( ruleid ),
@@ -496,10 +501,12 @@ class ExtractContent( ExtractBase ):
 @click.argument( "pdf_file", nargs=1, type=click.Path(exists=True,dir_okay=False) )
 @click.option( "--arg","args", multiple=True, help="Configuration parameter(s) (key=val)." )
 @click.option( "--progress/--no-progress", is_flag=True, default=False, help="Log progress messages." )
-@click.option( "--format","-f", default="json", type=click.Choice(["raw","text","json"]), help="Output format." )
+@click.option( "--format","-f","output_fmt", default="json", type=click.Choice(["raw","text","json"]),
+    help="Output format."
+)
 @click.option( "--save-targets","save_targets_fname", required=True, help="Where to save the extracted targets." )
 @click.option( "--save-footnotes","save_footnotes_fname", required=True, help="Where to save the extracted footnotes." )
-def main( pdf_file, args, progress, format, save_targets_fname, save_footnotes_fname ):
+def main( pdf_file, args, progress, output_fmt, save_targets_fname, save_footnotes_fname ):
     """Extract content from the MMP eASLRB."""
 
     # initialize
@@ -511,14 +518,14 @@ def main( pdf_file, args, progress, format, save_targets_fname, save_footnotes_f
             return
         log_msg_stderr( msg_type, msg )
     extract = ExtractContent( args, log_msg )
-    extract._log_msg( "progress",  "Loading PDF: {}", pdf_file )
+    extract.log_msg( "progress",  "Loading PDF: {}", pdf_file )
     with PdfDoc( pdf_file ) as pdf:
         extract.extract_content( pdf )
 
     # save the results
     with open( save_targets_fname, "w", encoding="utf-8" ) as targets_out, \
          open( save_footnotes_fname, "w", encoding="utf-8" ) as footnotes_out:
-        getattr( extract, "save_as_"+format )( targets_out, footnotes_out )
+        getattr( extract, "save_as_"+output_fmt, )( targets_out, footnotes_out )
 
 if __name__ == "__main__":
     main() #pylint: disable=no-value-for-parameter

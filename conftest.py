@@ -159,7 +159,7 @@ def _make_webapp():
 # ---------------------------------------------------------------------
 
 @pytest.fixture( scope="session" )
-def webdriver( request ):
+def webdriver():
     """Return a webdriver that can be used to control a browser."""
 
     # initialize

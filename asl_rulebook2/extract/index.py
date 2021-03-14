@@ -27,7 +27,8 @@ class ExtractIndex( ExtractBase ):
 
     def __init__( self, args, log=None ):
         super().__init__( args, _DEFAULT_ARGS, log )
-        self._index_entries = None
+        self.index_entries = None
+        self._prev_y0 = None
         # prepare to fixup problems in the index content
         fname2 = os.path.join( os.path.dirname(__file__), "data/index-fixups.json" )
         with open( fname2, "r", encoding="utf-8" ) as fp:
@@ -41,19 +42,19 @@ class ExtractIndex( ExtractBase ):
         curr_title = curr_content = None
 
         # process each page in the index
-        for page_no, page, lt_page in PageIterator( pdf ):
+        for page_no, _, lt_page in PageIterator( pdf ):
 
             if page_no > max( page_nos ):
                 break
             if page_no not in page_nos:
-                self._log_msg( "progress", "- Skipping page {}.", page_no )
+                self.log_msg( "progress", "- Skipping page {}.", page_no )
                 continue
-            self._log_msg( "progress", "- Processing page {}...", page_no )
+            self.log_msg( "progress", "- Processing page {}...", page_no )
 
             # process each element on the page
             self._prev_y0 = 99999
             elem_filter = lambda e: isinstance( e, LTChar )
-            for depth, elem in PageElemIterator( lt_page, elem_filter=elem_filter ):
+            for _, elem in PageElemIterator( lt_page, elem_filter=elem_filter ):
 
                 # check if we should ignore this element
                 if not self._in_viewport( elem, "index" ):
@@ -91,7 +92,7 @@ class ExtractIndex( ExtractBase ):
                         # continue collecting the content text
                         if elem.y0 - self._prev_y0 < -1 and curr_content.endswith( "-" ):
                             # join up hyphenated words
-                            curr_content = curr_content[:-1]
+                            curr_content = curr_content[:-1] #pylint: disable=unsubscriptable-object
                         curr_content += elem.get_text()
 
                 # loop back to process the next element
@@ -103,10 +104,10 @@ class ExtractIndex( ExtractBase ):
 
         # check for unused fixups
         if self._fixups:
-            self._log_msg( "warning", "Unused fixups: {}", self._fixups )
+            self.log_msg( "warning", "Unused fixups: {}", self._fixups )
 
         # process the content for each index entry
-        if not self._index_entries:
+        if not self.index_entries:
             raise RuntimeError( "Didn't find the first title (\"{}\").".format( self._args["first_title"] ) )
         self._process_content()
 
@@ -116,10 +117,10 @@ class ExtractIndex( ExtractBase ):
         # check if we've started parsing index entries
         # NOTE: There is some bold text at the start of the index, which we parse as an index title,
         # so we don't save anything until we've actually seen the first index entry.
-        if self._index_entries is None:
+        if self.index_entries is None:
             if title != self._args["first_title"]:
                 return
-            self._index_entries = []
+            self.index_entries = []
 
         # initialize
         title, content = title.strip(), content.strip()
@@ -130,24 +131,24 @@ class ExtractIndex( ExtractBase ):
         if title == "bold":
             # FUDGE! Some entries have "bold" in their content, using a bold font :-/, which we detect
             # as the start of a new entry. We fix that up here.
-            self._index_entries[-1]["content"] = "{} bold {}".format(
-                self._index_entries[-1]["content"], fixup_text(content)
+            self.index_entries[-1]["content"] = "{} bold {}".format(
+                self.index_entries[-1]["content"], fixup_text(content)
             )
-        elif title == "C" and self._index_entries[-1]["title"] == "FFE":
+        elif title == "C" and self.index_entries[-1]["title"] == "FFE":
             # FUDGE! The colon in the title for "FFE:C" is non-bold, so we parse this as two separate
             # index titles ("FFE" and "C") :-/ We can't fix this up in the normal way, since there is
             # also a real "FFE" entry, so we do it in the code here.
-            self._index_entries[-1].update( {
+            self.index_entries[-1].update( {
                 "title": "FFE:C", "content": fixup_text(content)
             } )
         else:
             # save the new index entry
             index_entry = self._make_index_entry( title, content )
             if index_entry:
-                self._index_entries.append( index_entry )
+                self.index_entries.append( index_entry )
             # FUDGE! EX/EXC are mis-parsed as a single index entry - we correct that in the fixups, and here.
             if title == "EX":
-                self._index_entries.append( self._make_index_entry( "EXC", "Exception" ) )
+                self.index_entries.append( self._make_index_entry( "EXC", "Exception" ) )
 
     def _make_index_entry( self, title, content ):
         """Create a new index entry."""
@@ -167,14 +168,14 @@ class ExtractIndex( ExtractBase ):
             for sr in fixup.get( "replace", [] ):
                 new_content = content.replace( sr[0], sr[1] )
                 if new_content == content:
-                    self._log_msg( "warning", "Content fixup had no effect for \"{}\": {}", title, sr[0] )
+                    self.log_msg( "warning", "Content fixup had no effect for \"{}\": {}", title, sr[0] )
                 else:
                     content = new_content
             # replace the content
             old_content = fixup.get( "old_content" )
             if old_content:
                 if fixup_text( content ) != old_content:
-                    self._log_msg( "warning", "Unexpected content for \"{}\" - skipping fixup.", title )
+                    self.log_msg( "warning", "Unexpected content for \"{}\" - skipping fixup.", title )
                 else:
                     new_content = fixup.get( "new_content" )
                     if not new_content:
@@ -197,7 +198,7 @@ class ExtractIndex( ExtractBase ):
     def _process_content( self ):
         """Extract information out of the index entries into a structured form."""
 
-        for index_entry in self._index_entries:
+        for index_entry in self.index_entries:
 
             # initialize
             content = index_entry[ "content" ]
@@ -295,14 +296,14 @@ class ExtractIndex( ExtractBase ):
 
     def save_as_raw( self, out ):
         """Save the raw results."""
-        for index_entry in self._index_entries:
+        for index_entry in self.index_entries:
             print( "=== {} ===".format( index_entry["title"] ), file=out )
             print( "{}".format( index_entry["raw_content"] ), file=out )
             print( file=out )
 
     def save_as_text( self, out ):
         """Save the results as plain-text."""
-        for index_entry in self._index_entries:
+        for index_entry in self.index_entries:
             print( "=== {} ===".format( index_entry["title"] ), file=out )
             if "subtitle" in index_entry:
                 print( index_entry["subtitle"], file=out )
@@ -329,7 +330,7 @@ class ExtractIndex( ExtractBase ):
     def save_as_json( self, out ):
         """Save the results as JSON."""
         entries = []
-        for index_entry in self._index_entries:
+        for index_entry in self.index_entries:
             buf = []
             buf.append( "{{ \"title\": {}".format( jsonval(index_entry["title"]) ) )
             if "subtitle" in index_entry:
@@ -357,9 +358,11 @@ class ExtractIndex( ExtractBase ):
 @click.argument( "pdf_file", nargs=1, type=click.Path(exists=True,dir_okay=False) )
 @click.option( "--arg","args", multiple=True, help="Configuration parameter(s) (key=val)." )
 @click.option( "--progress/--no-progress", is_flag=True, default=False, help="Log progress messages." )
-@click.option( "--format","-f", default="json", type=click.Choice(["raw","text","json"]), help="Output format." )
+@click.option( "--format","-f","output_fmt", default="json", type=click.Choice(["raw","text","json"]),
+    help="Output format."
+)
 @click.option( "--output","-o","output_fname", required=True, help="Where to save the extracted index." )
-def main( pdf_file, args, progress, format, output_fname ):
+def main( pdf_file, args, progress, output_fmt, output_fname ):
     """Extract the index from the MMP eASLRB."""
 
     # initialize
@@ -371,13 +374,13 @@ def main( pdf_file, args, progress, format, output_fname ):
             return
         log_msg_stderr( msg_type, msg )
     extract = ExtractIndex( args, log_msg )
-    extract._log_msg( "progress",  "Loading PDF: {}", pdf_file )
+    extract.log_msg( "progress",  "Loading PDF: {}", pdf_file )
     with PdfDoc( pdf_file ) as pdf:
         extract.extract_index( pdf )
 
     # save the results
     with open( output_fname, "w", encoding="utf-8" ) as out:
-        getattr( extract, "save_as_"+format )( out )
+        getattr( extract, "save_as_"+output_fmt )( out )
 
 if __name__ == "__main__":
     main() #pylint: disable=no-value-for-parameter

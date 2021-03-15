@@ -1,0 +1,76 @@
+[
+
+{ "title": "a",
+  "content": "amphibious"
+},
+
+{ "title": "Advance",
+  "ruleids": [ "A4.7" ]
+},
+
+{ "title": "Backblast",
+  "ruleids": [ "C13.8" ],
+  "rulerefs": [
+    { "caption": "Huts", "ruleids": [ "G5.62" ] },
+    { "caption": "RCL", "ruleids": [ "C12.3-.4" ] }
+  ]
+},
+
+{ "title": "CCPh",
+  "subtitle": "Close Combat Phase",
+  "ruleids": [ "A3.8" ],
+  "rulerefs": [
+    { "caption": "ENEMY Attacks", "ruleids": [ "S11.5" ] },
+    { "caption": "dropping SW before CC", "ruleids": [ "A4.43" ] }
+  ]
+},
+
+{ "title": "Double Time",
+  "ruleids": [ "A4.5-.51", "S6.222" ],
+  "see_also": [ "CX" ],
+  "content": "Also known as \"running <em>really</em> fast.\"",
+  "rulerefs": [
+    { "caption": "ENEMY Guard Automatic Action", "ruleids": [ "S6.303" ] },
+    { "caption": "Manhandling", "ruleids": [ "C10.3" ] },
+    { "caption": "NA for Pathfinders", "ruleids": [ "T1.2" ] },
+    { "caption": "S? NA", "ruleids": [ "S3.321" ] },
+    { "caption": "Water Shortage", "ruleids": [ "RCG21" ] },
+    { "caption": "Wire NA", "ruleids": [ "B26.46" ] }
+  ]
+},
+
+{ "title": "ELR",
+  "subtitle": "Experience Level Rating",
+  "ruleids": [ "A19.1" ],
+  "rulerefs": [
+    { "caption": "BRT", "ruleids": [ "TCG17" ] },
+    { "caption": "Loss", "ruleids": [ "A16.2" ] },
+    { "caption": "Massacre", "ruleids": [ "A20.4" ] },
+    { "caption": "Night", "ruleids": [ "E1.22" ] },
+    { "caption": "in PB", "ruleids": [ "SSR PB12" ] },
+    { "caption": "Regaining", "ruleids": [ "A16.3" ] },
+    { "caption": "RePh", "ruleids": [ "O11.617", "PCG4", "QCG3", "R9.6202" ] }
+  ]
+},
+
+{ "title": "Firepower",
+  "ruleids": [ "A1.21" ],
+  "see_also": [ "FP" ]
+},
+
+{ "title": "Gaps, Convoy",
+  "ruleids": [ "E11.21" ]
+},
+
+{ "title": "H#",
+  "subtitle": "HEAT Depletion Number; the number is the Depletion Number, and the superscript following it indicates the first year it applies and a letter indicates the month of that year [EX: A superscript of \"4\" means the vehicle/ordnance has that ammo starting in 1944]",
+  "ruleids": [ "C8.3" ],
+  "see_also": [ "HEAT" ]
+},
+
+
+{ "title": "Identity, Vehicular",
+  "ruleids": [ "D1.4" ]
+}
+
+]

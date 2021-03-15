@@ -2,6 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
+import asl_rulebook2.webapp.tests.proto.generated.control_tests_pb2 as control__tests__pb2
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
@@ -26,6 +27,11 @@ class ControlTestsStub(object):
                 request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 )
+        self.setDataDir = channel.unary_unary(
+                '/ControlTests/setDataDir',
+                request_serializer=control__tests__pb2.SetDataDirRequest.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                )
 
 
 class ControlTestsServicer(object):
@@ -45,6 +51,12 @@ class ControlTestsServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def setDataDir(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ControlTestsServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -56,6 +68,11 @@ def add_ControlTestsServicer_to_server(servicer, server):
             'endTests': grpc.unary_unary_rpc_method_handler(
                     servicer.endTests,
                     request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            ),
+            'setDataDir': grpc.unary_unary_rpc_method_handler(
+                    servicer.setDataDir,
+                    request_deserializer=control__tests__pb2.SetDataDirRequest.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
     }
@@ -100,6 +117,23 @@ class ControlTests(object):
             metadata=None):
         return grpc.experimental.unary_unary(request, target, '/ControlTests/endTests',
             google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def setDataDir(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/ControlTests/setDataDir',
+            control__tests__pb2.SetDataDirRequest.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)

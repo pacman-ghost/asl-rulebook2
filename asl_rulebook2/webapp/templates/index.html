@@ -8,6 +8,14 @@
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static',
     filename = 'jquery-ui/jquery-ui' + WEB_DEBUG_MIN + '.css'
 ) }}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='growl/jquery.growl.css' ) }}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/global.css' ) }}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/MainApp.css' ) }}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/NavPane.css' ) }}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/SearchPane.css' ) }}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/SearchResult.css' ) }}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/ContentPane.css' ) }}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/TabbedPages.css' ) }}" />
 </head>
 
 <body>
@@ -25,14 +33,24 @@
 <script src="{{ url_for( 'static',
     filename = 'jquery-ui/jquery-ui' + WEB_DEBUG_MIN + '.js'
 ) }}"></script>
+<script src="{{ url_for( 'static',
+    filename = 'split/split' + WEB_DEBUG_MIN + '.js'
+) }}"></script>
+<script src="{{ url_for( 'static',
+    filename = 'tinyemitter/tinyemitter' + WEB_DEBUG_MIN + '.js'
+) }}"></script>
+<script src="{{ url_for( 'static', filename='growl/jquery.growl.js' ) }}"></script>
 
 <script>
-    // create the main application
-    gMainApp = Vue.createApp( {
-        template: "<main-app />",
-    } ) ;
+gGetContentDocsUrl = "{{ url_for( 'get_content_docs') }}" ;
 </script>
-<script src="{{url_for('static',filename='src/MainApp.js')}}"></script>
-<script> gMainApp.mount( "#main-app" ) ; </script>
+
+<script type="module" src="{{ url_for( 'static', filename='MainApp.js' ) }}"></script>
+<script type="module" src="{{ url_for( 'static', filename='NavPane.js' ) }}"></script>
+<script type="module" src="{{ url_for( 'static', filename='SearchPane.js' ) }}"></script>
+<script type="module" src="{{ url_for( 'static', filename='SearchResult.js' ) }}"></script>
+<script type="module" src="{{ url_for( 'static', filename='ContentPane.js' ) }}"></script>
+<script type="module" src="{{ url_for( 'static', filename='TabbedPages.js' ) }}"></script>
+<script type="module" src="{{ url_for( 'static', filename='utils.js' ) }}"></script>
 
 </html>

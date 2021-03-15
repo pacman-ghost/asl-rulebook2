@@ -5,6 +5,9 @@ from google.protobuf.empty_pb2 import Empty
 
 from asl_rulebook2.webapp.tests.proto.generated.control_tests_pb2_grpc import ControlTestsStub
 
+from asl_rulebook2.webapp.tests.proto.generated.control_tests_pb2 import \
+    SetDataDirRequest
+
 # ---------------------------------------------------------------------
 
 # NOTE: The API for this class should be kept in sync with ControlTestsServicer.
@@ -25,3 +28,10 @@ class ControlTests:
     def end_tests( self ):
         """End a test run."""
         self._stub.endTests( Empty() )
+
+    def set_data_dir( self, fixtures_dname ):
+        """Set the data directory."""
+        self._stub.setDataDir(
+            SetDataDirRequest( fixturesDirName = fixtures_dname )
+        )
+        return self

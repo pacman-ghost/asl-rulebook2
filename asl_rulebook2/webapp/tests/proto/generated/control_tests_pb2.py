@@ -20,13 +20,53 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x13\x63ontrol_tests.proto\x1a\x1bgoogle/protobuf/empty.proto2\x88\x01\n\x0c\x43ontrolTests\x12<\n\nstartTests\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\x12:\n\x08\x65ndTests\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Emptyb\x06proto3'
+  serialized_pb=b'\n\x13\x63ontrol_tests.proto\x1a\x1bgoogle/protobuf/empty.proto\",\n\x11SetDataDirRequest\x12\x17\n\x0f\x66ixturesDirName\x18\x01 \x01(\t2\xc2\x01\n\x0c\x43ontrolTests\x12<\n\nstartTests\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\x12:\n\x08\x65ndTests\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\x12\x38\n\nsetDataDir\x12\x12.SetDataDirRequest\x1a\x16.google.protobuf.Emptyb\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,])
 
 
 
+
+_SETDATADIRREQUEST = _descriptor.Descriptor(
+  name='SetDataDirRequest',
+  full_name='SetDataDirRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='fixturesDirName', full_name='SetDataDirRequest.fixturesDirName', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=52,
+  serialized_end=96,
+)
+
+DESCRIPTOR.message_types_by_name['SetDataDirRequest'] = _SETDATADIRREQUEST
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
+
+SetDataDirRequest = _reflection.GeneratedProtocolMessageType('SetDataDirRequest', (_message.Message,), {
+  'DESCRIPTOR' : _SETDATADIRREQUEST,
+  '__module__' : 'control_tests_pb2'
+  # @@protoc_insertion_point(class_scope:SetDataDirRequest)
+  })
+_sym_db.RegisterMessage(SetDataDirRequest)
 
 
 
@@ -37,8 +77,8 @@ _CONTROLTESTS = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=53,
-  serialized_end=189,
+  serialized_start=99,
+  serialized_end=293,
   methods=[
   _descriptor.MethodDescriptor(
     name='startTests',
@@ -56,6 +96,16 @@ _CONTROLTESTS = _descriptor.ServiceDescriptor(
     index=1,
     containing_service=None,
     input_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
+    output_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='setDataDir',
+    full_name='ControlTests.setDataDir',
+    index=2,
+    containing_service=None,
+    input_type=_SETDATADIRREQUEST,
     output_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,

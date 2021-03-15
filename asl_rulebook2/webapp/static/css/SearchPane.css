@@ -1,0 +1,8 @@
+#nav .tabbed-page[data-tabid="search"] { display: flex ; flex-direction: column ; }
+
+/* search box */
+#search-box { display: flex ; }
+#search-box input#query-string { margin-right: 5px ; flex-grow: 1 ; }
+
+/* search results */
+#search-results { flex-grow: -1 ; margin: 8px 0 2px 0 ; overflow-y: auto ; }

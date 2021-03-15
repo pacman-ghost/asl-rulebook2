@@ -1,0 +1,4 @@
+.tabbed-pages { display: flex ; flex-direction: column ; }
+.tabbed-pages .tabbed-page { height: calc(100% - 24px) ; }
+.tabbed-pages .tab-strip { height: 24px ; display: flex ; font-size: 10pt ; font-style: italic ; }
+.tabbed-pages .tab-strip .tab { border: 1px solid #aaa ; padding: 2px 5px ; margin-right: 5px ; }

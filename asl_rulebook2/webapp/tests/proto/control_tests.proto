@@ -4,8 +4,16 @@ import "google/protobuf/empty.proto" ;
 
 // --------------------------------------------------------------------
 
+message SetDataDirRequest {
+    string fixturesDirName = 1 ;
+}
+
+// --------------------------------------------------------------------
+
 service ControlTests
 {
     rpc startTests( google.protobuf.Empty ) returns ( google.protobuf.Empty ) ;
     rpc endTests( google.protobuf.Empty ) returns ( google.protobuf.Empty ) ;
+
+    rpc setDataDir( SetDataDirRequest ) returns ( google.protobuf.Empty ) ;
 }

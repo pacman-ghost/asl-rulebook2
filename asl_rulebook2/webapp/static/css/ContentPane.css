@@ -1,0 +1,10 @@
+#content { position: relative ; }
+
+#content .tabbed-page { border-bottom: 1px solid #aaa ; }
+#content .tab-strip { padding: 0 0.5em ; }
+#content .tab-strip .tab { margin-top: -1px ; z-index: 5 ; border-radius: 0 0 5px 5px ; }
+#content .tab-strip .tab { background: #f0f0f0 ; color: #808080 ; }
+#content .tab-strip .tab.active { background: white ; color: #444 ; border-top: none ; }
+
+#content .content-doc iframe { position: absolute ; width: 100% ; height: calc(100% - 35px) ;  border: none ; }
+#content .content-doc .disabled { margin-top: 1em ; text-align: center ; font-style: italic ; color: #888 ; }

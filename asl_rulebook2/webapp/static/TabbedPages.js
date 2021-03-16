@@ -13,7 +13,7 @@ gMainApp.component( "tabbed-pages", {
 <div class="tabbed-pages">
     <slot />
     <div class="tab-strip">
-        <div v-for="tab in tabs" :data-tabid=tab.tabId @click=onTabClicked class="tab" v-bind:class="{'active': tab.tabId == activeTabId}" >
+        <div v-for="tab in tabs" :data-tabid=tab.tabId @click=onTabClicked class="tab" v-bind:class="{'active': tab.tabId == activeTabId}" :key=tab.tabId >
             {{tab.caption}}
         </div>
     </div>
@@ -44,12 +44,12 @@ gMainApp.component( "tabbed-pages", {
 
     methods: {
 
-        onTabClicked: function( evt ) {
+        onTabClicked( evt ) {
             // activate the selected tab
             this.activateTab( evt.target.dataset.tabid ) ;
         },
 
-        activateTab: function( tabId ) {
+        activateTab( tabId ) {
             // activate the specified tab
             this.activeTabId = tabId ;
             $( this.$el ).find( ".tabbed-page" ).each( function() {

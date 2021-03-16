@@ -1,8 +1,82 @@
 """ Miscellaneous utilities. """
 
+import os
 import pathlib
+import tempfile
 import re
 import math
+from io import StringIO
+from html.parser import HTMLParser
+
+# ---------------------------------------------------------------------
+
+class TempFile:
+    """Manage a temp file that can be closed while it's still being used."""
+
+    def __init__( self, mode="wb", extn=None, encoding=None ):
+        self.mode = mode
+        self.extn = extn
+        self.encoding = encoding
+        self.temp_file = None
+        self.name = None
+
+    def open( self ):
+        """Allocate a temp file."""
+        if self.encoding:
+            encoding = self.encoding
+        else:
+            encoding = "utf-8" if "b" not in self.mode else None
+        assert self.temp_file is None
+        self.temp_file = tempfile.NamedTemporaryFile(
+            mode = self.mode,
+            encoding = encoding,
+            suffix = self.extn,
+            delete = False
+        )
+        self.name = self.temp_file.name
+
+    def close( self, delete ):
+        """Close the temp file."""
+        self.temp_file.close()
+        if delete:
+            os.unlink( self.temp_file.name )
+
+    def write( self, data ):
+        """Write data to the temp file."""
+        self.temp_file.write( data )
+
+    def __enter__( self ):
+        """Enter the context manager."""
+        self.open()
+        return self
+
+    def __exit__( self, exc_type, exc_val, exc_tb ):
+        """Exit the context manager."""
+        self.close( delete=True )
+
+# ---------------------------------------------------------------------
+
+def strip_html( val ):
+    """Strip HTML."""
+
+    if not val:
+        return val
+
+    buf = StringIO()
+    class StripHtml( HTMLParser ):
+        """Strip HTML."""
+        def __init__( self ):
+            super().__init__()
+            self.strict = False
+        def handle_data( self, data ):
+            buf.write( data )
+        def error( self, message ):
+            pass
+
+    # strip HTML
+    html_stripper = StripHtml()
+    html_stripper.feed( val )
+    return buf.getvalue()
 
 # ---------------------------------------------------------------------
 
@@ -98,6 +172,10 @@ def append_text( buf, new ):
         if buf[-1] != "/":
             buf += " "
     return buf + new
+
+def plural( n, name1, name2 ):
+    """Return the singular/plural form of a string."""
+    return "{} {}".format( n, name1 if n == 1 else name2 )
 
 def remove_quotes( val ):
     """Remove enclosing quotes from a string."""

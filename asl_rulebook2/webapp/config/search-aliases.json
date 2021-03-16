@@ -1,0 +1,25 @@
+{
+
+"_comment_": "This file defines search aliases.",
+"_comment_": "Keys that appear in a query string will match itself or any of its associated values.",
+"_comment_": "  e.g. searching for 'entrenchments' will actually search for 'entrenchments OR foxhole OR trench OR ditch'",
+"_comment_": "These differ from search synonyms in that only the key word will trigger the replacement, not any word from the set.",
+"_comment_": "A user-defined version of this file in the data directory will also be loaded.",
+
+"latw": [
+    "atmm", "atr", "baz", "mol-p", "mol-projector", "piat", "pf", "pfk", "psk"
+],
+"fortification/foritifcations": [
+    "cave", "a-t ditch", "foxhole", "sangar", "trench", "bunker", "minefield", "mines", "booby trap", "panji", "pillbox", "roadblock", "tetrahedron", "wire"
+],
+"entrenchment/entrenchments": [
+    "foxhole", "trench", "ditch"
+],
+"vehicle/vehicles": [
+    "tank", "halftrack", "half-track", "jeep", "carrier"
+],
+"illumination": [
+    "tarshell", "illuminating round", "trip flare"
+]
+
+}

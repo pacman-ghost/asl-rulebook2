@@ -1,5 +1,5 @@
 import { gMainApp, gEventBus } from "./MainApp.js" ;
-import { IndexSearchResult } from "./SearchResult.js" ;
+import { fixupSearchHilites } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -30,7 +30,7 @@ gMainApp.component( "search-box", {
     },
 
     methods: {
-        onKeyUp: function( evt ) {
+        onKeyUp( evt ) {
             if ( evt.keyCode == 13 )
                 this.$refs["submit"].click() ;
         }
@@ -43,12 +43,15 @@ gMainApp.component( "search-box", {
 gMainApp.component( "search-results", {
 
     data() { return {
-        searchResults: [],
+        searchResults: null,
+        errorMsg: null,
     } ; },
 
     template: `<div>
-<div v-for="sr in searchResults" :key=sr.key >
-    <index-sr v-if="sr.srType == 'index'" :sr=sr />
+<div v-if=errorMsg class="error"> Search error: <div class="pre"> {{errorMsg}} </div> </div>
+<div v-else-if="searchResults != null && searchResults.length == 0" class="no-results"> Nothing was found. </div>
+<div v-else v-for="sr in searchResults" :key=sr.key >
+    <index-sr v-if="sr.sr_type == 'index'" :sr=sr />
     <div v-else> ??? </div>
 </div>
 </div>`,
@@ -60,22 +63,39 @@ gMainApp.component( "search-results", {
     methods: {
 
         onSearch( queryString ) {
-            // generate some dummy search results
-            let searchResults = [] ;
-            for ( let i=0 ; i < queryString.length ; ++i ) {
-                let buf = [ "Search result #" + (1+i) ] ;
-                let nItems = Math.floor( Math.sqrt( 100 * Math.random() ) ) - 1 ;
-                if ( nItems > 0 ) {
-                    buf.push( "<ul style='padding-left:1em;'>" ) ;
-                    for ( let j=0 ; j < nItems ; ++j )
-                        buf.push( "<li> item " + (1+j) ) ;
-                    buf.push( "</ul>" ) ;
+            // submit the search request
+            const onError = (errorMsg) => {
+                this.errorMsg = errorMsg ;
+                Vue.nextTick( () => {
+                    gEventBus.emit( "search-done" ) ;
+                } ) ;
+            } ;
+            this.errorMsg = null ;
+            $.ajax( { url: gSearchUrl, type: "POST", //eslint-disable-line no-undef
+                data: { queryString: queryString },
+                dataType: "json",
+            } ).done( (resp) => {
+                // check if there was an error
+                if ( resp.error ) {
+                    onError( resp.error ) ;
+                    return ;
                 }
-                searchResults.push(
-                    new IndexSearchResult( i, buf.join("") )
-                ) ;
-            }
-            this.searchResults = searchResults ;
+                // adjust highlighted text
+                resp.forEach( (sr) => {
+                    [ "title", "subtitle", "content" ].forEach( function( key ) {
+                        if ( sr[key] )
+                            sr[key] = fixupSearchHilites( sr[key] ) ;
+                    } ) ;
+                } ) ;
+                // load the search results into the UI
+                this.$el.scrollTop = 0;
+                this.searchResults = resp ;
+                Vue.nextTick( () => {
+                    gEventBus.emit( "search-done" ) ;
+                } ) ;
+            } ).fail( (xhr, status, errorMsg) => {
+                onError( errorMsg ) ;
+            } ) ;
         },
 
     },

@@ -12,6 +12,10 @@ $(document).ready( () => {
     gMainApp.mount( "#main-app" ) ;
 } ) ;
 
+// FUDGE! Can't seem to get access to the content docs via gMainApp, so we make them available
+// to the rest of the program via this global variable :-/
+export let gContentDocs = null ;
+
 // --------------------------------------------------------------------
 
 gMainApp.component( "main-app", {
@@ -47,23 +51,27 @@ gMainApp.component( "main-app", {
 
     methods: {
 
-        getContentDocs: (self) => new Promise( (resolve, reject) => {
-            // get the content docs
-            $.getJSON( gGetContentDocsUrl, (resp) => { //eslint-disable-line no-undef
-                self.contentDocs = resp ;
-                let docIds = Object.keys( resp ) ;
-                if ( docIds.length > 0 ) {
-                    Vue.nextTick( () => {
-                        gEventBus.emit( "show-content-doc", docIds[0] ) ; // FIXME! which one do we choose?
-                    } ) ;
-                }
-                resolve() ;
-            } ).fail( (xhr, status, errorMsg) => {
-                const msg = "Couldn't get the content docs." ;
-                showErrorMsg( msg + " <div class='pre'>" + errorMsg + "</div>" ) ;
-                reject( msg )
+        getContentDocs( self ) {
+            return new Promise( (resolve, reject) => {
+                // get the content docs
+                $.getJSON( gGetContentDocsUrl, (resp) => { //eslint-disable-line no-undef
+                    if ( gUrlParams.get( "add-empty-doc" ) )
+                        resp["empty"] = { "doc_id": "empty", "title": "Empty document" } ; // nb: for testing porpoises
+                    gContentDocs = self.contentDocs = resp ;
+                    let docIds = Object.keys( resp ) ;
+                    if ( docIds.length > 0 ) {
+                        Vue.nextTick( () => {
+                            gEventBus.emit( "show-target", docIds[0], null ) ; // FIXME! which one do we choose?
+                        } ) ;
+                    }
+                    resolve() ;
+                } ).fail( (xhr, status, errorMsg) => {
+                    const msg = "Couldn't get the content docs." ;
+                    showErrorMsg( msg + " <div class='pre'>" + errorMsg + "</div>" ) ;
+                    reject( msg )
+                } ) ;
             } ) ;
-        } ),
+        },
 
     },
 

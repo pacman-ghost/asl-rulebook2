@@ -10,7 +10,7 @@ from asl_rulebook2.utils import parse_page_numbers
 
 @click.command()
 @click.argument( "pdf_file", nargs=1, type=click.Path(exists=True,dir_okay=False) )
-@click.option( "--output","-o","output_fname", required=True, type=click.Path(dir_okay=False), help="Output PDF file" )
+@click.option( "--output","-o","output_fname", required=True, type=click.Path(dir_okay=False), help="Output PDF file." )
 @click.option( "--pages","-p", help="Page(s) to dump (e.g. 2,5,9-15)." )
 def main( pdf_file, output_fname, pages ):
     """Extract pages from a PDF."""

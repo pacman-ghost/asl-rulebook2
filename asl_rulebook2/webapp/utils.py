@@ -1,7 +1,23 @@
 """Helper functions."""
 
+import os
 import pathlib
 import re
+
+from asl_rulebook2.webapp import app, CONFIG_DIR
+
+# ---------------------------------------------------------------------
+
+def make_data_path( path ):
+    """Generate a path relative to the data directory."""
+    dname = app.config.get( "DATA_DIR" )
+    if not dname:
+        return None
+    return os.path.join( dname, path )
+
+def make_config_path( path ):
+    """Generate a path in the config directory."""
+    return os.path.join( CONFIG_DIR, path )
 
 # ---------------------------------------------------------------------
 

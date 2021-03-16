@@ -11,7 +11,7 @@ from flask import Flask
 import flask.cli
 import yaml
 
-from asl_rulebook2.webapp.config.constants import BASE_DIR
+from asl_rulebook2.webapp.config.constants import BASE_DIR, CONFIG_DIR
 
 shutdown_event = threading.Event()
 
@@ -19,6 +19,7 @@ shutdown_event = threading.Event()
 
 def _load_config( fname, section ):
     """Load config settings from a file."""
+    fname = os.path.join( CONFIG_DIR, fname )
     if not os.path.isfile( fname ):
         return
     config_parser = configparser.ConfigParser()
@@ -50,21 +51,12 @@ flask.cli.show_server_banner = lambda *args: None
 app = Flask( __name__ )
 
 # load the application configuration
-config_dir = os.path.join( BASE_DIR, "config" )
-_fname = os.path.join( config_dir, "app.cfg" )
-_load_config( _fname, "System" )
-
-# load any site configuration
-_fname = os.path.join( config_dir, "site.cfg" )
-_load_config( _fname, "Site Config" )
-
-# load any debug configuration
-_fname = os.path.join( config_dir, "debug.cfg" )
-if os.path.isfile( _fname ) :
-    _load_config( _fname, "Debug" )
+_load_config( "app.cfg", "System" )
+_load_config( "site.cfg", "Site Config" )
+_load_config( "debug.cfg", "Debug" )
 
 # initialize logging
-_fname = os.path.join( config_dir, "logging.yaml" )
+_fname = os.path.join( CONFIG_DIR, "logging.yaml" )
 if os.path.isfile( _fname ):
     with open( _fname, "r", encoding="utf-8" ) as fp:
         try:

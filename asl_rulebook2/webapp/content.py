@@ -2,6 +2,7 @@
 
 import os
 import io
+import json
 import glob
 
 from flask import jsonify, send_file, url_for, abort
@@ -13,7 +14,7 @@ content_docs = None
 
 # ---------------------------------------------------------------------
 
-def load_content_docs():
+def load_content_docs( logger ):
     """Load the content documents from the data directory."""
 
     # initialize
@@ -29,26 +30,32 @@ def load_content_docs():
         fname = os.path.join( dname, fname )
         if not os.path.isfile( fname ):
             return
-        kwargs = {}
-        kwargs["mode"] = "rb" if binary else "r"
-        if not binary:
-            kwargs["encoding"] = "utf-8"
-        with open( fname, **kwargs ) as fp:
-            content_doc[ key ] = fp.read()
+        if binary:
+            with open( fname, mode="rb" ) as fp:
+                data = fp.read()
+            logger.debug( "- Loaded \"%s\" file: #bytes=%d", key, len(data) )
+            content_doc[ key ] = data
+        else:
+            with open( fname, "r", encoding="utf-8" ) as fp:
+                content_doc[ key ] = json.load( fp )
+            logger.debug( "- Loaded \"%s\" file.", key )
 
     # load each content doc
+    logger.info( "Loading content docs: %s", dname )
     fspec = os.path.join( dname, "*.index" )
     for fname in glob.glob( fspec ):
-        fname = os.path.basename( fname )
-        title = os.path.splitext( fname )[0]
+        fname2 = os.path.basename( fname )
+        logger.info( "- %s", fname2 )
+        title = os.path.splitext( fname2 )[0]
         content_doc = {
+            "_fname": fname,
             "doc_id": slugify( title ),
             "title": title,
         }
-        get_doc( content_doc, "index", fname )
-        get_doc( content_doc, "targets", change_extn(fname,".targets") )
-        get_doc( content_doc, "footnotes", change_extn(fname,".footnotes") )
-        get_doc( content_doc, "content", change_extn(fname,".pdf"), binary=True )
+        get_doc( content_doc, "index", fname2 )
+        get_doc( content_doc, "targets", change_extn(fname2,".targets") )
+        get_doc( content_doc, "footnotes", change_extn(fname2,".footnotes") )
+        get_doc( content_doc, "content", change_extn(fname2,".pdf"), binary=True )
         content_docs[ content_doc["doc_id"] ] = content_doc
 
 # ---------------------------------------------------------------------
@@ -59,11 +66,13 @@ def get_content_docs():
     resp = {}
     for cdoc in content_docs.values():
         cdoc2 = {
-            "docId": cdoc["doc_id"],
+            "doc_id": cdoc["doc_id"],
             "title": cdoc["title"],
         }
         if "content" in cdoc:
             cdoc2["url"] = url_for( "get_content", doc_id=cdoc["doc_id"] )
+        if "targets" in cdoc:
+            cdoc2["targets"] = cdoc["targets"]
         resp[ cdoc["doc_id"] ] = cdoc2
     return jsonify( resp )
 

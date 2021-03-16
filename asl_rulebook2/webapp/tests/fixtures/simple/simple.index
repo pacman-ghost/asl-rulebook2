@@ -11,7 +11,7 @@
 { "title": "Backblast",
   "ruleids": [ "C13.8" ],
   "rulerefs": [
-    { "caption": "Huts", "ruleids": [ "G5.62" ] },
+    { "caption": "HEAT", "ruleids": [ "C13.8" ] },
     { "caption": "RCL", "ruleids": [ "C12.3-.4" ] }
   ]
 },
@@ -31,11 +31,9 @@
   "content": "Also known as \"running <em>really</em> fast.\"",
   "rulerefs": [
     { "caption": "ENEMY Guard Automatic Action", "ruleids": [ "S6.303" ] },
-    { "caption": "Manhandling", "ruleids": [ "C10.3" ] },
-    { "caption": "NA for Pathfinders", "ruleids": [ "T1.2" ] },
-    { "caption": "S? NA", "ruleids": [ "S3.321" ] },
-    { "caption": "Water Shortage", "ruleids": [ "RCG21" ] },
-    { "caption": "Wire NA", "ruleids": [ "B26.46" ] }
+    { "ruleids": [ "C10.3" ] },
+    { "caption": "NA in Advance Phase", "ruleids": [ "A4.7" ] },
+    { "caption": "'S?' is \"&lt;NA&gt;\"" }
   ]
 },
 
@@ -54,6 +52,7 @@
 },
 
 { "title": "Firepower",
+  "content": "The U.S. has lots of this.",
   "ruleids": [ "A1.21" ],
   "see_also": [ "FP" ]
 },
@@ -71,6 +70,12 @@
 
 { "title": "Identity, Vehicular",
   "ruleids": [ "D1.4" ]
+},
+
+{ "title": "HTML ti<u>tl</u>e",
+  "subtitle": "HTML subti<u>tl</u>e",
+  "content": "HTML con<u>ten</u>t: 2&frac34; MP",
+  "see_also": [ "HTML see-<u>al</u>so" ]
 }
 
 ]

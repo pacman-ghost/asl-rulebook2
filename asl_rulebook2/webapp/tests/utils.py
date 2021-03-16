@@ -17,6 +17,10 @@ def init_webapp( webapp, webdriver, **options ):
     global _webapp, _webdriver
     _webapp = webapp
     _webdriver = webdriver
+    options = {
+        key.replace("_","-"): val
+        for key, val in options.items()
+    }
 
     # load the webapp
     if get_pytest_option("webdriver") == "chrome" and get_pytest_option("headless"):
@@ -36,6 +40,18 @@ def _wait_for_webapp():
     """Wait for the webapp to finish initialization."""
     timeout = 5
     wait_for( timeout, lambda: find_child("#_mainapp-loaded_") )
+
+# ---------------------------------------------------------------------
+
+def select_tabbed_page( parent_sel, tab_id ):
+    """Select a tabbed page."""
+    tabbed_pages = find_child( ".tabbed-pages", find_child(parent_sel) )
+    btn = find_child( ".tab-strip .tab[data-tabid='{}']".format( tab_id ), tabbed_pages )
+    btn.click()
+    def find_tabbed_page():
+        elem = find_child( ".tabbed-page[data-tabid='{}']".format( tab_id ), tabbed_pages )
+        return elem and elem.is_displayed()
+    wait_for( 2, find_tabbed_page )
 
 # ---------------------------------------------------------------------
 
@@ -71,6 +87,11 @@ def find_children( sel, parent=None ):
         return parent.find_elements_by_css_selector( sel )
     except NoSuchElementException:
         return None
+
+def get_classes( elem ):
+    """Get the element's classes."""
+    classes = elem.get_attribute( "class" )
+    return classes.split()
 
 # ---------------------------------------------------------------------
 

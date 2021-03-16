@@ -1,15 +1,15 @@
 {
 
-"A4.7": { "caption": "ADVANCE PHASE", "page_no": 1, "pos": [72,702] },
-"C13.8": { "caption": "BACKBLAST", "page_no": 1, "pos": [72,404] },
-"A3.8": { "caption": "CLOSE COMBAT PHASE (CCPh)", "page_no": 1, "pos": [72.97] },
+"A4.7": { "caption": "ADVANCE PHASE", "page_no": 1, "pos": [72,718] },
+"C13.8": { "caption": "BACKBLAST", "page_no": 1, "pos": [72,503] },
+"A3.8": { "caption": "CLOSE COMBAT PHASE (CCPh)", "page_no": 1, "pos": [72,292] },
 
-"A4.5": { "caption": "DOUBLE TIME", "page_no": 2, "pos": [72,702] },
-"A19.1": { "caption": "EXPERIENCE LEVEL RATING (ELR)", "page_no": 2, "pos": [72.404] },
-"A1.21": { "caption": "FIREPOWER (FP)", "page_no": 2, "pos": [72,97] },
+"A4.5": { "caption": "DOUBLE TIME", "page_no": 2, "pos": [72,718] },
+"A19.1": { "caption": "EXPERIENCE LEVEL RATING (ELR)", "page_no": 2, "pos": [72,503] },
+"A1.21": { "caption": "FIREPOWER (FP)", "page_no": 2, "pos": [72,292] },
 
-"A1.21": { "caption": "FIREPOWER (FP)", "page_no": 3, "pos": [72,702] },
-"E11.21": { "caption": "GAPS", "page_no": 3, "pos":[72,404] },
-"C8.3": { "caption": "HEAT (H)", "page_no": 3, "pos": [72,97] }
+"E11.21": { "caption": "GAPS", "page_no": 3, "pos":[72,718] },
+"C8.3": { "caption": "HEAT (H)", "page_no": 3, "pos": [72,503] },
+"D1.4": { "caption": "IDENTITY & GROUND PRESSURE", "page_no": 3, "pos": [72,292] }
 
 }

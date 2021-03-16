@@ -9,6 +9,7 @@ from flask import render_template, jsonify, abort
 
 from asl_rulebook2.webapp import app, globvars, shutdown_event
 from asl_rulebook2.webapp.content import load_content_docs
+from asl_rulebook2.webapp.search import init_search
 from asl_rulebook2.webapp.utils import parse_int
 
 # ---------------------------------------------------------------------
@@ -20,7 +21,9 @@ def init_webapp():
     after that by the test suite, to reset the webapp before each test.
     """
     # initialize the webapp
-    load_content_docs()
+    logger = logging.getLogger( "startup" )
+    load_content_docs( logger )
+    init_search( logger )
 
 # ---------------------------------------------------------------------
 

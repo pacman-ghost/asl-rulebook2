@@ -50,6 +50,8 @@ def main( bind_addr, data_dir, force_init_delay, flask_debug ):
     # monitor extra files for changes
     extra_files = []
     fspecs = [ "static/", "templates/", "config/" ]
+    if app.config.get( "DATA_DIR" ):
+        fspecs.append( app.config["DATA_DIR"] )
     for fspec in fspecs:
         fspec = os.path.abspath( os.path.join( os.path.dirname(__file__), fspec ) )
         if os.path.isdir( fspec ):

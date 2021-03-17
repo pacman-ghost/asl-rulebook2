@@ -66,6 +66,9 @@ gMainApp.component( "search-results", {
 
             // initialize
             this.errorMsg = null ;
+            function onSearchDone() {
+                Vue.nextTick( () => { gEventBus.emit( "search-done" ) ; } ) ;
+            }
 
             // check if the query string is just a target
             let docIds = findTarget( queryString ) ;
@@ -73,14 +76,14 @@ gMainApp.component( "search-results", {
                 // yup - just show it directly
                 this.searchResults = null ;
                 gEventBus.emit( "show-target", docIds[0][0], docIds[0][1] ) ;
-                Vue.nextTick( () => { gEventBus.emit( "search-done" ) ; } ) ;
+                onSearchDone() ;
                 return ;
             }
 
             // submit the search request
             const onError = (errorMsg) => {
                 this.errorMsg = errorMsg ;
-                Vue.nextTick( () => { gEventBus.emit( "search-done" ) ; } ) ;
+                onSearchDone() ;
             } ;
             $.ajax( { url: gSearchUrl, type: "POST", //eslint-disable-line no-undef
                 data: { queryString: queryString },
@@ -101,7 +104,19 @@ gMainApp.component( "search-results", {
                 // load the search results into the UI
                 this.$el.scrollTop = 0;
                 this.searchResults = resp ;
-                Vue.nextTick( () => { gEventBus.emit( "search-done" ) ; } ) ;
+                // auto-show the first related rule we know about
+                for ( let i=0 ; i < resp.length ; ++i ) {
+                    const ruleids = resp[i].ruleids ;
+                    if ( ! ruleids )
+                        continue ;
+                    const targets = findTarget( ruleids[0] ) ;
+                    if ( targets ) {
+                        gEventBus.emit( "show-target", targets[0][0], targets[0][1] ) ;
+                        break ;
+                    }
+                }
+                // flag that the search was completed
+                onSearchDone() ;
             } ).fail( (xhr, status, errorMsg) => {
                 onError( errorMsg ) ;
             } ) ;

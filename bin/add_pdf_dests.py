@@ -41,9 +41,11 @@ def main( pdf_file, title, targets_fname, yoffset, output_fname, gs_path ):
         print( "  /DOCINFO pdfmark", file=temp_file )
         print( file=temp_file )
         for ruleid, target in targets.items():
-            xpos, ypos = target["pos"]
+            xpos, ypos = target.get( "pos", ["null","null"] )
+            if isinstance( ypos, int ):
+                ypos += yoffset
             print( "[ /Dest /{} /Page {} /View [/XYZ {} {}] /DEST pdfmark".format(
-                ruleid, target["page_no"], xpos, ypos+yoffset
+                ruleid, target["page_no"], xpos, ypos
             ), file=temp_file )
         print( file=temp_file )
         temp_file.close( delete=False )

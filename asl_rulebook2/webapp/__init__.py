@@ -69,6 +69,7 @@ else:
 
 # load the application
 import asl_rulebook2.webapp.main #pylint: disable=wrong-import-position,cyclic-import
+import asl_rulebook2.webapp.startup #pylint: disable=wrong-import-position,cyclic-import
 import asl_rulebook2.webapp.content #pylint: disable=wrong-import-position,cyclic-import
 from asl_rulebook2.webapp import globvars #pylint: disable=wrong-import-position,cyclic-import
 app.before_request( globvars.on_request )

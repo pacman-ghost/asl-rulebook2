@@ -1,7 +1,10 @@
 """ Helper utilities. """
 
+import sys
+import uuid
+
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 from asl_rulebook2.webapp import tests as webapp_tests
 
@@ -27,6 +30,7 @@ def init_webapp( webapp, webdriver, **options ):
         # FUDGE! Headless Chrome doesn't want to show the PDF in the browser,
         # it downloads the file and saves it in the current directory :wtf:
         options["no-content"] = 1
+    options["store-msgs"] = 1 # nb: so that we can retrive notification messages
     options["reload"] = 1 # nb: force the webapp to reload
     webdriver.get( webapp.url_for( "main", **options ) )
     _wait_for_webapp()
@@ -70,6 +74,32 @@ def _get_tab_ids( sel ):
 
 # ---------------------------------------------------------------------
 
+#pylint: disable=multiple-statements,missing-function-docstring
+def get_last_info(): return get_stored_msg( "info" )
+def get_last_warning_msg(): return get_stored_msg( "warning" )
+def get_last_error_msg(): return get_stored_msg( "error" )
+#pylint: enable=multiple-statements,missing-function-docstring
+
+def get_stored_msg( msg_type ):
+    """Get a message stored for us by the front-end."""
+    elem = find_child( "#_last-{}-msg_".format(msg_type), _webdriver )
+    assert elem.tag_name == "textarea"
+    return elem.get_attribute( "value" )
+
+def set_stored_msg( msg_type, val ):
+    """Set a message for the front-end."""
+    elem = find_child( "#_last-{}-msg_".format(msg_type), _webdriver )
+    assert elem.tag_name == "textarea"
+    _webdriver.execute_script( "arguments[0].value = arguments[1]", elem, val )
+
+def set_stored_msg_marker( msg_type ):
+    """Store marker text in the message buffer (so we can tell if the front-end changes it)."""
+    marker = "marker:{}:{}".format( msg_type, uuid.uuid4() )
+    set_stored_msg( msg_type, marker )
+    return marker
+
+# ---------------------------------------------------------------------
+
 def find_child( sel, parent=None ):
     """Find a single child element."""
     try:
@@ -100,6 +130,29 @@ def wait_for( timeout, func ):
     WebDriverWait( _webdriver, timeout, poll_frequency=0.1 ).until(
         lambda driver: func()
     )
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+#pylint: disable=missing-function-docstring
+def wait_for_info_msg( timeout, expected, contains=True ):
+    return _do_wait_for_msg( timeout, "info", expected, contains )
+def wait_for_warning_msg( timeout, expected, contains=True ):
+    return _do_wait_for_msg( timeout, "warning", expected, contains )
+def wait_for_error_msg( timeout, expected, contains=True ):
+    return _do_wait_for_msg( timeout, "error", expected, contains )
+#pylint: enable=missing-function-docstring
+
+def _do_wait_for_msg( timeout, msg_type, expected, contains ):
+    """Wait for a message to be issued."""
+    func = getattr( sys.modules[__name__], "get_last_{}_msg".format( msg_type ) )
+    try:
+        wait_for( timeout,
+            lambda: expected in func() if contains else expected == func()
+        )
+    except TimeoutException:
+        print( "ERROR: Didn't get expected {} message: {}".format( msg_type, expected ) )
+        print( "- last {} message: {}".format( msg_type, func() ) )
+        assert False
 
 # ---------------------------------------------------------------------
 

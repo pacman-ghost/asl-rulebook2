@@ -321,7 +321,7 @@ def _adjust_sort_order( results ):
 
 # ---------------------------------------------------------------------
 
-def init_search( logger ):
+def init_search( startup_msgs, logger ):
     """Initialize the search engine."""
 
     # initialize
@@ -376,11 +376,11 @@ def init_search( logger ):
     assert len(_fts_index_entries) == _get_row_count( conn, "searchable" )
 
     # load the search config
-    load_search_config( logger )
+    load_search_config( startup_msgs, logger )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def load_search_config( logger ):
+def load_search_config( startup_msgs, logger ):
     """Load the search config."""
 
     # initialize
@@ -411,12 +411,16 @@ def load_search_config( logger ):
                 _SEARCH_TERM_ADJUSTMENTS[ key ].update( vals )
 
     # load the search replacements
-    def load_search_replacements( fname ):
+    def load_search_replacements( fname, ftype ):
         if not os.path.isfile( fname ):
             return
         logger.info( "Loading search replacements: %s", fname )
-        with open( fname, "r", encoding="utf-8" ) as fp:
-            data = json.load( fp )
+        try:
+            with open( fname, "r", encoding="utf-8" ) as fp:
+                data = json.load( fp )
+        except Exception as ex: #pylint: disable=broad-except
+            startup_msgs.warning( "Can't load {} search replacements.".format( ftype ), str(ex) )
+            return
         nitems = 0
         for key, val in data.items():
             if key.startswith( "_" ):
@@ -425,16 +429,20 @@ def load_search_config( logger ):
             add_search_term_adjustment( key, val )
             nitems += 1
         logger.info( "- Loaded %s.", plural(nitems,"search replacement","search replacements") )
-    load_search_replacements( make_config_path( "search-replacements.json" ) )
-    load_search_replacements( make_data_path( "search-replacements.json" ) )
+    load_search_replacements( make_config_path( "search-replacements.json" ), "default" )
+    load_search_replacements( make_data_path( "search-replacements.json" ), "user" )
 
     # load the search aliases
-    def load_search_aliases( fname ):
+    def load_search_aliases( fname, ftype ):
         if not os.path.isfile( fname ):
             return
         logger.info( "Loading search aliases: %s", fname )
-        with open( fname, "r", encoding="utf-8" ) as fp:
-            data = json.load( fp )
+        try:
+            with open( fname, "r", encoding="utf-8" ) as fp:
+                data = json.load( fp )
+        except Exception as ex: #pylint: disable=broad-except
+            startup_msgs.warning( "Can't load {} search aliases.".format( ftype ), str(ex) )
+            return
         nitems = 0
         for keys, aliases in data.items():
             if keys.startswith( "_" ):
@@ -444,16 +452,20 @@ def load_search_config( logger ):
                 add_search_term_adjustment( key, set( itertools.chain( aliases, [key] ) ) )
             nitems += 1
         logger.info( "- Loaded %s.", plural(nitems,"search aliases","search aliases") )
-    load_search_aliases( make_config_path( "search-aliases.json" ) )
-    load_search_aliases( make_data_path( "search-aliases.json" ) )
+    load_search_aliases( make_config_path( "search-aliases.json" ), "default" )
+    load_search_aliases( make_data_path( "search-aliases.json" ), "user" )
 
     # load the search synonyms
-    def load_search_synonyms( fname ):
+    def load_search_synonyms( fname, ftype ):
         if not os.path.isfile( fname ):
             return
         logger.info( "Loading search synonyms: %s", fname )
-        with open( fname, "r", encoding="utf-8" ) as fp:
-            data = json.load( fp )
+        try:
+            with open( fname, "r", encoding="utf-8" ) as fp:
+                data = json.load( fp )
+        except Exception as ex: #pylint: disable=broad-except
+            startup_msgs.warning( "Can't load {} search synonyms.".format( ftype ), str(ex) )
+            return
         nitems = 0
         for synonyms in data:
             if isinstance( synonyms, str ):
@@ -464,8 +476,8 @@ def load_search_config( logger ):
                 add_search_term_adjustment( term, synonyms )
             nitems += 1
         logger.info( "- Loaded %s.", plural(nitems,"search synonym","search synonyms") )
-    load_search_synonyms( make_config_path( "search-synonyms.json" ) )
-    load_search_synonyms( make_data_path( "search-synonyms.json" ) )
+    load_search_synonyms( make_config_path( "search-synonyms.json" ), "default" )
+    load_search_synonyms( make_data_path( "search-synonyms.json" ), "user" )
 
 # ---------------------------------------------------------------------
 

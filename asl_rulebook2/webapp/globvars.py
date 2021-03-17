@@ -26,7 +26,7 @@ def on_request():
         global _init_done
         if not _init_done or (request.path == "/" and request.args.get("reload")):
             try:
-                from asl_rulebook2.webapp.main import init_webapp
+                from asl_rulebook2.webapp.startup import init_webapp
                 init_webapp()
             finally:
                 # NOTE: It's important to set this, even if initialization failed, so we don't

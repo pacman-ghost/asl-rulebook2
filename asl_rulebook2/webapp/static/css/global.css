@@ -12,4 +12,4 @@
 .growl .growl-close { position: absolute ; top: 0 ; right: 6px ; }
 .growl .growl-title { display: none ; }
 .growl .pre { font-family: monospace ; }
-.growl div.pre { margin: 0 0 15px 15px ; font-size: 80% ; }
+.growl div.pre { margin: 0 0 10px 10px ; font-size: 80% ; }

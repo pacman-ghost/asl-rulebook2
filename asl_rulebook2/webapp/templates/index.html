@@ -20,6 +20,8 @@
 
 <body>
     <div id="main-app"></div>
+    {# NOTE: We include some elements to support the test suite, and since they can be updated by the test suite, we manage them manually (instead of using Vue). #}
+    {%include "testing.html"%}
 </body>
 
 {%if WEB_DEBUG%}
@@ -42,7 +44,8 @@
 <script src="{{ url_for( 'static', filename='growl/jquery.growl.js' ) }}"></script>
 
 <script>
-gGetContentDocsUrl = "{{ url_for( 'get_content_docs') }}" ;
+gGetContentDocsUrl = "{{ url_for( 'get_content_docs' ) }}" ;
+gGetStartupMsgsUrl = "{{ url_for( 'get_startup_msgs' ) }}" ;
 gSearchUrl = "{{ url_for( 'search' ) }}" ;
 </script>
 

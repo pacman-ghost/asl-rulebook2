@@ -1,3 +1,5 @@
+import { gUrlParams } from "./MainApp.js" ;
+
 // --------------------------------------------------------------------
 
 const _HILITE_REGEXES = [
@@ -16,15 +18,21 @@ export function fixupSearchHilites( val )
 
 // --------------------------------------------------------------------
 
-export function showInfoMsg( msg ) { _doShowNotificationMsg( "notice", msg ) ; }
-export function showWarningMsg( msg ) { _doShowNotificationMsg( "warning", msg ) ; }
-export function showErrorMsg( msg ) { _doShowNotificationMsg( "error", msg ) ; }
+export function showInfoMsg( msg ) { showNotificationMsg( "notice", msg ) ; }
+export function showWarningMsg( msg ) { showNotificationMsg( "warning", msg ) ; }
+export function showErrorMsg( msg ) { showNotificationMsg( "error", msg ) ; }
 
-function _doShowNotificationMsg( msgType, msg )
+export function showNotificationMsg( msgType, msg )
 {
+    if ( gUrlParams.get( "store-msgs" ) ) {
+        // store the message for the test suite
+        $( "#_last-" + msgType + "-msg_" ).val( msg ) ;
+        return ;
+    }
+
     // show the notification message
     $.growl( {
-        style: msgType,
+        style: (msgType == "info") ? "notice" : msgType,
         title: null,
         message: msg,
         location: "br",

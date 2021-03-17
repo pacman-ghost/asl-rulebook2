@@ -7,6 +7,7 @@ from selenium.webdriver.common.keys import Keys
 
 from asl_rulebook2.utils import strip_html
 from asl_rulebook2.webapp.search import load_search_config, _make_fts_query_string
+from asl_rulebook2.webapp.startup import StartupMsgs
 from asl_rulebook2.webapp.tests.utils import init_webapp, select_tabbed_page, get_classes, \
     wait_for, find_child, find_children
 
@@ -124,11 +125,13 @@ def test_make_fts_query_string():
     """Test generating the FTS query string."""
 
     # initialize
-    load_search_config( logging.getLogger("_unknown_") )
+    startup_msgs = StartupMsgs()
+    load_search_config( startup_msgs, logging.getLogger("_unknown_") )
 
     def check( query, expected ):
         fts_query_string, _ = _make_fts_query_string(query)
         assert fts_query_string == expected
+        assert not startup_msgs.msgs
 
     # test some query strings
     check( "", "" )

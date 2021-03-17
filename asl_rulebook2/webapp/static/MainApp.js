@@ -1,4 +1,4 @@
-import { showErrorMsg } from "./utils.js" ;
+import { showErrorMsg, showNotificationMsg } from "./utils.js" ;
 
 // parse any URL parameters
 export let gUrlParams = new URLSearchParams( window.location.search.substring(1) ) ;
@@ -45,6 +45,7 @@ gMainApp.component( "main-app", {
             this.getContentDocs( this ),
         ] ).then( () => {
             this.isLoaded = true ;
+            this.showStartupMsgs() ;
             $( "#query-string" ).focus() ; // nb: because autofocus on the <input> doesn't work :-/
         } ) ;
     },
@@ -70,6 +71,23 @@ gMainApp.component( "main-app", {
                     showErrorMsg( msg + " <div class='pre'>" + errorMsg + "</div>" ) ;
                     reject( msg )
                 } ) ;
+            } ) ;
+        },
+
+        showStartupMsgs() {
+            $.getJSON( gGetStartupMsgsUrl, (resp) => { //eslint-disable-line no-undef
+                // show any startup messages
+                [ "info", "warning", "error" ].forEach( (msgType) => {
+                    if ( ! resp[msgType] )
+                        return ;
+                    resp[msgType].forEach( (msg) => {
+                        if ( Array.isArray( msg ) )
+                            msg = msg[0] + " <div class='pre'>" + msg[1] + "</div>" ;
+                        showNotificationMsg( msgType, msg ) ;
+                    } ) ;
+                } ) ;
+            } ).fail( (xhr, status, errorMsg) => { //eslint-disable-line no-unused-vars
+                showErrorMsg( "Couldn't get the startup messages." ) ;
             } ) ;
         },
 

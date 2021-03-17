@@ -14,7 +14,7 @@ content_docs = None
 
 # ---------------------------------------------------------------------
 
-def load_content_docs( logger ):
+def load_content_docs( startup_msgs, logger ):
     """Load the content documents from the data directory."""
 
     # initialize
@@ -23,27 +23,36 @@ def load_content_docs( logger ):
     dname = app.config.get( "DATA_DIR" )
     if not dname:
         return
-    if not os.path.dirname( dname ):
-        raise RuntimeError( "Invalid data directory: {}".format( dname ) )
+    if not os.path.isdir( dname ):
+        startup_msgs.error( "Invalid data directory.", dname )
+        return
 
-    def get_doc( content_doc, key, fname, binary=False ):
+    def load_file( fname, content_doc, key, on_error, binary=False ):
         fname = os.path.join( dname, fname )
         if not os.path.isfile( fname ):
-            return
-        if binary:
-            with open( fname, mode="rb" ) as fp:
-                data = fp.read()
-            logger.debug( "- Loaded \"%s\" file: #bytes=%d", key, len(data) )
-            content_doc[ key ] = data
-        else:
-            with open( fname, "r", encoding="utf-8" ) as fp:
-                content_doc[ key ] = json.load( fp )
-            logger.debug( "- Loaded \"%s\" file.", key )
+            return False
+        # load the specified file
+        try:
+            if binary:
+                with open( fname, mode="rb" ) as fp:
+                    data = fp.read()
+                logger.debug( "- Loaded \"%s\" file: #bytes=%d", key, len(data) )
+            else:
+                with open( fname, "r", encoding="utf-8" ) as fp:
+                    data = json.load( fp )
+                logger.debug( "- Loaded \"%s\" file.", key )
+        except Exception as ex: #pylint: disable=broad-except
+            on_error( "Couldn't load \"{}\".".format( os.path.basename(fname) ), str(ex) )
+            return False
+        # save the file data
+        content_doc[ key ] = data
+        return True
 
     # load each content doc
     logger.info( "Loading content docs: %s", dname )
     fspec = os.path.join( dname, "*.index" )
     for fname in glob.glob( fspec ):
+        # load the main index file
         fname2 = os.path.basename( fname )
         logger.info( "- %s", fname2 )
         title = os.path.splitext( fname2 )[0]
@@ -52,10 +61,13 @@ def load_content_docs( logger ):
             "doc_id": slugify( title ),
             "title": title,
         }
-        get_doc( content_doc, "index", fname2 )
-        get_doc( content_doc, "targets", change_extn(fname2,".targets") )
-        get_doc( content_doc, "footnotes", change_extn(fname2,".footnotes") )
-        get_doc( content_doc, "content", change_extn(fname2,".pdf"), binary=True )
+        if not load_file( fname2, content_doc, "index", startup_msgs.error ):
+            continue # nb: we can't do anything without an index file
+        # load any associated files
+        load_file( change_extn(fname2,".targets"), content_doc, "targets", startup_msgs.warning )
+        load_file( change_extn(fname2,".footnotes"), content_doc, "footnotes", startup_msgs.warning )
+        load_file( change_extn(fname2,".pdf"), content_doc, "content", startup_msgs.warning, binary=True )
+        # save the new content doc
         content_docs[ content_doc["doc_id"] ] = content_doc
 
 # ---------------------------------------------------------------------

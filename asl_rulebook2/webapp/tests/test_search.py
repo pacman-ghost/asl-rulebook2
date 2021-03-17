@@ -106,14 +106,7 @@ def test_targets( webapp, webdriver ):
         # click on a target
         elem = find_child( "#search-results {}".format( sel ) )
         elem.click()
-        def check_target():
-            # check the active tab
-            if find_child( "#content .tab-strip .tab.active" ).get_attribute( "data-tabid" ) != "simple":
-                return False
-            # check the current target
-            elem = find_child( "#content .tabbed-page[data-tabid='simple'] .content-doc" )
-            return elem.get_attribute( "data-target" ) == expected
-        wait_for( 2, check_target )
+        wait_for( 2, lambda: _get_curr_target() == ( "simple", expected ) )
 
     # do the tests
     do_test( "CC", ".sr .ruleids .ruleid a", "A3.8" )
@@ -141,6 +134,36 @@ def test_toggle_rulerefs( webapp, webdriver ):
     do_test( "RCL", False ) # nb: matches some (but not all) of the ruleref's
     do_test( "rcl AND heat", None ) # nb: matches all of the ruleref's
     do_test( "firepower", None ) # nb: has no ruleref's
+
+# ---------------------------------------------------------------------
+
+def test_target_search( webapp, webdriver ):
+    """Test searching for targets."""
+
+    # initialize
+    webapp.control_tests.set_data_dir( "simple" )
+    init_webapp( webapp, webdriver )
+
+    # search for a target
+    results = _do_search( "cc" )
+    assert len(results) > 0
+    results = _do_search( "D1.4" )
+    assert len(results) == 0 # nb: previous search results should be removed
+    wait_for( 2, lambda: _get_curr_target() == ( "simple", "D1.4" ) )
+
+    # search for a target
+    results = _do_search( "astral plane" )
+    assert results is None # nb: this is the "no results" message
+    results = _do_search( "E11.21" )
+    assert len(results) == 0 # nb: the "no results"  message should be cleared
+    wait_for( 2, lambda: _get_curr_target() == ( "simple", "E11.21" ) )
+
+    # search for a target
+    results = _do_search( "*" )
+    assert isinstance( results, str ) # nb: this is an error message
+    results = _do_search( "a4.7" )
+    assert len(results) == 0 # nb: the error message should be cleared
+    wait_for( 2, lambda: _get_curr_target() == ( "simple", "A4.7" ) )
 
 # ---------------------------------------------------------------------
 
@@ -324,6 +347,18 @@ def _unload_search_results():
     return results
 
 # ---------------------------------------------------------------------
+
+def _get_curr_target():
+    """Get the currently-shown target."""
+    # check the active tab
+    elem = find_child( "#content .tab-strip .tab.active" )
+    if not elem:
+        return ( None, None )
+    tab_id = elem.get_attribute( "data-tabid" )
+    # check the current target
+    elem = find_child( "#content .tabbed-page[data-tabid='{}'] .content-doc".format( tab_id ) )
+    target = elem.get_attribute( "data-target" )
+    return ( tab_id, target )
 
 def _is_expanded_rulerefs( sr_elem ):
     """Check if ruleref's have been expanded for a search result."""

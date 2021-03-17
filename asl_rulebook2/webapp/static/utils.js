@@ -1,4 +1,12 @@
-import { gUrlParams } from "./MainApp.js" ;
+import { gTargetIndex, gUrlParams } from "./MainApp.js" ;
+
+// --------------------------------------------------------------------
+
+export function findTarget( target )
+{
+    // check if the target is known to us
+    return gTargetIndex[ target.toLowerCase() ] ;
+}
 
 // --------------------------------------------------------------------
 

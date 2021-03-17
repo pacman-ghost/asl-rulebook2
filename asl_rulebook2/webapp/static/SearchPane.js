@@ -1,5 +1,5 @@
 import { gMainApp, gEventBus } from "./MainApp.js" ;
-import { fixupSearchHilites } from "./utils.js" ;
+import { findTarget, fixupSearchHilites } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -63,14 +63,25 @@ gMainApp.component( "search-results", {
     methods: {
 
         onSearch( queryString ) {
+
+            // initialize
+            this.errorMsg = null ;
+
+            // check if the query string is just a target
+            let docIds = findTarget( queryString ) ;
+            if ( docIds ) {
+                // yup - just show it directly
+                this.searchResults = null ;
+                gEventBus.emit( "show-target", docIds[0][0], docIds[0][1] ) ;
+                Vue.nextTick( () => { gEventBus.emit( "search-done" ) ; } ) ;
+                return ;
+            }
+
             // submit the search request
             const onError = (errorMsg) => {
                 this.errorMsg = errorMsg ;
-                Vue.nextTick( () => {
-                    gEventBus.emit( "search-done" ) ;
-                } ) ;
+                Vue.nextTick( () => { gEventBus.emit( "search-done" ) ; } ) ;
             } ;
-            this.errorMsg = null ;
             $.ajax( { url: gSearchUrl, type: "POST", //eslint-disable-line no-undef
                 data: { queryString: queryString },
                 dataType: "json",
@@ -90,9 +101,7 @@ gMainApp.component( "search-results", {
                 // load the search results into the UI
                 this.$el.scrollTop = 0;
                 this.searchResults = resp ;
-                Vue.nextTick( () => {
-                    gEventBus.emit( "search-done" ) ;
-                } ) ;
+                Vue.nextTick( () => { gEventBus.emit( "search-done" ) ; } ) ;
             } ).fail( (xhr, status, errorMsg) => {
                 onError( errorMsg ) ;
             } ) ;

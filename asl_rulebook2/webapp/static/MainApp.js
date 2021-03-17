@@ -15,6 +15,7 @@ $(document).ready( () => {
 // FUDGE! Can't seem to get access to the content docs via gMainApp, so we make them available
 // to the rest of the program via this global variable :-/
 export let gContentDocs = null ;
+export let gTargetIndex = null ;
 
 // --------------------------------------------------------------------
 
@@ -58,7 +59,8 @@ gMainApp.component( "main-app", {
                 $.getJSON( gGetContentDocsUrl, (resp) => { //eslint-disable-line no-undef
                     if ( gUrlParams.get( "add-empty-doc" ) )
                         resp["empty"] = { "doc_id": "empty", "title": "Empty document" } ; // nb: for testing porpoises
-                    gContentDocs = self.contentDocs = resp ;
+                    self.contentDocs = resp ;
+                    self.installContentDocs( resp ) ;
                     let docIds = Object.keys( resp ) ;
                     if ( docIds.length > 0 ) {
                         Vue.nextTick( () => {
@@ -71,6 +73,23 @@ gMainApp.component( "main-app", {
                     showErrorMsg( msg + " <div class='pre'>" + errorMsg + "</div>" ) ;
                     reject( msg )
                 } ) ;
+            } ) ;
+        },
+
+        installContentDocs( contentDocs ) {
+            // install the content docs
+            gContentDocs = contentDocs ;
+            // build an index of all the targets
+            gTargetIndex = {} ;
+            Object.values( contentDocs ).forEach( (cdoc) => {
+                if ( ! cdoc.targets )
+                    return ;
+                for ( const target in cdoc.targets ) {
+                    let key = target.toLowerCase() ;
+                    if ( ! gTargetIndex[ key ] )
+                        gTargetIndex[ key ] = [] ;
+                    gTargetIndex[ key ].push( [ cdoc.doc_id, target ] ) ;
+                }
             } ) ;
         },
 

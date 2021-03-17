@@ -44,6 +44,7 @@
 <script src="{{ url_for( 'static', filename='growl/jquery.growl.js' ) }}"></script>
 
 <script>
+gImagesBaseUrl = "{{ url_for( 'static', filename='images/' ) }}" ;
 gGetContentDocsUrl = "{{ url_for( 'get_content_docs' ) }}" ;
 gGetStartupMsgsUrl = "{{ url_for( 'get_startup_msgs' ) }}" ;
 gSearchUrl = "{{ url_for( 'search' ) }}" ;

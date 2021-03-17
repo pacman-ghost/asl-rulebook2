@@ -121,6 +121,29 @@ def test_targets( webapp, webdriver ):
 
 # ---------------------------------------------------------------------
 
+def test_toggle_rulerefs( webapp, webdriver ):
+    """Test expanding/collapsing ruleref's."""
+
+    # initialize
+    webapp.control_tests.set_data_dir( "simple" )
+    init_webapp( webapp, webdriver )
+
+    def do_test( query_string, expected ):
+        results = _do_search( query_string )
+        assert len(results) == 1
+        sr_elem = find_child( "#search-results .sr" )
+        assert _is_expanded_rulerefs( sr_elem ) == expected
+
+    # do the tests
+    do_test( "CCPh", True ) # nb: matches the title
+    do_test( "Combat", True ) # nb: matches the subtitle
+    do_test( "running", True ) # nb: matches the content
+    do_test( "RCL", False ) # nb: matches some (but not all) of the ruleref's
+    do_test( "rcl AND heat", None ) # nb: matches all of the ruleref's
+    do_test( "firepower", None ) # nb: has no ruleref's
+
+# ---------------------------------------------------------------------
+
 def test_make_fts_query_string():
     """Test generating the FTS query string."""
 
@@ -299,3 +322,16 @@ def _unload_search_results():
         results.append( sr )
 
     return results
+
+# ---------------------------------------------------------------------
+
+def _is_expanded_rulerefs( sr_elem ):
+    """Check if ruleref's have been expanded for a search result."""
+    img = find_child( "img.toggle-rulerefs", sr_elem )
+    if not img:
+        return None
+    url = img.get_attribute( "src" )
+    if url.endswith( "collapse-rulerefs.png" ):
+        return True
+    assert url.endswith( "expand-rulerefs.png" )
+    return False

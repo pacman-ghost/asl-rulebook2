@@ -2,9 +2,20 @@ import { gUrlParams } from "./MainApp.js" ;
 
 // --------------------------------------------------------------------
 
+const BEGIN_HIGHLIGHT = "!@:" ;
+const END_HIGHLIGHT = ":@!" ;
+
 const _HILITE_REGEXES = [
-    new RegExp("!@:","g"), new RegExp(":@!","g"),
+    new RegExp( BEGIN_HIGHLIGHT, "g" ),
+    new RegExp( END_HIGHLIGHT, "g" ),
 ] ;
+
+export function hasHilite( val ) {
+    // check if the value has a highlighted term
+    if ( val === undefined )
+        return false ;
+    return  val.indexOf( BEGIN_HIGHLIGHT ) !== -1 || val.indexOf( "<span class='hilite'>" ) !== -1 ;
+}
 
 export function fixupSearchHilites( val )
 {

@@ -108,6 +108,7 @@ def _do_search( args ):
         result = {
             "doc_id": row[1],
             "sr_type": row[2],
+            "_key": "{}:{}:{}".format( row[1], row[2], row[0] ),
             "_score": - row[3],
         }
         get_col( result, "title", row[4] )

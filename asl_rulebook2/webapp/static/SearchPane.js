@@ -50,8 +50,8 @@ gMainApp.component( "search-results", {
     template: `<div>
 <div v-if=errorMsg class="error"> Search error: <div class="pre"> {{errorMsg}} </div> </div>
 <div v-else-if="searchResults != null && searchResults.length == 0" class="no-results"> Nothing was found. </div>
-<div v-else v-for="sr in searchResults" :key=sr.key >
-    <index-sr v-if="sr.sr_type == 'index'" :sr=sr />
+<div v-else v-for="sr in searchResults" :key=sr._key >
+    <index-sr v-if="sr.sr_type == 'index'" :sr=sr :key=sr />
     <div v-else> ??? </div>
 </div>
 </div>`,

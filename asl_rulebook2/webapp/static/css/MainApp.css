@@ -1,6 +1,6 @@
 #main-app { width: 100% ; height: 100% ; display: flex ; }
 
 /* splitter */
-#nav { min-width: 300px ; }
+#nav { min-width: 350px ; }
 #content { flex-grow: 1 ; min-width: 500px ; }
 #main-app .gutter.gutter-horizontal { cursor: ew-resize ; background: #ccc ; }

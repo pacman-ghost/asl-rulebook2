@@ -2,10 +2,13 @@ import { gTargetIndex, gUrlParams } from "./MainApp.js" ;
 
 // --------------------------------------------------------------------
 
-export function findTarget( target )
+export function findTargets( target, csetId )
 {
     // check if the target is known to us
-    return gTargetIndex[ target.toLowerCase() ] ;
+    let targets = gTargetIndex[ target.toLowerCase() ] ;
+    if ( targets && csetId )
+        targets = targets.filter( (m) => m.cset_id == csetId ) ;
+    return targets ;
 }
 
 // --------------------------------------------------------------------

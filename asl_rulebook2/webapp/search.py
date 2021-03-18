@@ -85,7 +85,7 @@ def _do_search( args ):
     def highlight( n ):
          # NOTE: highlight() is an FTS extension function, and takes column numbers :-/
         return "highlight(searchable,{},'{}','{}')".format( n, _BEGIN_HIGHLIGHT, _END_HIGHLIGHT )
-    sql = "SELECT rowid,doc_id,sr_type,rank,{},{},{},{} FROM searchable".format(
+    sql = "SELECT rowid,cset_id,sr_type,rank,{},{},{},{} FROM searchable".format(
         highlight(2), highlight(3), highlight(4), highlight(5)
     )
     sql += " WHERE searchable MATCH ?"
@@ -106,7 +106,7 @@ def _do_search( args ):
             continue
         index_entry = _fts_index_entries[ row[0] ]
         result = {
-            "doc_id": row[1],
+            "cset_id": row[1],
             "sr_type": row[2],
             "_key": "{}:{}:{}".format( row[1], row[2], row[0] ),
             "_score": - row[3],
@@ -347,17 +347,17 @@ def init_search( startup_msgs, logger ):
     # the overall content, and also lets us do AND/OR queries across all searchable content.
     conn.execute(
         "CREATE VIRTUAL TABLE searchable USING fts5"
-        " ( doc_id, sr_type, title, subtitle, content, rulerefs, tokenize='porter unicode61' )"
+        " ( cset_id, sr_type, title, subtitle, content, rulerefs, tokenize='porter unicode61' )"
     )
 
     # load the searchable content
     logger.info( "Loading the search index..." )
     conn.execute( "DELETE FROM searchable" )
     curs = conn.cursor()
-    for cdoc in webapp_content.content_docs.values():
-        logger.info( "- Loading index file: %s", cdoc["_fname"] )
+    for cset in webapp_content.content_sets.values():
+        logger.info( "- Loading index file: %s", cset["index_fname"] )
         nrows = 0
-        for index_entry in cdoc["index"]:
+        for index_entry in cset["index"]:
             rulerefs = _RULEREF_SEPARATOR.join( r.get("caption","") for r in index_entry.get("rulerefs",[]) )
             # NOTE: We should really strip content before adding it to the search index, otherwise any HTML tags
             # will need to be included in search terms. However, this means that the content returned by a query
@@ -365,8 +365,8 @@ def init_search( startup_msgs, logger ):
             # but that means we would lose the highlighting of search terms that SQLite gives us. We opt to insert
             # the original content, since none of it should contain HTML, anyway.
             curs.execute(
-                "INSERT INTO searchable (doc_id,sr_type,title,subtitle,content,rulerefs) VALUES (?,?,?,?,?,?)", (
-                    cdoc["doc_id"], "index",
+                "INSERT INTO searchable (cset_id,sr_type,title,subtitle,content,rulerefs) VALUES (?,?,?,?,?,?)", (
+                    cset["cset_id"], "index",
                     index_entry.get("title"), index_entry.get("subtitle"), index_entry.get("content"), rulerefs
             ) )
             _fts_index_entries[ curs.lastrowid ] = index_entry

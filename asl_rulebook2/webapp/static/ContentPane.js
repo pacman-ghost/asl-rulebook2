@@ -8,14 +8,14 @@ gMainApp.component( "content-pane", {
 
     template: `
 <tabbed-pages ref="tabbedPages">
-    <tabbed-page v-for="doc in contentDocs" :tabId=doc.doc_id :caption=doc.title :key=doc.doc_id >
-        <content-doc :doc=doc />
+    <tabbed-page v-for="cdoc in contentDocs" :tabId=cdoc.cdoc_id :caption=cdoc.title :key=cdoc.cdoc_id >
+        <content-doc :cdoc=cdoc />
     </tabbed-page>
 </tabbed-pages>`,
 
     mounted() {
-        gEventBus.on( "show-target", (docId, target) => { //eslint-disable-line no-unused-vars
-            this.$refs.tabbedPages.activateTab( docId ) ; // nb: tabId == docId
+        gEventBus.on( "show-target", (cdocId, target) => { //eslint-disable-line no-unused-vars
+            this.$refs.tabbedPages.activateTab( cdocId ) ; // nb: tabId == cdocId
         } ) ;
     },
 
@@ -25,7 +25,7 @@ gMainApp.component( "content-pane", {
 
 gMainApp.component( "content-doc", {
 
-    props: [ "doc" ],
+    props: [ "cdoc" ],
     data() { return {
         target: null,
         noContent: gUrlParams.get( "no-content" ),
@@ -33,14 +33,17 @@ gMainApp.component( "content-doc", {
 
     template: `
 <div class="content-doc" :data-target=target >
-    <div v-if=noContent class="disabled"> Content disabled. <div v-if=target>target = {{target}}</div> </div>
-    <iframe v-else-if=doc.url :src=makeDocUrl />
+    <div v-if=noContent class="disabled">
+        <div style='margin-bottom:0.25em;'>&mdash;&mdash;&mdash; Content disabled &mdash;&mdash;&mdash; </div>
+        {{cdoc.title}} <div v-if=target> target = {{target}} </div>
+    </div>
+    <iframe v-else-if=cdoc.url :src=makeDocUrl />
     <div v-else class="disabled"> No content. </div>
 </div>`,
 
     created() {
-        gEventBus.on( "show-target", (docId, target) => {
-            if ( docId != this.doc.doc_id )
+        gEventBus.on( "show-target", (cdocId, target) => {
+            if ( cdocId != this.cdoc.cdoc_id )
                 return ;
             // FUDGE! We give the tab time to show itself before we scroll to the target.
             setTimeout( () => {
@@ -52,7 +55,7 @@ gMainApp.component( "content-doc", {
     computed: {
 
         makeDocUrl() {
-            let url = this.doc.url ;
+            let url = this.cdoc.url ;
             if ( this.target )
                 url += "#nameddest=" + this.target ;
             return url ;

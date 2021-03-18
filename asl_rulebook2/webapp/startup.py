@@ -6,7 +6,7 @@ from collections import defaultdict
 from flask import jsonify
 
 from asl_rulebook2.webapp import app
-from asl_rulebook2.webapp.content import load_content_docs
+from asl_rulebook2.webapp.content import load_content_sets
 from asl_rulebook2.webapp.search import init_search
 
 _logger = logging.getLogger( "startup" )
@@ -26,7 +26,7 @@ def init_webapp():
     _startup_msgs = StartupMsgs()
 
     # initialize the webapp
-    load_content_docs( _startup_msgs, _logger )
+    load_content_sets( _startup_msgs, _logger )
     init_search( _startup_msgs, _logger )
 
 # ---------------------------------------------------------------------

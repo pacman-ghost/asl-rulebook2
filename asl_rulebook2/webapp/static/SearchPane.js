@@ -1,5 +1,5 @@
 import { gMainApp, gEventBus } from "./MainApp.js" ;
-import { findTarget, fixupSearchHilites } from "./utils.js" ;
+import { findTargets, fixupSearchHilites } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -71,11 +71,11 @@ gMainApp.component( "search-results", {
             }
 
             // check if the query string is just a target
-            let docIds = findTarget( queryString ) ;
-            if ( docIds ) {
-                // yup - just show it directly
+            let targets = findTargets( queryString, null ) ;
+            if ( targets && targets.length > 0 ) {
+                // yup - just show it directly (first one, if multiple)
                 this.searchResults = null ;
-                gEventBus.emit( "show-target", docIds[0][0], docIds[0][1] ) ;
+                gEventBus.emit( "show-target", targets[0].cdoc_id, targets[0].target ) ;
                 onSearchDone() ;
                 return ;
             }
@@ -109,9 +109,9 @@ gMainApp.component( "search-results", {
                     const ruleids = resp[i].ruleids ;
                     if ( ! ruleids )
                         continue ;
-                    const targets = findTarget( ruleids[0] ) ;
-                    if ( targets ) {
-                        gEventBus.emit( "show-target", targets[0][0], targets[0][1] ) ;
+                    const targets = findTargets( ruleids[0], resp[i].cset_id ) ;
+                    if ( targets && targets.length > 0 ) {
+                        gEventBus.emit( "show-target", targets[0].cdoc_id, targets[0].target ) ;
                         break ;
                     }
                 }

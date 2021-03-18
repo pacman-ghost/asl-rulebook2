@@ -1,5 +1,5 @@
-import { gMainApp, gEventBus, gContentDocs, gUrlParams } from "./MainApp.js" ;
-import { fixupSearchHilites, hasHilite } from "./utils.js" ;
+import { gMainApp, gEventBus, gUrlParams } from "./MainApp.js" ;
+import { findTargets, fixupSearchHilites, hasHilite } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -23,12 +23,12 @@ gMainApp.component( "index-sr", {
         <div v-if=sr.content class="content" v-html=sr.content />
         <div v-if=makeSeeAlso v-html=makeSeeAlso class="see-also" />
         <div v-if=sr.ruleids class="ruleids" >
-            <ruleid v-for="rid in sr.ruleids" :docId=sr.doc_id :ruleId=rid :key=rid />
+            <ruleid v-for="rid in sr.ruleids" :csetId=sr.cset_id :ruleId=rid :key=rid />
         </div>
         <ul v-if=sr.rulerefs class="rulerefs" >
             <li v-for="rref in sr.rulerefs" v-show=showRuleref(rref) :key=rref >
                 <span v-if=rref.caption class="caption" v-html=fixupHilites(rref.caption) />
-                <ruleid v-for="rid in rref.ruleids" :docId=sr.doc_id :ruleId=rid :key=rid />
+                <ruleid v-for="rid in rref.ruleids" :csetId=sr.cset_id :ruleId=rid :key=rid />
             </li>
         </ul>
     </div>
@@ -103,9 +103,9 @@ gMainApp.component( "index-sr", {
 
 gMainApp.component( "ruleid", {
 
-    props: [ "docId", "ruleId" ],
+    props: [ "csetId", "ruleId" ],
     data() { return {
-        target: null,
+        cdocId: null, target: null,
     } ; },
 
     template: `<span class="ruleid" v-bind:class="{unknown:!target}">[<a v-if=target @click=onClick>{{ruleId}}</a><span v-else>{{ruleId}}</span>]</span>`,
@@ -119,16 +119,20 @@ gMainApp.component( "ruleid", {
             ruleId = ruleId.substring( 0, pos ) ;
         }
         // check if the rule is one we know about
-        if ( gContentDocs[this.docId] && gContentDocs[this.docId].targets ) {
-            if ( gContentDocs[this.docId].targets[ ruleId ] )
-                this.target = ruleId ;
+        let targets = findTargets( ruleId, this.csetId ) ;
+        if ( targets && targets.length > 0 ) {
+            // NOTE: We assume that targets are unique within a content set. This might not be true if MMP
+            // ever adds Chapter Z stuff to the main index, but we'll cross that bridge if and when we come to it.
+            // TBH, that stuff would probably be better off as a separate content set, anyway.
+            this.cdocId = targets[0].cdoc_id ;
+            this.target = ruleId ;
         }
     },
 
     methods: {
         onClick() {
             // show the target
-            gEventBus.emit( "show-target", this.docId, this.target ) ;
+            gEventBus.emit( "show-target", this.cdocId, this.target ) ;
         },
     },
 

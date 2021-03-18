@@ -1,0 +1,13 @@
+[
+
+{ "title": "Content Set 2",
+  "rulerefs": [
+    { "caption": "The only document", "ruleids": [
+        "cs2a", "cs2b", "cs2c", "cs2d", "cs2e", "cs2f"
+      ]
+    }
+  ]
+}
+
+]
+

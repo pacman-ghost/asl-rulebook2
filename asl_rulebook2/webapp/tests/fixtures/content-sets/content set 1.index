@@ -1,0 +1,23 @@
+[
+
+{ "title": "Content Set 1",
+  "rulerefs": [
+    { "caption": "Main document", "ruleids": [
+        "1a", "2a", "3a", "4a", "5a", "6a"
+      ]
+    },
+    { "caption": "Linked document", "ruleids": [
+        "1b", "2b", "3b", "4b", "5b", "6b"
+      ]
+    }
+  ]
+},
+
+{ "title": "Unknown ruleid",
+  "content": "This ruleid belongs to Content Set 2, so shouldn't work in <i>this</i> content set.",
+  "rulerefs": [ {
+    "caption": "Incorrect ruleref", "ruleids": [ "cs2a" ]
+  } ]
+}
+
+]

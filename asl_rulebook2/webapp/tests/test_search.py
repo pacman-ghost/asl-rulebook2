@@ -167,6 +167,60 @@ def test_target_search( webapp, webdriver ):
 
 # ---------------------------------------------------------------------
 
+def test_content_sets( webapp, webdriver ):
+    """Test how content sets are managed."""
+
+    # initialize
+    webapp.control_tests.set_data_dir( "content-sets" )
+    init_webapp( webapp, webdriver, add_empty_doc=1 )
+
+    # bring up all the targets
+    results = _do_search( "content" )
+    results = {
+        sr["title"]: [
+            [ rref["caption"], rref["ruleids"] ]
+            for rref in sr["rulerefs"]
+        ] for sr in results
+    }
+    assert results == {
+        "((Content)) Set 1": [
+            [ "Main document", [ "1a", "2a", "3a", "4a", "5a", "6a" ] ],
+            [ "Linked document", [ "1b", "2b", "3b", "4b", "5b", "6b" ] ],
+        ],
+        "((Content)) Set 2": [
+            [ "The only document", [ "cs2a", "cs2b", "cs2c", "cs2d", "cs2e", "cs2f" ] ]
+        ],
+        "Unknown ruleid": [
+            [ "Incorrect ruleref", [ "cs2a" ] ]
+        ],
+    }
+
+    # check that the ruleid links are enabled/disabled correctly
+    ruleid_elems = {}
+    for sr_elem in find_children( "#search-results .sr" ):
+        title = find_child( ".title", sr_elem ).text
+        for ruleid_elem in find_children( ".ruleid", sr_elem ):
+            link = find_child( "a", ruleid_elem )
+            if title == "Unknown ruleid":
+                assert link is None
+            else:
+                assert link
+                assert link.text not in ruleid_elems
+                ruleid_elems[ link.text ] = ruleid_elem
+
+    def do_test( ruleid, expected ):
+        ruleid_elems[ ruleid ].click()
+        wait_for( 2, lambda: _get_curr_target() == (expected, ruleid) )
+
+    # test clicking on ruleid targets
+    do_test( "4b", "content-set-1!linked" )
+    do_test( "1a", "content-set-1" )
+    do_test( "cs2d", "content-set-2" )
+    select_tabbed_page( "#content", "empty" )
+    do_test( "1b", "content-set-1!linked" )
+
+# ---------------------------------------------------------------------
+
 def test_make_fts_query_string():
     """Test generating the FTS query string."""
 

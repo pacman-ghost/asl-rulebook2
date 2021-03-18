@@ -12,9 +12,8 @@ $(document).ready( () => {
     gMainApp.mount( "#main-app" ) ;
 } ) ;
 
-// FUDGE! Can't seem to get access to the content docs via gMainApp, so we make them available
-// to the rest of the program via this global variable :-/
-export let gContentDocs = null ;
+// FUDGE! Can't seem to get access to gMainApp member variables, so we make them available
+// to the rest of the program via global variables :-/
 export let gTargetIndex = null ;
 
 // --------------------------------------------------------------------
@@ -58,13 +57,13 @@ gMainApp.component( "main-app", {
                 // get the content docs
                 $.getJSON( gGetContentDocsUrl, (resp) => { //eslint-disable-line no-undef
                     if ( gUrlParams.get( "add-empty-doc" ) )
-                        resp["empty"] = { "doc_id": "empty", "title": "Empty document" } ; // nb: for testing porpoises
+                        resp["empty"] = { "cdoc_id": "empty", "title": "Empty document" } ; // nb: for testing porpoises
                     self.contentDocs = resp ;
                     self.installContentDocs( resp ) ;
-                    let docIds = Object.keys( resp ) ;
-                    if ( docIds.length > 0 ) {
+                    let cdocIds = Object.keys( resp ) ;
+                    if ( cdocIds.length > 0 ) {
                         Vue.nextTick( () => {
-                            gEventBus.emit( "show-target", docIds[0], null ) ; // FIXME! which one do we choose?
+                            gEventBus.emit( "show-target", cdocIds[0], null ) ; // FIXME! which one do we choose?
                         } ) ;
                     }
                     resolve() ;
@@ -77,8 +76,6 @@ gMainApp.component( "main-app", {
         },
 
         installContentDocs( contentDocs ) {
-            // install the content docs
-            gContentDocs = contentDocs ;
             // build an index of all the targets
             gTargetIndex = {} ;
             Object.values( contentDocs ).forEach( (cdoc) => {
@@ -88,7 +85,11 @@ gMainApp.component( "main-app", {
                     let key = target.toLowerCase() ;
                     if ( ! gTargetIndex[ key ] )
                         gTargetIndex[ key ] = [] ;
-                    gTargetIndex[ key ].push( [ cdoc.doc_id, target ] ) ;
+                    gTargetIndex[ key ].push( {
+                        cset_id: cdoc.parent_cset_id,
+                        cdoc_id: cdoc.cdoc_id,
+                        target: target
+                    } ) ;
                 }
             } ) ;
         },

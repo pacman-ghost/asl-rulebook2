@@ -1,0 +1,11 @@
+{
+
+"1a": { "caption": "Item 1a", "page_no": 1, "pos": [72,718] },
+"2a": { "caption": "Item 2a", "page_no": 1, "pos": [72,503] },
+"3a": { "caption": "Item 3a", "page_no": 1, "pos": [72,292] },
+
+"4a": { "caption": "Item 4a", "page_no": 2, "pos": [72,718] },
+"5a": { "caption": "Item 5a", "page_no": 2, "pos": [72,503] },
+"6a": { "caption": "Item 6a", "page_no": 2, "pos": [72,292] }
+
+}

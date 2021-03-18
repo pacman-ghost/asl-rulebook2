@@ -1,0 +1,12 @@
+{
+
+"cs2a": { "caption": "Item 1", "page_no": 1, "pos": [72,718] },
+"cs2b": { "caption": "Item 2", "page_no": 1, "pos": [72,503] },
+"cs2c": { "caption": "Item 3", "page_no": 1, "pos": [72,292] },
+
+"cs2d": { "caption": "Item 4", "page_no": 2, "pos": [72,718] },
+"cs2e": { "caption": "Item 5", "page_no": 2, "pos": [72,503] },
+"cs2f": { "caption": "Item 6", "page_no": 2, "pos": [72,292] }
+
+}
+

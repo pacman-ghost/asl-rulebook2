@@ -1,5 +1,5 @@
 import { gMainApp, gEventBus, gUrlParams } from "./MainApp.js" ;
-import { findTargets, fixupSearchHilites, hasHilite } from "./utils.js" ;
+import { findTargets, getPrimaryTarget, isRuleid, getChapterResource, fixupSearchHilites, hasHilite } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -8,11 +8,16 @@ gMainApp.component( "index-sr", {
     props: [ "sr" ],
     data() { return {
         expandRulerefs: null,
+        iconUrl: getChapterResource( "icon", this.getChapterId() ),
+        cssBackground: this.makeCssBackground(),
     } ; },
 
     template: `
 <div class="sr index-sr" >
-    <div v-if="sr.title || sr.subtitle" class="title" >
+    <div v-if="sr.title || sr.subtitle" :style="{background: cssBackground}" class="title" >
+        <a v-if=iconUrl href="#" @click=onClickIcon >
+            <img :src=iconUrl class="icon" />
+        </a>
         <span v-if=sr.title class="title" v-html=sr.title />
         <span v-if=sr.subtitle class="subtitle" v-html=sr.subtitle />
     </div>
@@ -77,6 +82,13 @@ gMainApp.component( "index-sr", {
 
     methods: {
 
+        onClickIcon() {
+            // open the search result's primary target
+            let target = getPrimaryTarget( this.sr ) ;
+            if ( target )
+                gEventBus.emit( "show-target", target.cdoc_id, target.target ) ;
+        },
+
         onToggleRulerefs() {
             // expand/collapse the ruleref's
             if ( this.expandRulerefs !== null )
@@ -95,6 +107,32 @@ gMainApp.component( "index-sr", {
             return fixupSearchHilites( val ) ;
         },
 
+        makeCssBackground() {
+            // generate the CSS background URL for the search result's title
+            let url = getChapterResource( "background", this.getChapterId() ) ;
+            return url ? "url(" + url + ")" : "#ddd" ;
+        },
+
+        getChapterId() {
+            // figure out which chapter this search result belongs to
+            // NOTE: This is actually a bit fiddly :-/ An index entry can have multiple main ruleid's associated
+            // with it, so which one do we choose? Or no ruleid's at all - these are often not associated with
+            // a chapter (e.g. term definitions), but that isn't necessarily always going to be the case.
+            // Since the only time we need to do this is in the front-end (so that we can show an icon and
+            // title background for each index search result), we handle it in the front-end, rather than
+            // in the backend search engine, or during the extraction process. Strictly speaking, each index entry
+            // should state which chapter it came from, but this is way overkill for what we need. Instead,
+            // we look at the ruleid and infer the chapter ID from the first letter (nb: we need to be careful
+            // handle things like "KGP SSR 2" or "RB CG2".
+            let target = getPrimaryTarget( this.sr ) ;
+            if ( ! target )
+                return null ;
+            target = target.target ;
+            if ( isRuleid( target ) )
+                return target[0] ;
+            return null ;
+        },
+
     },
 
 } ) ;
@@ -108,24 +146,18 @@ gMainApp.component( "ruleid", {
         cdocId: null, target: null,
     } ; },
 
-    template: `<span class="ruleid" v-bind:class="{unknown:!target}">[<a v-if=target @click=onClick>{{ruleId}}</a><span v-else>{{ruleId}}</span>]</span>`,
+    // NOTE: This bit of HTML is sensitive to spaces :-/
+    template: `<span class="ruleid" :class="{unknown:!target}">[<a v-if=target @click=onClick>{{ruleId}}</a><span v-else>{{ruleId}}</span>]</span>`,
 
     created() {
-        // figure out which rule is being referenced
-        let ruleId = this.ruleId ;
-        let pos = ruleId.indexOf( "-" ) ;
-        if ( pos >= 0 ) {
-            // NOTE: For ruleid's of the form "A12.3-.4", we want to target "A12.3".
-            ruleId = ruleId.substring( 0, pos ) ;
-        }
         // check if the rule is one we know about
-        let targets = findTargets( ruleId, this.csetId ) ;
+        let targets = findTargets( this.ruleId, this.csetId ) ;
         if ( targets && targets.length > 0 ) {
             // NOTE: We assume that targets are unique within a content set. This might not be true if MMP
             // ever adds Chapter Z stuff to the main index, but we'll cross that bridge if and when we come to it.
             // TBH, that stuff would probably be better off as a separate content set, anyway.
             this.cdocId = targets[0].cdoc_id ;
-            this.target = ruleId ;
+            this.target = targets[0].target ;
         }
     },
 

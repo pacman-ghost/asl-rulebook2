@@ -1,0 +1,20 @@
+[
+
+{ "title": "Linked document - Page 1",
+  "sections": [
+    { "caption": "Top of the page", "ruleid": "1b" },
+    { "caption": "Middle of the page", "ruleid": "2b" },
+    { "caption": "Bottom of the page", "ruleid": "3b" }
+  ]
+},
+
+{ "title": "Linked document - Page 2",
+  "sections": [
+    { "caption": "Top of the page", "ruleid": "4b" },
+    { "caption": "Middle of the page", "ruleid": "5b" },
+    { "caption": "Bottom of the page", "ruleid": "6b" },
+    { "caption": "Unknown ruleid", "ruleid": "_unknown_" }
+  ]
+}
+
+]

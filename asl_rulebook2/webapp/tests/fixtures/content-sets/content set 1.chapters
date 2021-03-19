@@ -1,0 +1,20 @@
+[
+
+{ "title": "Page 1",
+  "sections": [
+    { "caption": "Top of the page", "ruleid": "1a" },
+    { "caption": "Middle of the page", "ruleid": "2a" },
+    { "caption": "Bottom of the page", "ruleid": "3a" }
+  ]
+},
+
+{ "title": "Page 2",
+  "sections": [
+    { "caption": "Top of the page", "ruleid": "4a" },
+    { "caption": "Middle of the page", "ruleid": "5a" },
+    { "caption": "Bottom of the page", "ruleid": "6a" },
+    { "caption": "No ruleid" }
+  ]
+}
+
+]

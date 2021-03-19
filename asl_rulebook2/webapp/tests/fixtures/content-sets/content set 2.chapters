@@ -1,0 +1,19 @@
+[
+
+{ "title": "Page 1 (Content Set 2)",
+  "sections": [
+    { "caption": "Top of the page", "ruleid": "cs2a" },
+    { "caption": "Middle of the page", "ruleid": "cs2b" },
+    { "caption": "Bottom of the page", "ruleid": "cs2c" }
+  ]
+},
+
+{ "title": "Page 2 (Content Set 2)",
+  "sections": [
+    { "caption": "Top of the page", "ruleid": "cs2d" },
+    { "caption": "Middle of the page", "ruleid": "cs2e" },
+    { "caption": "Bottom of the page", "ruleid": "cs2f" }
+  ]
+}
+
+]

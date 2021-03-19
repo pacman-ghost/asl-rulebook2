@@ -1,5 +1,5 @@
 import { gMainApp, gEventBus } from "./MainApp.js" ;
-import { findTargets, fixupSearchHilites } from "./utils.js" ;
+import { findTargets, getPrimaryTarget, fixupSearchHilites } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -90,8 +90,8 @@ gMainApp.component( "search-results", {
                 dataType: "json",
             } ).done( (resp) => {
                 // check if there was an error
-                if ( resp.error ) {
-                    onError( resp.error ) ;
+                if ( resp.error !== undefined ) {
+                    onError( resp.error || "Unknown error." ) ;
                     return ;
                 }
                 // adjust highlighted text
@@ -104,16 +104,11 @@ gMainApp.component( "search-results", {
                 // load the search results into the UI
                 this.$el.scrollTop = 0;
                 this.searchResults = resp ;
-                // auto-show the first related rule we know about
-                for ( let i=0 ; i < resp.length ; ++i ) {
-                    const ruleids = resp[i].ruleids ;
-                    if ( ! ruleids )
-                        continue ;
-                    const targets = findTargets( ruleids[0], resp[i].cset_id ) ;
-                    if ( targets && targets.length > 0 ) {
-                        gEventBus.emit( "show-target", targets[0].cdoc_id, targets[0].target ) ;
-                        break ;
-                    }
+                // auto-show the primary target for the first search result
+                if ( resp.length > 0 ) {
+                    let target = getPrimaryTarget( resp[0] ) ;
+                    if ( target )
+                        gEventBus.emit( "show-target", target.cdoc_id, target.target ) ;
                 }
                 // flag that the search was completed
                 onSearchDone() ;

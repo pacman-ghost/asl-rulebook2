@@ -72,6 +72,18 @@ def _get_tab_ids( sel ):
     tabs = find_children( "{} .tab".format( sel ) )
     return [ tab.get_attribute( "data-tabid" ) for tab in tabs ]
 
+def get_curr_target():
+    """Get the currently-shown target."""
+    # check the active tab
+    elem = find_child( "#content .tab-strip .tab.active" )
+    if not elem:
+        return ( None, None )
+    tab_id = elem.get_attribute( "data-tabid" )
+    # check the current target
+    elem = find_child( "#content .tabbed-page[data-tabid='{}'] .content-doc".format( tab_id ) )
+    target = elem.get_attribute( "data-target" )
+    return ( tab_id, target )
+
 # ---------------------------------------------------------------------
 
 #pylint: disable=multiple-statements,missing-function-docstring
@@ -122,6 +134,10 @@ def get_classes( elem ):
     """Get the element's classes."""
     classes = elem.get_attribute( "class" )
     return classes.split()
+
+def has_class( elem, class_name ):
+    """Check if an element has a specified CSS class."""
+    return class_name in get_classes( elem )
 
 # ---------------------------------------------------------------------
 

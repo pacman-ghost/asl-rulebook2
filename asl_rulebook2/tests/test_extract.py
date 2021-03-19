@@ -50,14 +50,17 @@ def test_extract_content():
         with PdfDoc( fname ) as pdf:
             extract = ExtractContent( args={}, log=_check_log_msg )
             extract.extract_content( pdf )
-        targets_buf, footnotes_buf = io.StringIO(), io.StringIO()
-        extract.save_as_text( targets_buf, footnotes_buf )
+        targets_buf, chapters_buf, footnotes_buf = io.StringIO(), io.StringIO(), io.StringIO()
+        extract.save_as_text( targets_buf, chapters_buf, footnotes_buf )
         targets_buf = targets_buf.getvalue()
+        chapters_buf = chapters_buf.getvalue()
         footnotes_buf = footnotes_buf.getvalue()
 
         # check the results
         fname2 = os.path.join( dname, "targets.txt" )
         assert open( fname2, "r", encoding="utf-8" ).read() == targets_buf
+        fname2 = os.path.join( dname, "chapters.txt" )
+        assert open( fname2, "r", encoding="utf-8" ).read() == chapters_buf
         fname2 = os.path.join( dname, "footnotes.txt" )
         assert open( fname2, "r", encoding="utf-8" ).read() == footnotes_buf
 
@@ -81,9 +84,10 @@ def test_extract_all():
         index_buf = io.StringIO()
         extract.extract_index.save_as_json( index_buf )
         index_buf = index_buf.getvalue()
-        targets_buf, footnotes_buf = io.StringIO(), io.StringIO()
-        extract.extract_content.save_as_json( targets_buf, footnotes_buf )
+        targets_buf, chapters_buf, footnotes_buf = io.StringIO(), io.StringIO(), io.StringIO()
+        extract.extract_content.save_as_json( targets_buf, chapters_buf, footnotes_buf )
         targets_buf = targets_buf.getvalue()
+        chapters_buf = chapters_buf.getvalue()
         footnotes_buf = footnotes_buf.getvalue()
 
         # check the results
@@ -91,6 +95,8 @@ def test_extract_all():
         assert open( fname2, "r", encoding="utf-8" ).read() == index_buf
         fname2 = os.path.join( dname, "targets.json" )
         assert open( fname2, "r", encoding="utf-8" ).read() == targets_buf
+        fname2 = os.path.join( dname, "chapters.json" )
+        assert open( fname2, "r", encoding="utf-8" ).read() == chapters_buf
         fname2 = os.path.join( dname, "footnotes.json" )
         assert open( fname2, "r", encoding="utf-8" ).read() == footnotes_buf
 

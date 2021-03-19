@@ -1,10 +1,9 @@
-#nav .tabbed-page[data-tabid="search"] { display: flex ; flex-direction: column ; }
-
 /* search box */
-#search-box { display: flex ; }
+#search-box { display: flex ; padding: 1px ; margin-bottom: 8px ; }
 #search-box input#query-string { margin-right: 5px ; flex-grow: 1 ; }
 
 /* search results */
-#search-results { flex-grow: -1 ; margin: 8px 0 2px 0 ; overflow-y: auto ; }
+#nav .tabbed-page[data-tabid='search'] .wrapper { overflow-y: none ; }
+#search-results { height: calc(100% - 35px) ; overflow-y: auto ;  }
 #search-results .no-results { font-style: italic ; color: #666 ; }
 #search-results .error .pre { font-family: monospace ; margin: 0.25em 0 0 0.5em ; }

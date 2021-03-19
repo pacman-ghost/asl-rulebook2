@@ -6,5 +6,5 @@
 #content .tab-strip .tab { background: #f0f0f0 ; color: #808080 ; }
 #content .tab-strip .tab.active { background: white ; color: #444 ; border-top: none ; }
 
-#content .content-doc iframe { position: absolute ; width: 100% ; height: calc(100% - 35px) ;  border: none ; }
+#content .content-doc iframe { position: absolute ; width: 100% ; height: calc(100% - 40px) ;  border: none ; }
 #content .content-doc .disabled { margin-top: 1em ; text-align: center ; font-style: italic ; color: #888 ; }

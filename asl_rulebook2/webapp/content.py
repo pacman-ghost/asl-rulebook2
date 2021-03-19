@@ -11,7 +11,7 @@ from asl_rulebook2.webapp import app
 from asl_rulebook2.webapp.utils import slugify
 
 content_sets = None
-content_doc_index = None
+_chapter_resources = None
 
 # ---------------------------------------------------------------------
 
@@ -28,25 +28,50 @@ def load_content_sets( startup_msgs, logger ):
     #   in the MMP eASLRB index, and have their own index.
 
     # initialize
-    global content_sets
+    global content_sets, _chapter_resources
     content_sets = {}
-    dname = app.config.get( "DATA_DIR" )
-    if not dname:
+    _chapter_resources = { "background": {}, "icon": {} }
+
+    # get the data directory
+    data_dir = app.config.get( "DATA_DIR" )
+    if not data_dir:
         return
-    if not os.path.isdir( dname ):
-        startup_msgs.error( "Invalid data directory.", dname )
+    if not os.path.isdir( data_dir ):
+        startup_msgs.error( "Invalid data directory.", data_dir )
         return
+
+    def find_resource( fname, dnames ):
+        # find a chapter resource file
+        for dname in dnames:
+            fname2 = os.path.join( dname, fname )
+            if os.path.isfile( fname2 ):
+                return fname2
+        return None
 
     def load_content_doc( fname_stem, title ):
         # load the content doc files
         content_doc = { "title": title }
         load_file( fname_stem+".targets", content_doc, "targets", startup_msgs.warning )
+        load_file( fname_stem+".chapters", content_doc, "chapters", startup_msgs.warning )
         load_file( fname_stem+".footnotes", content_doc, "footnotes", startup_msgs.warning )
         load_file( fname_stem+".pdf", content_doc, "content", startup_msgs.warning, binary=True )
+        # locate any chapter backgrounds and icons
+        resource_dirs = [
+            data_dir, os.path.join( os.path.dirname(__file__), "data/chapters/" )
+        ]
+        for chapter in content_doc.get( "chapters", [] ):
+            chapter_id = chapter.get( "chapter_id" )
+            if not chapter_id:
+                continue
+            for rtype in [ "background", "icon" ]:
+                fname = find_resource( "{}-{}.png".format( chapter_id, rtype ), resource_dirs )
+                if fname:
+                    _chapter_resources[ rtype ][ chapter_id ] = os.path.join( "static/", fname )
+                    chapter[ rtype ] = url_for( "get_chapter_resource", chapter_id=chapter_id, rtype=rtype )
         return content_doc
 
     def load_file( fname, save_loc, key, on_error, binary=False ):
-        fname = os.path.join( dname, fname )
+        fname = os.path.join( data_dir, fname )
         if not os.path.isfile( fname ):
             return False
         # load the specified file
@@ -69,7 +94,7 @@ def load_content_sets( startup_msgs, logger ):
     def find_assoc_cdocs( fname_stem ):
         # find other content docs associated with the content set (names have the form "Foo (...)")
         matches = set()
-        for fname in os.listdir( dname ):
+        for fname in os.listdir( data_dir ):
             if not fname.startswith( fname_stem ):
                 continue
             fname = os.path.splitext( fname )[0]
@@ -79,8 +104,8 @@ def load_content_sets( startup_msgs, logger ):
         return matches
 
     # load each content set
-    logger.info( "Loading content sets: %s", dname )
-    fspec = os.path.join( dname, "*.index" )
+    logger.info( "Loading content sets: %s", data_dir )
+    fspec = os.path.join( data_dir, "*.index" )
     for fname in glob.glob( fspec ):
         fname2 = os.path.basename( fname )
         logger.info( "- %s", fname2 )
@@ -141,8 +166,9 @@ def get_content_docs():
             }
             if "content" in cdoc:
                 cdoc2["url"] = url_for( "get_content", cdoc_id=cdoc["cdoc_id"] )
-            if "targets" in cdoc:
-                cdoc2["targets"] = cdoc["targets"]
+            for key in [ "targets", "chapters", "background", "icon" ]:
+                if key in cdoc:
+                    cdoc2[key] = cdoc[key]
             resp[ cdoc["cdoc_id"] ] = cdoc2
     return jsonify( resp )
 
@@ -158,3 +184,13 @@ def get_content( cdoc_id ):
                 return send_file( buf, mimetype="application/pdf" )
     abort( 404 )
     return None # stupid pylint :-/
+
+# ---------------------------------------------------------------------
+
+@app.route( "/chapter/<chapter_id>/<rtype>" )
+def get_chapter_resource( chapter_id, rtype ):
+    """Return a chapter resource."""
+    fname = _chapter_resources.get( rtype, {} ).get( chapter_id )
+    if not fname:
+        abort( 404 )
+    return send_file( fname )

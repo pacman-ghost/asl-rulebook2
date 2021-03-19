@@ -1,14 +1,41 @@
-import { gTargetIndex, gUrlParams } from "./MainApp.js" ;
+import { gTargetIndex, gChapterResources, gUrlParams } from "./MainApp.js" ;
 
 // --------------------------------------------------------------------
+
+export function getPrimaryTarget( indexSearchResult )
+{
+    // identify the main target for a search result
+    let ruleids = indexSearchResult.ruleids ;
+    if ( ! ruleids )
+        return null ;
+    let targets = findTargets( ruleids[0], indexSearchResult.cset_id ) ;
+    if ( targets && targets.length > 0 )
+        return targets[0] ;
+    return null ;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 export function findTargets( target, csetId )
 {
     // check if the target is known to us
+    let pos = target.indexOf( "-" ) ;
+    if ( pos >= 0 ) {
+        // NOTE: For ruleid's of the form "A12.3-.4", we want to target "A12.3".
+        target = target.substring( 0, pos ) ;
+    }
     let targets = gTargetIndex[ target.toLowerCase() ] ;
     if ( targets && csetId )
         targets = targets.filter( (m) => m.cset_id == csetId ) ;
     return targets ;
+}
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+export function isRuleid( val )
+{
+    // check if the value looks like a ruleid
+    return val.match( /^[A-Z](\.|CG)?\d/ ) ;
 }
 
 // --------------------------------------------------------------------
@@ -36,6 +63,16 @@ export function fixupSearchHilites( val )
         return val ;
     return val.replace( _HILITE_REGEXES[0], "<span class='hilite'>" )
               .replace( _HILITE_REGEXES[1], "</span>" ) ;
+}
+
+// --------------------------------------------------------------------
+
+export function getChapterResource( rtype, chapterId )
+{
+    // get the URL for a chapter resource (if available)
+    if ( ! gChapterResources[ rtype ] )
+        return null ;
+    return gChapterResources[ rtype ][ chapterId ] ;
 }
 
 // --------------------------------------------------------------------

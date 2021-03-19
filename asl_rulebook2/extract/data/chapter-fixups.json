@@ -1,0 +1,30 @@
+{
+
+"titles": {
+    "A": "Infantry And Basic Game Rules",
+    "B": "Terrain",
+    "C": "Ordnance & Offboard Artillery (OBA)",
+    "D": "Vehicles",
+    "E": "Miscellaneous",
+    "F": "North Africa",
+    "G": "Pacific Theater",
+    "J": "Deluxe ASL",
+    "W": "Korean War"
+},
+
+"_comment_": "Section titles are all-caps, and are converted to normal-caps during extraction. This table specifies words that actually should be all-caps.",
+"capitalize_words": [
+    "LOS", "SW", "CC", "SMOKE",
+    "OBA", "TH#", "TK#", "DRM", "RCL", "LATW",
+    "AFV", "OVR", "DD",
+    "ASL",
+    "KW", "UN"
+],
+
+"replace": {
+    "B32": [ "RAILROADS10", "Railroads" ],
+    "B34": [ "TOWERS18", "Towers" ],
+    "B36": [ "PREPARED FIRE ZONE2", "Prepared Fire Zone" ]
+}
+
+}

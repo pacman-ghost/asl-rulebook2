@@ -126,7 +126,7 @@ def _do_search( args ):
                 ruleref2 = {}
                 if "caption" in index_entry["rulerefs"][i]:
                     assert ruleref.replace( _BEGIN_HIGHLIGHT, "" ).replace( _END_HIGHLIGHT, "" ) \
-                           == index_entry["rulerefs"][i]["caption"]
+                           == index_entry["rulerefs"][i]["caption"].strip()
                     ruleref2["caption"] = fixup_text( ruleref )
                 if "ruleids" in index_entry["rulerefs"][i]:
                     ruleref2["ruleids"] = index_entry["rulerefs"][i]["ruleids"]

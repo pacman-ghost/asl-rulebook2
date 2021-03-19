@@ -13,7 +13,11 @@ gMainApp.component( "tabbed-pages", {
 <div class="tabbed-pages">
     <slot />
     <div class="tab-strip">
-        <div v-for="tab in tabs" :data-tabid=tab.tabId @click=onTabClicked class="tab" v-bind:class="{'active': tab.tabId == activeTabId}" :key=tab.tabId >
+        <div v-for="tab in tabs"
+          :key=tab :data-tabid=tab.tabId
+          :class="{'active': tab.tabId == activeTabId}" class="tab"
+          @click=onTabClicked
+        >
             {{tab.caption}}
         </div>
     </div>
@@ -53,8 +57,7 @@ gMainApp.component( "tabbed-pages", {
             // activate the specified tab
             this.activeTabId = tabId ;
             $( this.$el ).find( ".tabbed-page" ).each( function() {
-                let displayStyle = $(this).data("display") || "block" ;
-                $(this).css( "display", ($(this).data("tabid") == tabId) ? displayStyle : "none" ) ;
+                $(this).css( "display", ($(this).data("tabid") == tabId) ? "block" : "none" ) ;
             } ) ;
         },
 
@@ -62,7 +65,7 @@ gMainApp.component( "tabbed-pages", {
 
 } ) ;
 
-// --------------------------------------------------------------------
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 gMainApp.component( "tabbed-page", {
 
@@ -70,7 +73,7 @@ gMainApp.component( "tabbed-page", {
 
     template: `
 <div :data-tabid=tabId v-show=isActive class="tabbed-page" >
-    <slot />
+    <div class="wrapper"> <slot /> </div>
 </div>`,
 
     mounted() {

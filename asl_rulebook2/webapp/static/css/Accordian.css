@@ -1,0 +1,15 @@
+.accordian { padding: 0 5px 0 0 ; }
+
+.accordian-pane { margin: 5px ; }
+
+.accordian-pane .title {
+    margin-bottom: 5px ; border: 1px solid #aaa ; border-radius: 5px ;
+    display: flex ; align-items: center ;
+    padding: 5px 8px ;
+    cursor: pointer ;
+}
+.accordian-pane .title .icon { height: 20px ; margin-right: 10px ; }
+
+.accordian-pane .entries { margin: 0 0 5px 15px ; list-style-type: none ; }
+.accordian-pane .entries .entry a { cursor: pointer ; }
+.accordian-pane .entries .entry.disabled { color: #666 ; }

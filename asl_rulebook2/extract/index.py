@@ -224,7 +224,7 @@ class ExtractIndex( ExtractBase ):
                     subtitle, content = content[1:pos], content[pos+1:]
                 else:
                     subtitle, content = extract_parens_content( content )
-                index_entry[ "subtitle" ] = subtitle
+                index_entry[ "subtitle" ] = subtitle.strip()
                 if content.startswith( ":" ):
                     content = content[1:]
                 content = content.strip()
@@ -257,7 +257,7 @@ class ExtractIndex( ExtractBase ):
                     if pos > 0:
                         vals = re.split( "[;,]", val[pos+1:] )
                         ruleids = [ v.strip() for v in vals ]
-                        val = val[:pos]
+                        val = val[:pos].strip()
                     else:
                         ruleids = None
                     rulerefs.append( { "caption": val, "ruleids": ruleids } )

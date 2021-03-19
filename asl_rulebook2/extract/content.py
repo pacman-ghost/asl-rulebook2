@@ -46,16 +46,18 @@ class ExtractContent( ExtractBase ):
     def __init__( self, args, log=None ):
         super().__init__( args, _DEFAULT_ARGS, log )
         self.targets = {}
+        self._chapters = []
         self._footnotes = {}
         self._curr_chapter = self._curr_footnote = self._curr_pageid = None
         self._prev_elem = self._top_left_elem = None
         # prepare to fixup problems in the content
-        fname2 = os.path.join( os.path.dirname(__file__), "data/target-fixups.json" )
-        with open( fname2, "r", encoding="utf-8" ) as fp:
-            self._target_fixups = json.load( fp )
-        fname2 = os.path.join( os.path.dirname(__file__), "data/footnote-fixups.json" )
-        with open( fname2, "r", encoding="utf-8" ) as fp:
-            self._footnote_fixups = json.load( fp )
+        def load_fixup( fname ):
+            fname = os.path.join( os.path.dirname(__file__), "data/", fname )
+            with open( fname, "r", encoding="utf-8" ) as fp:
+                return json.load( fp )
+        self._target_fixups = load_fixup( "target-fixups.json" )
+        self._chapter_fixups = load_fixup( "chapter-fixups.json" )
+        self._footnote_fixups = load_fixup( "footnote-fixups.json" )
 
     def extract_content( self, pdf ):
         """Extract content from the MMP eASLRB."""
@@ -181,6 +183,9 @@ class ExtractContent( ExtractBase ):
             self.log_msg( "warning", "Unused fixups: {}", self._target_fixups )
         if self._footnote_fixups:
             self.log_msg( "warning", "Unused fixups: {}", self._footnote_fixups )
+
+        # extract the chapters
+        self._extract_chapters()
 
     def _save_target( self, caption, page_no, lt_page, elem ):
         """Save a parsed target."""
@@ -387,6 +392,71 @@ class ExtractContent( ExtractBase ):
         } )
         self._curr_footnote = None
 
+    def _extract_chapters( self ):
+        """Extract the chapters and their sections."""
+
+        # FUDGE! Extracting the index at the start of each chapter from the PDF would be horribly complicated,
+        # since they are laid out as a 2-column table, but the PDF elements run left-to-right across the entire table,
+        # and things get very messy when the section title spans multiple lines :-/
+        # We fudge around this by doing things as a post-processing step, looking for targets that have a ruleid
+        # that match a particular form.
+
+        # initialize
+        self._chapters = []
+        fixup_regexes = [
+            ( re.compile( r"\b{}\b".format( word.title() ) ), word )
+            for word in self._chapter_fixups["capitalize_words"]
+        ]
+
+        # process each chapter
+        for arg, val in _DEFAULT_ARGS.items():
+            mo = re.search( r"^chapter-([a-z])$", arg )
+            if not mo:
+                continue
+            chapter_id = mo.group(1).upper()
+            ruleid_regex = re.compile( r"^{}(\d+)$".format( chapter_id ) )
+            page_nos = parse_page_numbers( val )
+            # look for ruleid's that mark the start of a section
+            sections = []
+            for ruleid, target in self.targets.items():
+                mo = ruleid_regex.search( ruleid )
+                if not mo:
+                    continue
+                # found one - add it to the list
+                fixup = self._chapter_fixups.get( "replace", {} ).pop( ruleid, None )
+                if fixup:
+                    caption = target["caption"]
+                    if caption != fixup[0]:
+                        self.log_msg( "warning", "Unexpected chapter fixup caption ({}): {}",
+                            ruleid, caption
+                        )
+                    caption = fixup[1]
+                else:
+                    caption = target["caption"].title()
+                for fixup in fixup_regexes:
+                    caption = fixup[0].sub( fixup[1], caption )
+                sections.append( {
+                    "caption": "{}. {}".format( mo.group(1), caption ),
+                    "ruleid": ruleid,
+                } )
+            # FUDGE! Chapter titles often span across the width of the page i.e. across both columns
+            # of the 2-column layout, which makes them messy to parse. There are not too many of them,
+            # so it's easier just to specify them manually :-/
+            title = self._chapter_fixups.get( "titles", {} ).get(
+                chapter_id, "Chapter "+chapter_id
+            )
+            self._chapters.append( {
+                "chapter_title": title,
+                "chapter_id": chapter_id,
+                "page_no": min( page_nos ),
+                "sections": sections
+            } )
+
+        # check for unused search-and-replace fixups
+        fixups = self._chapter_fixups.get( "replace" )
+        if fixups:
+            self.log_msg( "warning", "Unused chapter fixup: {}", fixups )
+
     def _is_start_of_line( self, elem, lt_page ):
         """Check if the element is at the start of its line."""
         # NOTE: We can't just check the element's x co-ordinate, since there is sometimes a floating image
@@ -399,15 +469,15 @@ class ExtractContent( ExtractBase ):
             return True # the element is at the top of the right column
         return False
 
-    def save_as_raw( self, targets_out, footnotes_out ):
+    def save_as_raw( self, targets_out, chapters_out, footnotes_out ):
         """Save the raw results."""
-        self._save_as_raw_or_text( targets_out, footnotes_out, True )
+        self._save_as_raw_or_text( targets_out, chapters_out, footnotes_out, True )
 
-    def save_as_text( self, targets_out, footnotes_out ):
+    def save_as_text( self, targets_out, chapters_out, footnotes_out ):
         """Save the results as plain-text."""
-        self._save_as_raw_or_text( targets_out, footnotes_out, False )
+        self._save_as_raw_or_text( targets_out, chapters_out, footnotes_out, False )
 
-    def _save_as_raw_or_text( self, targets_out, footnotes_out, raw ):
+    def _save_as_raw_or_text( self, targets_out, chapters_out, footnotes_out, raw ):
         """Save the results as raw or plain-text."""
 
         # save the targets
@@ -427,6 +497,18 @@ class ExtractContent( ExtractBase ):
                 print( "{} => {} @ p{}:[{},{}]".format(
                     ruleid, target["caption"], target["page_no"], xpos, ypos
                 ), file=targets_out )
+
+        # save the chapters
+        for chapter_no, chapter in enumerate(self._chapters):
+            if chapter_no > 0:
+                print( file=chapters_out )
+            print( "=== {}: {} (p{}) ===\n".format(
+                chapter["chapter_id"], chapter["chapter_title"], chapter["page_no"]
+            ), file=chapters_out )
+            for section in chapter["sections"]:
+                print( "{} => {}".format(
+                    section["caption"], section["ruleid"],
+                ), file=chapters_out )
 
         # save the footnotes
         def make_caption( caption ):
@@ -451,7 +533,7 @@ class ExtractContent( ExtractBase ):
                     print( " ; ".join( make_caption(c) for c in footnote["captions"] ), file=footnotes_out )
                     print( footnote["content"], file=footnotes_out )
 
-    def save_as_json( self, targets_out, footnotes_out ):
+    def save_as_json( self, targets_out, chapters_out, footnotes_out ):
         """Save the results as JSON."""
 
         # save the targets
@@ -468,6 +550,23 @@ class ExtractContent( ExtractBase ):
         print( "{{\n{}\n\n}}".format(
             ",\n".join( targets )
         ), file=targets_out )
+
+        # save the chapters
+        chapters = []
+        for chapter in self._chapters:
+            sections = []
+            for section in chapter["sections"]:
+                sections.append( "    {{ \"caption\": {}, \"ruleid\": {} }}".format(
+                    jsonval(section["caption"]), jsonval(section["ruleid"])
+                ) )
+            chapters.append(
+                "{{ \"title\": {},\n  \"chapter_id\": {},\n  \"page_no\": {},\n  \"sections\": [\n{}\n] }}".format(
+                jsonval(chapter["chapter_title"]), jsonval(chapter["chapter_id"]), jsonval(chapter["page_no"]),
+                ",\n".join( sections )
+            ) )
+        print( "[\n\n{}\n\n]".format(
+            ",\n\n".join( chapters )
+        ), file=chapters_out )
 
         # save the footnotes
         def make_caption( caption ):
@@ -508,8 +607,9 @@ class ExtractContent( ExtractBase ):
     help="Output format."
 )
 @click.option( "--save-targets","save_targets_fname", required=True, help="Where to save the extracted targets." )
+@click.option( "--save-chapters","save_chapters_fname", required=True, help="Where to save the extracted chaopters." )
 @click.option( "--save-footnotes","save_footnotes_fname", required=True, help="Where to save the extracted footnotes." )
-def main( pdf_file, args, progress, output_fmt, save_targets_fname, save_footnotes_fname ):
+def main( pdf_file, args, progress, output_fmt, save_targets_fname, save_chapters_fname, save_footnotes_fname ):
     """Extract content from the MMP eASLRB."""
 
     # initialize
@@ -527,8 +627,9 @@ def main( pdf_file, args, progress, output_fmt, save_targets_fname, save_footnot
 
     # save the results
     with open( save_targets_fname, "w", encoding="utf-8" ) as targets_out, \
+         open( save_chapters_fname, "w", encoding="utf-8" ) as chapters_out, \
          open( save_footnotes_fname, "w", encoding="utf-8" ) as footnotes_out:
-        getattr( extract, "save_as_"+output_fmt, )( targets_out, footnotes_out )
+        getattr( extract, "save_as_"+output_fmt, )( targets_out, chapters_out, footnotes_out )
 
 if __name__ == "__main__":
     main() #pylint: disable=no-value-for-parameter

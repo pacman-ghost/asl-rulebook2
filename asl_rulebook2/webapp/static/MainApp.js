@@ -14,7 +14,9 @@ $(document).ready( () => {
 
 // FUDGE! Can't seem to get access to gMainApp member variables, so we make them available
 // to the rest of the program via global variables :-/
+export let gContentDocs = null ;
 export let gTargetIndex = null ;
+export let gChapterResources = null ;
 
 // --------------------------------------------------------------------
 
@@ -45,6 +47,7 @@ gMainApp.component( "main-app", {
             this.getContentDocs( this ),
         ] ).then( () => {
             this.isLoaded = true ;
+            gEventBus.emit( "app-loaded" ) ;
             this.showStartupMsgs() ;
             $( "#query-string" ).focus() ; // nb: because autofocus on the <input> doesn't work :-/
         } ) ;
@@ -63,12 +66,12 @@ gMainApp.component( "main-app", {
                     let cdocIds = Object.keys( resp ) ;
                     if ( cdocIds.length > 0 ) {
                         Vue.nextTick( () => {
-                            gEventBus.emit( "show-target", cdocIds[0], null ) ; // FIXME! which one do we choose?
+                            gEventBus.emit( "show-page", cdocIds[0], 1 ) ; // FIXME! which cdoc do we choose?
                         } ) ;
                     }
                     resolve() ;
                 } ).fail( (xhr, status, errorMsg) => {
-                    const msg = "Couldn't get the content docs." ;
+                    let msg = "Couldn't get the content docs." ;
                     showErrorMsg( msg + " <div class='pre'>" + errorMsg + "</div>" ) ;
                     reject( msg )
                 } ) ;
@@ -76,12 +79,14 @@ gMainApp.component( "main-app", {
         },
 
         installContentDocs( contentDocs ) {
+            // install the content docs
+            gContentDocs = contentDocs ;
             // build an index of all the targets
             gTargetIndex = {} ;
             Object.values( contentDocs ).forEach( (cdoc) => {
                 if ( ! cdoc.targets )
                     return ;
-                for ( const target in cdoc.targets ) {
+                for ( let target in cdoc.targets ) {
                     let key = target.toLowerCase() ;
                     if ( ! gTargetIndex[ key ] )
                         gTargetIndex[ key ] = [] ;
@@ -91,6 +96,18 @@ gMainApp.component( "main-app", {
                         target: target
                     } ) ;
                 }
+            } ) ;
+            // build an index of the available chapters resources
+            gChapterResources = { background: {}, icon: {} } ;
+            Object.values( contentDocs ).forEach( (cdoc) => {
+                if ( ! cdoc.chapters )
+                    return ;
+                cdoc.chapters.forEach( (chapter) => {
+                    if ( "background" in chapter )
+                        gChapterResources.background[ chapter.chapter_id ] = chapter.background ;
+                    if ( "icon" in chapter )
+                        gChapterResources.icon[ chapter.chapter_id ] = chapter.icon ;
+                } ) ;
             } ) ;
         },
 

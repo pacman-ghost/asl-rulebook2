@@ -8,7 +8,7 @@ from selenium.webdriver.common.keys import Keys
 from asl_rulebook2.utils import strip_html
 from asl_rulebook2.webapp.search import load_search_config, _make_fts_query_string
 from asl_rulebook2.webapp.startup import StartupMsgs
-from asl_rulebook2.webapp.tests.utils import init_webapp, select_tabbed_page, get_classes, \
+from asl_rulebook2.webapp.tests.utils import init_webapp, select_tabbed_page, get_curr_target, get_classes, \
     wait_for, find_child, find_children
 
 # ---------------------------------------------------------------------
@@ -21,15 +21,15 @@ def test_search( webapp, webdriver ):
     init_webapp( webapp, webdriver )
 
     # test a search that finds nothing
-    results = _do_search( "oogah, boogah!" )
+    results = do_search( "oogah, boogah!" )
     assert results is None
 
     # test error handling
-    results = _do_search( "!:simulated-error:!" )
+    results = do_search( "!:simulated-error:!" )
     assert "Simulated error." in results
 
     # do a search
-    results = _do_search( "enemy" )
+    results = do_search( "enemy" )
     assert results == [
         { "sr_type": "index",
           "title": "CCPh", "subtitle": "Close Combat Phase",
@@ -54,7 +54,7 @@ def test_search( webapp, webdriver ):
     ]
 
     # do another search
-    results = _do_search( "gap" )
+    results = do_search( "gap" )
     assert results == [
         { "sr_type": "index",
           "title": "((Gaps)), Convoy",
@@ -72,17 +72,17 @@ def test_content_fixup( webapp, webdriver ):
     init_webapp( webapp, webdriver )
 
     # search for a fraction
-    results = _do_search( "3/4" )
+    results = do_search( "3/4" )
     assert len(results) == 1
     assert results[0]["content"] == "HTML content: 2((\u00be)) MP"
 
     # search for something that ends with a hash
-    results = _do_search( "H#" )
+    results = do_search( "H#" )
     assert len(results) == 1
     assert results[0]["title"] == "((H#))"
 
     # search for "U.S."
-    results = _do_search( "U.S." )
+    results = do_search( "U.S." )
     assert len(results) == 1
     assert results[0]["content"] == "The ((U.S.)) has lots of this."
 
@@ -101,12 +101,12 @@ def test_targets( webapp, webdriver ):
         select_tabbed_page( "#content", "empty" )
 
         # do the search
-        _do_search( query_string )
+        do_search( query_string )
 
         # click on a target
         elem = find_child( "#search-results {}".format( sel ) )
         elem.click()
-        wait_for( 2, lambda: _get_curr_target() == ( "simple", expected ) )
+        wait_for( 2, lambda: get_curr_target() == ( "simple", expected ) )
 
     # do the tests
     do_test( "CC", ".sr .ruleids .ruleid a", "A3.8" )
@@ -122,7 +122,7 @@ def test_toggle_rulerefs( webapp, webdriver ):
     init_webapp( webapp, webdriver )
 
     def do_test( query_string, expected ):
-        results = _do_search( query_string )
+        results = do_search( query_string )
         assert len(results) == 1
         sr_elem = find_child( "#search-results .sr" )
         assert _is_expanded_rulerefs( sr_elem ) == expected
@@ -145,79 +145,25 @@ def test_target_search( webapp, webdriver ):
     init_webapp( webapp, webdriver )
 
     # search for a target
-    results = _do_search( "cc" )
+    results = do_search( "cc" )
     assert len(results) > 0
-    results = _do_search( "D1.4" )
+    results = do_search( "D1.4" )
     assert len(results) == 0 # nb: previous search results should be removed
-    wait_for( 2, lambda: _get_curr_target() == ( "simple", "D1.4" ) )
+    wait_for( 2, lambda: get_curr_target() == ( "simple", "D1.4" ) )
 
     # search for a target
-    results = _do_search( "astral plane" )
+    results = do_search( "astral plane" )
     assert results is None # nb: this is the "no results" message
-    results = _do_search( "E11.21" )
+    results = do_search( "E11.21" )
     assert len(results) == 0 # nb: the "no results"  message should be cleared
-    wait_for( 2, lambda: _get_curr_target() == ( "simple", "E11.21" ) )
+    wait_for( 2, lambda: get_curr_target() == ( "simple", "E11.21" ) )
 
     # search for a target
-    results = _do_search( "*" )
+    results = do_search( "*" )
     assert isinstance( results, str ) # nb: this is an error message
-    results = _do_search( "a4.7" )
+    results = do_search( "a4.7" )
     assert len(results) == 0 # nb: the error message should be cleared
-    wait_for( 2, lambda: _get_curr_target() == ( "simple", "A4.7" ) )
-
-# ---------------------------------------------------------------------
-
-def test_content_sets( webapp, webdriver ):
-    """Test how content sets are managed."""
-
-    # initialize
-    webapp.control_tests.set_data_dir( "content-sets" )
-    init_webapp( webapp, webdriver, add_empty_doc=1 )
-
-    # bring up all the targets
-    results = _do_search( "content" )
-    results = {
-        sr["title"]: [
-            [ rref["caption"], rref["ruleids"] ]
-            for rref in sr["rulerefs"]
-        ] for sr in results
-    }
-    assert results == {
-        "((Content)) Set 1": [
-            [ "Main document", [ "1a", "2a", "3a", "4a", "5a", "6a" ] ],
-            [ "Linked document", [ "1b", "2b", "3b", "4b", "5b", "6b" ] ],
-        ],
-        "((Content)) Set 2": [
-            [ "The only document", [ "cs2a", "cs2b", "cs2c", "cs2d", "cs2e", "cs2f" ] ]
-        ],
-        "Unknown ruleid": [
-            [ "Incorrect ruleref", [ "cs2a" ] ]
-        ],
-    }
-
-    # check that the ruleid links are enabled/disabled correctly
-    ruleid_elems = {}
-    for sr_elem in find_children( "#search-results .sr" ):
-        title = find_child( ".title", sr_elem ).text
-        for ruleid_elem in find_children( ".ruleid", sr_elem ):
-            link = find_child( "a", ruleid_elem )
-            if title == "Unknown ruleid":
-                assert link is None
-            else:
-                assert link
-                assert link.text not in ruleid_elems
-                ruleid_elems[ link.text ] = ruleid_elem
-
-    def do_test( ruleid, expected ):
-        ruleid_elems[ ruleid ].click()
-        wait_for( 2, lambda: _get_curr_target() == (expected, ruleid) )
-
-    # test clicking on ruleid targets
-    do_test( "4b", "content-set-1!linked" )
-    do_test( "1a", "content-set-1" )
-    do_test( "cs2d", "content-set-2" )
-    select_tabbed_page( "#content", "empty" )
-    do_test( "1b", "content-set-1!linked" )
+    wait_for( 2, lambda: get_curr_target() == ( "simple", "A4.7" ) )
 
 # ---------------------------------------------------------------------
 
@@ -298,7 +244,7 @@ def test_make_fts_query_string():
 
 # ---------------------------------------------------------------------
 
-def _do_search( query_string ):
+def do_search( query_string ):
     """Do a search."""
 
     def get_seq_no():
@@ -401,18 +347,6 @@ def _unload_search_results():
     return results
 
 # ---------------------------------------------------------------------
-
-def _get_curr_target():
-    """Get the currently-shown target."""
-    # check the active tab
-    elem = find_child( "#content .tab-strip .tab.active" )
-    if not elem:
-        return ( None, None )
-    tab_id = elem.get_attribute( "data-tabid" )
-    # check the current target
-    elem = find_child( "#content .tabbed-page[data-tabid='{}'] .content-doc".format( tab_id ) )
-    target = elem.get_attribute( "data-target" )
-    return ( tab_id, target )
 
 def _is_expanded_rulerefs( sr_elem ):
     """Check if ruleref's have been expanded for a search result."""

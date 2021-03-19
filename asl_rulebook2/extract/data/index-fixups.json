@@ -144,7 +144,7 @@
 
 "Movement, Vehicle": {
     "replace": [
-        [ "(see Amphibians: D16)", "(see Amphibians)" ]
+        [ ", (see Amphibians: D16)", ", see Amphibians: D16" ]
     ]
 },
 

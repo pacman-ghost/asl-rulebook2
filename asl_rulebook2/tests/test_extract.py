@@ -111,7 +111,7 @@ def _for_each_version( func ):
     ncalls = 0
     for name in os.listdir( base_dir ):
         dname = os.path.join( base_dir, name )
-        if os.path.isdir( dname ):
+        if os.path.isfile( os.path.join( dname, "eASLRB.pdf" ) ):
             func( dname )
             ncalls += 1
     assert ncalls > 0

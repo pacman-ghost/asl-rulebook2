@@ -20,7 +20,7 @@ gMainApp.component( "search-box", {
     template: `
 <div>
     <input type="text" id="query-string" @keyup=onKeyUp v-model.trim="queryString" ref="queryString" autofocus >
-    <button @click="$emit('search',this.queryString)" ref=submit> Go </button>
+    <button @click="$emit('search',this.queryString)" ref="submit"> Go </button>
 </div>`,
 
     mounted: function() {
@@ -32,7 +32,7 @@ gMainApp.component( "search-box", {
     methods: {
         onKeyUp( evt ) {
             if ( evt.keyCode == 13 )
-                this.$refs["submit"].click() ;
+                this.$refs.submit.click() ;
         }
     },
 
@@ -50,8 +50,9 @@ gMainApp.component( "search-results", {
     template: `<div>
 <div v-if=errorMsg class="error"> Search error: <div class="pre"> {{errorMsg}} </div> </div>
 <div v-else-if="searchResults != null && searchResults.length == 0" class="no-results"> Nothing was found. </div>
-<div v-else v-for="sr in searchResults" :key=sr._key >
-    <index-sr v-if="sr.sr_type == 'index'" :sr=sr :key=sr />
+<div v-else v-for="sr in searchResults" :key=sr >
+    <index-sr v-if="sr.sr_type == 'index'" :sr=sr />
+    <qa-entry v-else-if="sr.sr_type == 'q+a'" :qaEntry=sr class="sr" />
     <div v-else> ??? </div>
 </div>
 </div>`,
@@ -95,17 +96,12 @@ gMainApp.component( "search-results", {
                     return ;
                 }
                 // adjust highlighted text
-                resp.forEach( (sr) => {
-                    [ "title", "subtitle", "content" ].forEach( function( key ) {
-                        if ( sr[key] )
-                            sr[key] = fixupSearchHilites( sr[key] ) ;
-                    } ) ;
-                } ) ;
+                resp.forEach( this.hiliteSearchResult ) ;
                 // load the search results into the UI
                 this.$el.scrollTop = 0;
                 this.searchResults = resp ;
                 // auto-show the primary target for the first search result
-                if ( resp.length > 0 ) {
+                if ( resp.length > 0 && resp[0].sr_type == "index" ) {
                     let target = getPrimaryTarget( resp[0] ) ;
                     if ( target )
                         gEventBus.emit( "show-target", target.cdoc_id, target.target ) ;
@@ -117,6 +113,29 @@ gMainApp.component( "search-results", {
             } ) ;
         },
 
+        hiliteSearchResult( sr ) {
+            // wrap highlighted search terms with HTML span's
+            if ( sr.sr_type == "index" ) {
+                [ "title", "subtitle", "content" ].forEach( function( key ) {
+                    if ( sr[key] !== undefined )
+                        sr[key] = fixupSearchHilites( sr[key] ) ;
+                } ) ;
+            } else if ( sr.sr_type == "q+a" ) {
+                if ( ! sr.content )
+                    return ;
+                sr.content.forEach( (content) => {
+                    if ( content.question )
+                        content.question = fixupSearchHilites( content.question ) ;
+                    if ( content.answers ) {
+                        content.answers.forEach( (answer) => {
+                            answer[0] = fixupSearchHilites( answer[0] ) ;
+                        } ) ;
+                    }
+                } ) ;
+            } else {
+                console.log( "INTERNAL ERROR: Unknown search result type:", sr.sr_type ) ;
+            }
+        },
     },
 
 } ) ;

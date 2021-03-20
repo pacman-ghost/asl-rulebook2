@@ -3,6 +3,8 @@
 import os
 import pathlib
 import re
+import json
+import traceback
 
 from asl_rulebook2.webapp import app, CONFIG_DIR
 
@@ -18,6 +20,25 @@ def make_data_path( path ):
 def make_config_path( path ):
     """Generate a path in the config directory."""
     return os.path.join( CONFIG_DIR, path )
+
+def load_data_file( fname, ftype, binary, logger, on_error ):
+    """Load a data file."""
+    try:
+        # load the file
+        if binary:
+            with open( fname, mode="rb" ) as fp:
+                data = fp.read()
+            logger.debug( "- Loaded \"%s\" file: #bytes=%d", ftype, len(data) )
+        else:
+            with open( fname, "r", encoding="utf-8" ) as fp:
+                data = json.load( fp )
+            logger.debug( "- Loaded \"%s\" file.", ftype )
+    except Exception as ex: #pylint: disable=broad-except
+        msg = "Couldn't load \"{}\".".format( os.path.basename(fname) )
+        on_error( msg, str(ex) )
+        logger.error( "%s\n%s", msg, traceback.format_exc() )
+        return None
+    return data
 
 # ---------------------------------------------------------------------
 
@@ -35,6 +56,10 @@ def slugify( val ):
             return "-"
         return "_"
     return "".join( fix(ch) for ch in val )
+
+def split_strip( val, sep ):
+    """Split a string and strip each field."""
+    return [ v.strip() for v in val.split( sep ) ]
 
 def parse_int( val, default=None ):
     """Parse an integer."""

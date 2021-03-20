@@ -1,0 +1,7 @@
+[
+
+{ "title": "Bad highlight",
+  "content": "before <a href='bad-highlight'>link</a> after"
+}
+
+]

@@ -100,3 +100,29 @@ export function showNotificationMsg( msgType, msg )
     } ) ;
 }
 
+// --------------------------------------------------------------------
+
+export function makeImagesZoomable( $elem )
+{
+    // look for images that have been marked as zoomable, and make it so
+    $elem.find( "img.imageZoom" ).each( function() {
+        $(this).wrap( $( "<a>", {
+            class: "imageZoom",
+            href: $(this).attr( "src" ),
+            title: "Click to zoom",
+            onFocus: "javascript:this.blur()"
+        } ) ) ;
+    } ) ;
+    $elem.find( "img.imageZoom" ).imageZoom( $ ) ;
+}
+
+// --------------------------------------------------------------------
+
+export function getCssSize( elem, attr )
+{
+    // return the element's size
+    attr = $(elem).css( attr ) ;
+    if ( attr.substring( attr.length-2 ) == "px" )
+        attr = attr.substring( 0, attr.length-2 ) ;
+    return parseInt( attr ) ;
+}

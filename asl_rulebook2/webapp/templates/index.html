@@ -9,11 +9,13 @@
     filename = 'jquery-ui/jquery-ui' + WEB_DEBUG_MIN + '.css'
 ) }}" />
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='growl/jquery.growl.css' ) }}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='imageZoom/jquery.imageZoom.css' ) }}" />
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/global.css' ) }}" />
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/MainApp.css' ) }}" />
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/NavPane.css' ) }}" />
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/SearchPane.css' ) }}" />
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/SearchResult.css' ) }}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/RuleInfo.css' ) }}" />
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/ContentPane.css' ) }}" />
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/TabbedPages.css' ) }}" />
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/Accordian.css' ) }}" />
@@ -43,18 +45,23 @@
     filename = 'tinyemitter/tinyemitter' + WEB_DEBUG_MIN + '.js'
 ) }}"></script>
 <script src="{{ url_for( 'static', filename='growl/jquery.growl.js' ) }}"></script>
+<script src="{{ url_for( 'static', filename='imageZoom/jquery.imageZoom.min.js' ) }}"></script>
 
 <script>
 gImagesBaseUrl = "{{ url_for( 'static', filename='images/' ) }}" ;
+gGetAppConfigUrl = "{{ url_for( 'get_app_config' ) }}" ;
 gGetContentDocsUrl = "{{ url_for( 'get_content_docs' ) }}" ;
 gGetStartupMsgsUrl = "{{ url_for( 'get_startup_msgs' ) }}" ;
 gSearchUrl = "{{ url_for( 'search' ) }}" ;
+gGetQAUrl = "{{ url_for( 'get_qa', ruleid='RULEID' ) }}" ;
+gGetQAImageUrl = "{{ url_for( 'get_qa_image', fname='FNAME' ) }}" ;
 </script>
 
 <script type="module" src="{{ url_for( 'static', filename='MainApp.js' ) }}"></script>
 <script type="module" src="{{ url_for( 'static', filename='NavPane.js' ) }}"></script>
 <script type="module" src="{{ url_for( 'static', filename='SearchPane.js' ) }}"></script>
 <script type="module" src="{{ url_for( 'static', filename='SearchResult.js' ) }}"></script>
+<script type="module" src="{{ url_for( 'static', filename='RuleInfo.js' ) }}"></script>
 <script type="module" src="{{ url_for( 'static', filename='ContentPane.js' ) }}"></script>
 <script type="module" src="{{ url_for( 'static', filename='TabbedPages.js' ) }}"></script>
 <script type="module" src="{{ url_for( 'static', filename='Accordian.js' ) }}"></script>

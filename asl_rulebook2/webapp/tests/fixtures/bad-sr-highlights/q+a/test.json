@@ -1,0 +1,24 @@
+{
+
+"Test Chapter": [
+
+{ "caption": "Bad question",
+  "content": [
+    { "question": "foo <a href='foo'>link</a> foo"
+    }
+  ]
+},
+
+{ "caption": "Bad answer",
+  "content": [
+    { "question": "The question.",
+      "answers": [
+          [ "bar <a href='bar'>link</a> bar", "test" ]
+      ]
+    }
+  ]
+}
+
+]
+
+}

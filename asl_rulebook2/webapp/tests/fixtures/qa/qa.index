@@ -1,0 +1,16 @@
+[
+
+{ "title": "Full Q+A entry",
+  "ruleids": [ "F1" ]
+},
+
+{ "title": "Informational Q+A entry",
+  "ruleids": [ "I1" ]
+},
+
+{ "title": "Everything",
+  "subtitle": "This index entry is referenced by every Q+A entry.",
+  "ruleids": [ "E1" ]
+}
+
+]

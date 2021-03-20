@@ -14,6 +14,7 @@ $(document).ready( () => {
 
 // FUDGE! Can't seem to get access to gMainApp member variables, so we make them available
 // to the rest of the program via global variables :-/
+export let gAppConfig = null ;
 export let gContentDocs = null ;
 export let gTargetIndex = null ;
 export let gChapterResources = null ;
@@ -34,26 +35,54 @@ gMainApp.component( "main-app", {
 `,
 
     mounted() {
+
         // initialize the splitter
         Split( [ "#nav", "#content" ], { //eslint-disable-line no-undef
             direction: "horizontal",
             sizes: [ 25, 75 ],
             gutterSize: 2,
         } ) ;
+
         // initialze the webapp
-        // NOTE: We don't provide a catch handler, since each individual Promise should report
-        // their own errors i.e. what could we do here, other than show a generic "startup failed" error?
         Promise.all( [
+            this.getAppConfig( this ),
             this.getContentDocs( this ),
         ] ).then( () => {
             this.isLoaded = true ;
             gEventBus.emit( "app-loaded" ) ;
             this.showStartupMsgs() ;
             $( "#query-string" ).focus() ; // nb: because autofocus on the <input> doesn't work :-/
+        } ).catch( () => {
+            // NOTE: Each individual Promise should report their own errors i.e. what could we do here,
+            // other than show a generic "startup failed" error?
         } ) ;
+
+        // add a global keypress handler
+        $(document).on( "keyup", (evt) => {
+            if ( evt.keyCode == 27 ) {
+                if ( $(".jquery-image-zoom").length >= 1 )
+                    return ; // an image is zoomed - ignore the Escape
+                gEventBus.emit( "escape-pressed" ) ;
+            }
+        } ) ;
+
     },
 
     methods: {
+
+        getAppConfig() {
+            return new Promise( (resolve, reject) => {
+                // get the app config
+                $.getJSON( gGetAppConfigUrl, (resp) => { //eslint-disable-line no-undef
+                    gAppConfig = resp ;
+                    resolve() ;
+                } ).fail( (xhr, status, errorMsg) => {
+                    let msg = "Couldn't get the app config." ;
+                    showErrorMsg( msg + " <div class='pre'>" + errorMsg + "</div>" ) ;
+                    reject( msg )
+                } ) ;
+            } ) ;
+        },
 
         getContentDocs( self ) {
             return new Promise( (resolve, reject) => {

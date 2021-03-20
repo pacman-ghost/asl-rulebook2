@@ -9,7 +9,7 @@ from asl_rulebook2.utils import strip_html
 from asl_rulebook2.webapp.search import load_search_config, _make_fts_query_string
 from asl_rulebook2.webapp.startup import StartupMsgs
 from asl_rulebook2.webapp.tests.utils import init_webapp, select_tabbed_page, get_curr_target, get_classes, \
-    wait_for, find_child, find_children
+    wait_for, find_child, find_children, get_image_filename
 
 # ---------------------------------------------------------------------
 
@@ -167,6 +167,33 @@ def test_target_search( webapp, webdriver ):
 
 # ---------------------------------------------------------------------
 
+def test_bad_sr_highlights( webapp, webdriver ):
+    """Test fixing up highlight markers that have been incorrectly inserted into search result content."""
+
+    # initialize
+    webapp.control_tests.set_data_dir( "bad-sr-highlights" )
+    init_webapp( webapp, webdriver )
+
+    # bring up an index  search result with a problem in its content
+    results = do_search( "highlight" )
+    assert results == [ {
+        "sr_type": "index",
+        "title": "Bad ((highlight))",
+        "content": "before link after",
+    } ]
+
+    # bring up a Q+A entry with a problem in its question
+    results = do_search( "foo" )
+    assert len(results) == 1
+    assert results[0]["content"][0]["question"] == "((foo)) link ((foo))"
+
+    # bring up a Q+A entry with a problem in one of its answers
+    results = do_search( "bar" )
+    assert len(results) == 1
+    assert results[0]["content"][0]["answers"][0][0] == "((bar)) link ((bar))"
+
+# ---------------------------------------------------------------------
+
 def test_make_fts_query_string():
     """Test generating the FTS query string."""
 
@@ -274,26 +301,6 @@ def do_search( query_string ):
 def _unload_search_results():
     """Unload the search results."""
 
-    def unload_elem( result, key, elem ):
-        """Unload a single element."""
-        if not elem:
-            return False
-        elem_text = get_elem_text( elem )
-        if not elem_text:
-            return False
-        result[key] = elem_text
-        return True
-
-    def get_elem_text( elem ):
-        """Get the element's text content."""
-        val = elem.get_attribute( "innerHTML" )
-        # change how highlighted content is represented
-        matches = list( re.finditer( r'<span class="hilite">(.*?)</span>', val ) )
-        for mo in reversed(matches):
-            val = val[:mo.start()] + "((" + mo.group(1) + "))" + val[mo.end():]
-        # remove HTML tags
-        return strip_html( val.strip() )
-
     def unload_ruleids( result, key, parent ):
         """Unload a list of ruleid's."""
         if not parent:
@@ -332,19 +339,53 @@ def _unload_search_results():
         unload_rulerefs( result, "rulerefs", find_child(".rulerefs",sr) )
         return result
 
+    def unload_qa_sr( sr ): #pylint: disable=possibly-unused-variable
+        """Unload a "qa" search result."""
+        from asl_rulebook2.webapp.tests.test_qa import unload_qa
+        return unload_qa( sr )
+
     # unload the search results
     results = []
     for sr in find_children( "#search-results .sr"):
         classes = get_classes( sr )
         classes.remove( "sr" )
-        assert len(classes) == 1 and classes[0].endswith( "-sr" )
-        sr_type = classes[0][:-3]
+        classes = [ c for c in classes if c in ["index-sr","qa"] ]
+        assert len(classes) == 1
+        sr_type = classes[0]
+        if sr_type.endswith( "-sr" ):
+            sr_type = sr_type[:-3]
         func = locals()[ "unload_{}_sr".format( sr_type ) ]
         sr = func( sr )
         sr["sr_type"] = sr_type
         results.append( sr )
 
     return results
+
+def unload_elem( save_loc, key, elem ):
+    """Unload a single element."""
+    if not elem:
+        return False
+    if elem.tag_name in ("div", "span"):
+        val = get_elem_text( elem )
+    elif elem.tag_name == "img":
+        val = get_image_filename( elem )
+    else:
+        assert False, "Unknown element type: " + elem.tag_name
+        return False
+    if not val:
+        return False
+    save_loc[ key ] = val
+    return True
+
+def get_elem_text( elem ):
+    """Get the element's text content."""
+    val = elem.get_attribute( "innerHTML" )
+    # change how highlighted content is represented
+    matches = list( re.finditer( r'<span class="hilite">(.*?)</span>', val ) )
+    for mo in reversed(matches):
+        val = val[:mo.start()] + "((" + mo.group(1) + "))" + val[mo.end():]
+    # remove HTML tags
+    return strip_html( val ).strip()
 
 # ---------------------------------------------------------------------
 

@@ -1,4 +1,5 @@
 #nav { margin: 0 5px ; }
 #nav .no-chapters { font-style: italic ; color: #888 ; }
+#nav .wrapper { position: relative ; }
 
 #nav .tab-strip { border-top: 1px solid #aaa ; padding: 5px 5px ; }

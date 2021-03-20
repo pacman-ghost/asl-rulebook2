@@ -8,6 +8,8 @@ from flask import jsonify
 from asl_rulebook2.webapp import app
 from asl_rulebook2.webapp.content import load_content_sets
 from asl_rulebook2.webapp.search import init_search
+from asl_rulebook2.webapp.qa import init_qa
+from asl_rulebook2.webapp.utils import parse_int
 
 _logger = logging.getLogger( "startup" )
 _startup_msgs = None
@@ -26,8 +28,21 @@ def init_webapp():
     _startup_msgs = StartupMsgs()
 
     # initialize the webapp
-    load_content_sets( _startup_msgs, _logger )
-    init_search( _startup_msgs, _logger )
+    content_sets = load_content_sets( _startup_msgs, _logger )
+    qa = init_qa( _startup_msgs, _logger )
+    init_search( content_sets, qa, _startup_msgs, _logger )
+
+# ---------------------------------------------------------------------
+
+@app.route( "/app-config" )
+def get_app_config():
+    """Return the app config."""
+    result = {}
+    for key in [ "DISABLE_AUTO_SHOW_RULE_INFO" ]:
+        val = app.config.get( key )
+        if val is not None:
+            result[ key ] = parse_int( val, val )
+    return jsonify( result )
 
 # ---------------------------------------------------------------------
 

@@ -1,6 +1,7 @@
 """ Helper utilities. """
 
 import sys
+import os
 import uuid
 
 from selenium.webdriver.support.ui import WebDriverWait
@@ -31,6 +32,7 @@ def init_webapp( webapp, webdriver, **options ):
         # it downloads the file and saves it in the current directory :wtf:
         options["no-content"] = 1
     options["store-msgs"] = 1 # nb: so that we can retrive notification messages
+    options["no-animations"] = 1
     options["reload"] = 1 # nb: force the webapp to reload
     webdriver.get( webapp.url_for( "main", **options ) )
     _wait_for_webapp()
@@ -139,7 +141,24 @@ def has_class( elem, class_name ):
     """Check if an element has a specified CSS class."""
     return class_name in get_classes( elem )
 
+def get_image_filename( elem ):
+    """Get the filename of an <img> element."""
+    if elem is None:
+        return None
+    assert elem.tag_name == "img"
+    return os.path.basename( elem.get_attribute( "src" ) )
+
 # ---------------------------------------------------------------------
+
+def wait_for_elem( timeout, sel, parent=None ):
+    """Wait for an element to appear."""
+    elem = None
+    def check_elem():
+        nonlocal elem
+        elem = find_child( sel, parent )
+        return elem is not None and elem.is_displayed()
+    wait_for( timeout, check_elem )
+    return elem
 
 def wait_for( timeout, func ):
     """Wait for a condition to become true."""

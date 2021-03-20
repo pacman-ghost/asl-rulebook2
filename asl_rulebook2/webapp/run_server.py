@@ -52,6 +52,7 @@ def main( bind_addr, data_dir, force_init_delay, flask_debug ):
     fspecs = [ "static/", "templates/", "config/" ]
     if app.config.get( "DATA_DIR" ):
         fspecs.append( app.config["DATA_DIR"] )
+        fspecs.append( os.path.join( app.config["DATA_DIR"], "q+a" ) )
     for fspec in fspecs:
         fspec = os.path.abspath( os.path.join( os.path.dirname(__file__), fspec ) )
         if os.path.isdir( fspec ):

@@ -6,6 +6,7 @@ import json
 import re
 import itertools
 import string
+import copy
 import tempfile
 import logging
 import traceback
@@ -14,11 +15,10 @@ from flask import request, jsonify
 
 from asl_rulebook2.utils import plural
 from asl_rulebook2.webapp import app
-from asl_rulebook2.webapp import content as webapp_content
-from asl_rulebook2.webapp.utils import make_config_path, make_data_path
+from asl_rulebook2.webapp.utils import make_config_path, make_data_path, split_strip
 
 _sqlite_path = None
-_fts_index_entries= None
+_fts_index= None
 
 _logger = logging.getLogger( "search" )
 
@@ -39,8 +39,22 @@ _FIXUP_TEXT_REGEXES = [
     ]
 ]
 
-# these are used to separate ruleref's in the FTS table (internal use only)
+# NOTE: These regex's identify highlight markers that SQLite has inadvertently inserted *inside* an HTML tag,
+# because it is treating the searchable content as plain-text, and not HTML.
+# NOTE: The content has cases of naked <'s e.g. "move < 2 MP", so we need to be careful not to get tripped up
+# by these.
+_HILITES_INSIDE_HTML_TAG_REGEXES = [
+    re.compile( r"\<\S.*?({}).*?\>".format( _BEGIN_HIGHLIGHT ) ),
+    re.compile( r"\<\S.*?({}).*?\>".format( _END_HIGHLIGHT ) ),
+]
+
+# these are used to separate ruleref's in the FTS table
 _RULEREF_SEPARATOR = "-:-"
+
+# these are used to separate Q+A fields in the FTS table
+_QA_CONTENT_SEPERATOR = " !=! "
+_QA_FIELD_SEPARATOR = " :-: "
+_NO_QA_QUESTION = "_??_"
 
 _SEARCH_TERM_ADJUSTMENTS = None
 
@@ -68,13 +82,6 @@ def search() :
 
 def _do_search( args ):
 
-    def fixup_text( val ):
-        if val is None:
-            return None
-        for regex in _FIXUP_TEXT_REGEXES:
-            val = regex[0].sub( regex[1], val )
-        return val
-
     # run the search
     query_string = args[ "queryString" ].strip()
     if query_string == "!:simulated-error:!":
@@ -85,7 +92,7 @@ def _do_search( args ):
     def highlight( n ):
          # NOTE: highlight() is an FTS extension function, and takes column numbers :-/
         return "highlight(searchable,{},'{}','{}')".format( n, _BEGIN_HIGHLIGHT, _END_HIGHLIGHT )
-    sql = "SELECT rowid,cset_id,sr_type,rank,{},{},{},{} FROM searchable".format(
+    sql = "SELECT rowid, sr_type, cset_id, rank, {}, {}, {}, {} FROM searchable".format(
         highlight(2), highlight(3), highlight(4), highlight(5)
     )
     sql += " WHERE searchable MATCH ?"
@@ -94,44 +101,35 @@ def _do_search( args ):
         ( "{title subtitle content rulerefs}: " + fts_query_string, )
     )
 
-    def get_col( sr, key, val ):
-        if val:
-            sr[key] = fixup_text( val )
+    def remove_bad_hilites( val ):
+        # remove highlight markers that SQLite may have incorrectly inserted into a value
+        if val is None:
+            return None
+        for regex in _HILITES_INSIDE_HTML_TAG_REGEXES:
+            matches = list( regex.finditer( val ) )
+            for mo in reversed( matches ):
+                val = val[:mo.start(1)] + val[mo.end(1):]
+        return val
 
     # get the results
     results = []
     for row in curs:
-        if row[2] != "index":
-            _logger.error( "Unknown searchable row type (rowid=%d): %s", row[0], row[2] )
+        row = list( row )
+        for col_no in range( 4, 7+1 ):
+            row[col_no] = remove_bad_hilites( row[col_no] )
+        if row[1] == "index":
+            result = _unload_index_sr( row )
+        elif row[1] == "q+a":
+            result = _unload_qa_sr( row )
+        else:
+            _logger.error( "Unknown searchable row type (rowid=%d): %s", row[0], row[1] )
             continue
-        index_entry = _fts_index_entries[ row[0] ]
-        result = {
-            "cset_id": row[1],
-            "sr_type": row[2],
-            "_key": "{}:{}:{}".format( row[1], row[2], row[0] ),
+        if not result:
+            continue
+        result.update( {
+            "sr_type": row[1],
             "_score": - row[3],
-        }
-        get_col( result, "title", row[4] )
-        get_col( result, "subtitle", row[5] )
-        get_col( result, "content", row[6] )
-        if index_entry.get( "ruleids" ):
-            result["ruleids"] = index_entry["ruleids"]
-        if index_entry.get( "see_also" ):
-            result["see_also"] = index_entry["see_also"]
-        rulerefs = [ r.strip() for r in row[7].split(_RULEREF_SEPARATOR) ] if row[7] else []
-        assert len(rulerefs) == len(index_entry.get("rulerefs",[]))
-        if rulerefs:
-            result[ "rulerefs" ] = []
-            for i, ruleref in enumerate(rulerefs):
-                ruleref2 = {}
-                if "caption" in index_entry["rulerefs"][i]:
-                    assert ruleref.replace( _BEGIN_HIGHLIGHT, "" ).replace( _END_HIGHLIGHT, "" ) \
-                           == index_entry["rulerefs"][i]["caption"].strip()
-                    ruleref2["caption"] = fixup_text( ruleref )
-                if "ruleids" in index_entry["rulerefs"][i]:
-                    ruleref2["ruleids"] = index_entry["rulerefs"][i]["ruleids"]
-                assert ruleref2
-                result["rulerefs"].append( ruleref2 )
+        } )
         results.append( result )
 
     # fixup the results
@@ -141,13 +139,79 @@ def _do_search( args ):
     results = _adjust_sort_order( results )
 
     # return the results
-    _logger.debug( "Search results:" if len(results) > 0 else "Search results: none" )
-    for result in results:
-        _logger.debug( "- %s (%.3f)",
-           result["title"].replace( _BEGIN_HIGHLIGHT, "" ).replace( _END_HIGHLIGHT, "" ),
-           result["_score"]
-        )
+    if _logger.isEnabledFor( logging.DEBUG ):
+        _logger.debug( "Search results:" if len(results) > 0 else "Search results: none" )
+        for result in results:
+            title = result.get( "title", result.get("caption","???") )
+            _logger.debug( "- %s: %s (%.3f)",
+                result["_fts_rowid"],
+                title.replace( _BEGIN_HIGHLIGHT, "" ).replace( _END_HIGHLIGHT, "" ),
+                result["_score"]
+            )
     return jsonify( results )
+
+def _unload_index_sr( row ):
+    """Unload an index search result from the database."""
+    index_entry = _fts_index["index"][ row[0] ] # nb: our copy of the index entry (must remain unchanged)
+    result = { "cset_id": row[2] } # nb: the index entry we will return to the caller
+    _get_result_col( result, "title", row[4] )
+    _get_result_col( result, "subtitle", row[5] )
+    _get_result_col( result, "content", row[6] )
+    if index_entry.get( "ruleids" ):
+        result["ruleids"] = index_entry["ruleids"]
+    if index_entry.get( "see_also" ):
+        result["see_also"] = index_entry["see_also"]
+    rulerefs = split_strip( row[7], _RULEREF_SEPARATOR ) if row[7] else []
+    assert len(rulerefs) == len(index_entry.get("rulerefs",[]))
+    if rulerefs:
+        result[ "rulerefs" ] = []
+        for i, ruleref in enumerate(rulerefs):
+            ruleref2 = {}
+            if "caption" in index_entry["rulerefs"][i]:
+                assert ruleref.replace( _BEGIN_HIGHLIGHT, "" ).replace( _END_HIGHLIGHT, "" ) \
+                       == index_entry["rulerefs"][i]["caption"].strip()
+                ruleref2["caption"] = _fixup_text( ruleref )
+            if "ruleids" in index_entry["rulerefs"][i]:
+                ruleref2["ruleids"] = index_entry["rulerefs"][i]["ruleids"]
+            assert ruleref2
+            result["rulerefs"].append( ruleref2 )
+    return result
+
+def _unload_qa_sr( row ):
+    """Unload Q+A search result from the database."""
+    qa_entry = _fts_index["q+a"][ row[0] ] # nb: our copy of the Q+A entry (must remain unchanged)
+    result = copy.deepcopy( qa_entry ) # nb: the Q+A entry we will return to the caller (will be changed)
+    # replace the content in the Q+A entry we will return to the caller with the values
+    # from the search index (which will have search term highlighting)
+    sr_content = split_strip( row[6], _QA_CONTENT_SEPERATOR ) if row[6] else []
+    qa_entry_content = qa_entry.get( "content", [] )
+    if len(sr_content) != len(qa_entry_content):
+        _logger.error( "Mismatched # content's for Q+A entry: %s", qa_entry )
+        return None
+    for content_no, content in enumerate( qa_entry_content ):
+        fields = split_strip( sr_content[content_no], _QA_FIELD_SEPARATOR )
+        answers = content.get( "answers", [] )
+        if len(fields) - 1 != len(answers): # nb: fields = question + answer 1 + answer 2 + ...
+            _logger.error( "Mismatched # answers for content %d: %s\n- answers = %s", content_no, qa_entry, answers )
+            return None
+        if fields[0] != _NO_QA_QUESTION:
+            result["content"][content_no]["question"] = fields[0]
+        for answer_no, _ in enumerate(answers):
+            result["content"][content_no]["answers"][answer_no][0] = fields[ 1+answer_no ]
+    return result
+
+def _fixup_text( val ):
+    """Fix-up a text value retrieved from the search index."""
+    if val is None:
+        return None
+    for regex in _FIXUP_TEXT_REGEXES:
+        val = regex[0].sub( regex[1], val )
+    return val
+
+def _get_result_col( sr, key, val ):
+    """Get a column from a search result."""
+    if val:
+        sr[ key ] = _fixup_text( val )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -241,7 +305,7 @@ def _fixup_results_for_hash_terms( results, search_terms ):
     """Fixup search results for search terms that end with a hash.
 
     SQLite doesn't handle search terms that end with a hash particularly well.
-    We correct highlighted search terms in fixup_text(), but searching for e.g. "US#"
+    We correct highlighted search terms in _fixup_text(), but searching for e.g. "US#"
     will also match "use" and "using" - we remove such results here.
     """
 
@@ -322,12 +386,12 @@ def _adjust_sort_order( results ):
 
 # ---------------------------------------------------------------------
 
-def init_search( startup_msgs, logger ):
+def init_search( content_sets, qa, startup_msgs, logger ):
     """Initialize the search engine."""
 
     # initialize
-    global _fts_index_entries
-    _fts_index_entries = {}
+    global _fts_index
+    _fts_index = { "index": {}, "q+a": {} }
 
     # initialize the database
     global _sqlite_path
@@ -347,15 +411,27 @@ def init_search( startup_msgs, logger ):
     # the overall content, and also lets us do AND/OR queries across all searchable content.
     conn.execute(
         "CREATE VIRTUAL TABLE searchable USING fts5"
-        " ( cset_id, sr_type, title, subtitle, content, rulerefs, tokenize='porter unicode61' )"
+        " ( sr_type, cset_id, title, subtitle, content, rulerefs, tokenize='porter unicode61' )"
     )
 
-    # load the searchable content
-    logger.info( "Loading the search index..." )
+    # initialize the search index
+    logger.info( "Building the search index..." )
     conn.execute( "DELETE FROM searchable" )
     curs = conn.cursor()
-    for cset in webapp_content.content_sets.values():
-        logger.info( "- Loading index file: %s", cset["index_fname"] )
+    if content_sets:
+        _init_content_sets( conn, curs, content_sets, logger )
+    if qa:
+        _init_qa( curs, qa, logger )
+    conn.commit()
+
+    # load the search config
+    load_search_config( startup_msgs, logger )
+
+def _init_content_sets( conn, curs, content_sets, logger ):
+    """Add the content sets to the search index."""
+    sr_type = "index"
+    for cset in content_sets.values():
+        logger.info( "- Adding index file: %s", cset["index_fname"] )
         nrows = 0
         for index_entry in cset["index"]:
             rulerefs = _RULEREF_SEPARATOR.join( r.get("caption","") for r in index_entry.get("rulerefs",[]) )
@@ -365,19 +441,45 @@ def init_search( startup_msgs, logger ):
             # but that means we would lose the highlighting of search terms that SQLite gives us. We opt to insert
             # the original content, since none of it should contain HTML, anyway.
             curs.execute(
-                "INSERT INTO searchable (cset_id,sr_type,title,subtitle,content,rulerefs) VALUES (?,?,?,?,?,?)", (
-                    cset["cset_id"], "index",
+                "INSERT INTO searchable"
+                " ( sr_type, cset_id, title, subtitle, content, rulerefs )"
+                " VALUES ( ?, ?, ?, ?, ?, ? )", (
+                    sr_type, cset["cset_id"],
                     index_entry.get("title"), index_entry.get("subtitle"), index_entry.get("content"), rulerefs
             ) )
-            _fts_index_entries[ curs.lastrowid ] = index_entry
+            _fts_index[sr_type][ curs.lastrowid ] = index_entry
             index_entry["_fts_rowid"] = curs.lastrowid
             nrows += 1
-        conn.commit()
-        logger.info( "  - Loaded %s.", plural(nrows,"index entry","index entries"),  )
-    assert len(_fts_index_entries) == _get_row_count( conn, "searchable" )
+        logger.info( "  - Added %s.", plural(nrows,"index entry","index entries"),  )
+    assert len(_fts_index[sr_type]) == _get_row_count( conn, "searchable" )
 
-    # load the search config
-    load_search_config( startup_msgs, logger )
+def _init_qa( curs, qa, logger ):
+    """Add the Q+A to the search index."""
+    logger.info( "- Adding the Q+A." )
+    nrows = 0
+    sr_type = "q+a"
+    for qa_entries in qa.values():
+        for qa_entry in qa_entries:
+            buf = []
+            for content in qa_entry.get( "content", [] ):
+                buf2 = []
+                buf2.append( content.get( "question", _NO_QA_QUESTION ) )
+                # NOTE: We don't really want to index answers, since they are mostly not very useful (e.g. "Yes."),
+                # but we do so in order to get highlighting for those cases where they contain a search term.
+                for answer in content.get( "answers", [] ):
+                    buf2.append( answer[0] )
+                buf.append( _QA_FIELD_SEPARATOR.join( buf2 ) )
+            # NOTE: We munge all the questions and answers into one big searchable string, but we need to
+            # be able to separate that string back out into its component parts, so that we can return
+            # the Q+A entry to the front-end as a search result, but with highlighted search terms.
+            curs.execute(
+                "INSERT INTO searchable ( sr_type, title, content ) VALUES ( ?, ?, ? )", (
+                    sr_type, qa_entry.get("caption"), _QA_CONTENT_SEPERATOR.join(buf)
+            ) )
+            _fts_index[sr_type][ curs.lastrowid ] = qa_entry
+            qa_entry["_fts_rowid"] = curs.lastrowid
+            nrows += 1
+    logger.info( "  - Added %s.", plural(nrows,"Q+A entry","Q+A entries"),  )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -415,7 +517,7 @@ def load_search_config( startup_msgs, logger ):
     def load_search_replacements( fname, ftype ):
         if not os.path.isfile( fname ):
             return
-        logger.info( "Loading search replacements: %s", fname )
+        logger.info( "Loading %s search replacements: %s", ftype, fname )
         try:
             with open( fname, "r", encoding="utf-8" ) as fp:
                 data = json.load( fp )
@@ -437,7 +539,7 @@ def load_search_config( startup_msgs, logger ):
     def load_search_aliases( fname, ftype ):
         if not os.path.isfile( fname ):
             return
-        logger.info( "Loading search aliases: %s", fname )
+        logger.info( "Loading %s search aliases: %s", ftype, fname )
         try:
             with open( fname, "r", encoding="utf-8" ) as fp:
                 data = json.load( fp )
@@ -460,7 +562,7 @@ def load_search_config( startup_msgs, logger ):
     def load_search_synonyms( fname, ftype ):
         if not os.path.isfile( fname ):
             return
-        logger.info( "Loading search synonyms: %s", fname )
+        logger.info( "Loading %s search synonyms: %s", ftype, fname )
         try:
             with open( fname, "r", encoding="utf-8" ) as fp:
                 data = json.load( fp )

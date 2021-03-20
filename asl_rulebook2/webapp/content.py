@@ -2,15 +2,14 @@
 
 import os
 import io
-import json
 import glob
 
 from flask import jsonify, send_file, url_for, abort
 
 from asl_rulebook2.webapp import app
-from asl_rulebook2.webapp.utils import slugify
+from asl_rulebook2.webapp.utils import load_data_file, slugify
 
-content_sets = None
+_content_sets = None
 _chapter_resources = None
 
 # ---------------------------------------------------------------------
@@ -28,17 +27,17 @@ def load_content_sets( startup_msgs, logger ):
     #   in the MMP eASLRB index, and have their own index.
 
     # initialize
-    global content_sets, _chapter_resources
-    content_sets = {}
+    global _content_sets, _chapter_resources
+    _content_sets = {}
     _chapter_resources = { "background": {}, "icon": {} }
 
     # get the data directory
     data_dir = app.config.get( "DATA_DIR" )
     if not data_dir:
-        return
+        return None
     if not os.path.isdir( data_dir ):
         startup_msgs.error( "Invalid data directory.", data_dir )
-        return
+        return None
 
     def find_resource( fname, dnames ):
         # find a chapter resource file
@@ -75,17 +74,8 @@ def load_content_sets( startup_msgs, logger ):
         if not os.path.isfile( fname ):
             return False
         # load the specified file
-        try:
-            if binary:
-                with open( fname, mode="rb" ) as fp:
-                    data = fp.read()
-                logger.debug( "- Loaded \"%s\" file: #bytes=%d", key, len(data) )
-            else:
-                with open( fname, "r", encoding="utf-8" ) as fp:
-                    data = json.load( fp )
-                logger.debug( "- Loaded \"%s\" file.", key )
-        except Exception as ex: #pylint: disable=broad-except
-            on_error( "Couldn't load \"{}\".".format( os.path.basename(fname) ), str(ex) )
+        data = load_data_file( fname, key, binary, logger, on_error )
+        if data is None:
             return False
         # save the file data
         save_loc[ key ] = data
@@ -106,7 +96,7 @@ def load_content_sets( startup_msgs, logger ):
     # load each content set
     logger.info( "Loading content sets: %s", data_dir )
     fspec = os.path.join( data_dir, "*.index" )
-    for fname in glob.glob( fspec ):
+    for fname in sorted( glob.glob( fspec ) ):
         fname2 = os.path.basename( fname )
         logger.info( "- %s", fname2 )
         # load the index file
@@ -137,13 +127,15 @@ def load_content_sets( startup_msgs, logger ):
             content_doc[ "cdoc_id" ] = cdoc_id2
             content_set[ "content_docs" ][ cdoc_id2 ] = content_doc
         # save the new content set
-        content_sets[ content_set["cset_id"] ] = content_set
+        _content_sets[ content_set["cset_id"] ] = content_set
+
+    return _content_sets
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def _dump_content_sets():
     """Dump the available content sets."""
-    for cset_id, cset in content_sets.items():
+    for cset_id, cset in _content_sets.items():
         print( "=== {} ({}) ===".format( cset["title"], cset_id ) )
         for cdoc_id, cdoc in cset["content_docs"].items():
             print( "Content doc: {} ({})".format( cdoc["title"], cdoc_id ) )
@@ -157,7 +149,7 @@ def _dump_content_sets():
 def get_content_docs():
     """Return the available content docs."""
     resp = {}
-    for cset in content_sets.values():
+    for cset in _content_sets.values():
         for cdoc in cset["content_docs"].values():
             cdoc2 = {
                 "cdoc_id": cdoc["cdoc_id"],
@@ -177,7 +169,7 @@ def get_content_docs():
 @app.route( "/content/<cdoc_id>" )
 def get_content( cdoc_id ):
     """Return the content for the specified document."""
-    for cset in content_sets.values():
+    for cset in _content_sets.values():
         for cdoc in cset["content_docs"].values():
             if cdoc["cdoc_id"] == cdoc_id and "content" in cdoc:
                 buf = io.BytesIO( cdoc["content"] )

@@ -4,7 +4,7 @@
 #search-results .index-sr .title { padding: 3px 6px ; font-weight: bold ; border-radius: 3px ; }
 #search-results .index-sr .title img.icon { height: 15px ; float: left ; margin-top: 2px ; }
 #search-results .index-sr .subtitle { padding: 2px 5px ; font-weight: normal ; font-size: 80% ; font-style: italic ; }
-#search-results .index-sr .body { padding: 2px 5px 0 5px ; font-size: 90% ; }
+#search-results .index-sr .body { padding: 2px 5px 0 5px ; }
 #search-results .index-sr .content { color: #444 ; }
 #search-results .index-sr .see-also { color: #444 ; }
 #search-results .index-sr img.toggle-rulerefs { float: right ; margin: 0 0 0.25em 0.25em ; height: 1.25em ; cursor: pointer ; }

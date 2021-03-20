@@ -1,0 +1,53 @@
+{
+
+"Test Chapter": [
+
+{ "caption": "F1",
+  "ruleids": [ "F1", "E1" ],
+  "content": [
+    { "question": "This is a full question about <u>something</u> [EXC: those other things].",
+      "image": "thought-bubble.png",
+      "answers": [
+        [ "On the ONE HAND, it could be <u>this</u>.", "ps" ],
+        [ "But ALTERNATIVELY, it could be <u>that</u>.", "ps" ]
+      ],
+      "see_other": "Your guru."
+    },
+    { "question": "As a follow-up, what is the meaning of life?",
+      "answers": [
+        [ "It is what you make of it [EXC: See above].", "_unknown_" ]
+      ]
+    }
+  ]
+},
+
+{ "caption": "I1",
+  "ruleids": [ "I1", "E1" ],
+  "content": [
+    { "answers": [
+        [ "This Q+A has no question, just answers.", "gs" ],
+        [ "And another one", "ps" ]
+      ]
+    },
+    { "answers": [
+        [ "And yet another one", "gs" ]
+      ]
+    }
+  ]
+},
+
+{ "caption": "Missing content",
+  "ruleids": [ "M1", "E1" ]
+},
+
+{ "caption": "N1",
+  "ruleids": [ "N1", "E1" ],
+  "content": [
+    { "question": "An unanswerable question."
+    }
+  ]
+}
+
+]
+
+}

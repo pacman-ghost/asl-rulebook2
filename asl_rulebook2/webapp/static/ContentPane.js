@@ -18,7 +18,7 @@ gMainApp.component( "content-pane", {
         const showContentDoc = (cdocId) => {
             this.$refs.tabbedPages.activateTab( cdocId ) ; // nb: tabId == cdocId
         }
-        gEventBus.on( "show-target", (cdocId, target) => { //eslint-disable-line no-unused-vars
+        gEventBus.on( "show-target", (cdocId, ruleid) => { //eslint-disable-line no-unused-vars
             showContentDoc( cdocId ) ;
         } ) ;
         gEventBus.on( "show-page", (cdocId, pageNo) => { //eslint-disable-line no-unused-vars
@@ -34,16 +34,16 @@ gMainApp.component( "content-doc", {
 
     props: [ "cdoc" ],
     data() { return {
-        target: null, pageNo: null,
+        ruleid: null, pageNo: null,
         noContent: gUrlParams.get( "no-content" ),
     } ; },
 
     template: `
-<div class="content-doc" :data-target=target >
+<div class="content-doc" :data-ruleid=ruleid >
     <div v-if=noContent class="disabled">
         <div style='margin-bottom:0.25em;'>&mdash;&mdash;&mdash; Content disabled &mdash;&mdash;&mdash; </div>
         {{cdoc.title}}
-        <div v-if=target> target = {{target}} </div>
+        <div v-if=ruleid> ruleid = {{ruleid}} </div>
         <div v-else-if=pageNo> page = {{pageNo}} </div>
     </div>
     <iframe v-else-if=cdoc.url :src=makeDocUrl />
@@ -52,18 +52,18 @@ gMainApp.component( "content-doc", {
 
     created() {
 
-        gEventBus.on( "show-target", (cdocId, target) => {
-            if ( cdocId != this.cdoc.cdoc_id || !target )
+        gEventBus.on( "show-target", (cdocId, ruleid) => {
+            if ( cdocId != this.cdoc.cdoc_id || !ruleid )
                 return ;
-            let targets = findTargets( target, this.cdoc.parent_cset_id ) ;
+            let targets = findTargets( ruleid, this.cdoc.parent_cset_id ) ;
             if ( ! targets || targets.length == 0 ) {
-                showErrorMsg( "Unknown target: " + target ) ;
+                showErrorMsg( "Unknown ruleid: " + ruleid ) ;
                 return ;
             }
-            // scroll to the specified target
-            // FUDGE! We give the tab time to show itself before we scroll to the target.
+            // scroll to the specified ruleid
+            // FUDGE! We give the tab time to show itself before we scroll to the ruleid.
             setTimeout( () => {
-                this.target = target ;
+                this.ruleid = ruleid ;
                 this.pageNo = null ;
             }, 50 ) ;
         } ) ;
@@ -72,10 +72,10 @@ gMainApp.component( "content-doc", {
             if ( cdocId != this.cdoc.cdoc_id )
                 return ;
             // scroll to the specified page
-            // FUDGE! We give the tab time to show itself before we scroll to the target.
+            // FUDGE! We give the tab time to show itself before we scroll to the page.
             setTimeout( () => {
                 this.pageNo = pageNo ;
-                this.target = null ;
+                this.ruleid = null ;
             }, 50 ) ;
         } ) ;
 
@@ -85,8 +85,8 @@ gMainApp.component( "content-doc", {
 
         makeDocUrl() {
             let url = this.cdoc.url ;
-            if ( this.target )
-                url += "#nameddest=" + this.target ;
+            if ( this.ruleid )
+                url += "#nameddest=" + this.ruleid ;
             else if ( this.pageNo )
                 url += "#page=" + this.pageNo ;
             return url ;

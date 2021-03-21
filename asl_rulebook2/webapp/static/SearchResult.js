@@ -86,7 +86,7 @@ gMainApp.component( "index-sr", {
             // open the search result's primary target
             let target = getPrimaryTarget( this.sr ) ;
             if ( target )
-                gEventBus.emit( "show-target", target.cdoc_id, target.target ) ;
+                gEventBus.emit( "show-target", target.cdoc_id, target.ruleid ) ;
         },
 
         onToggleRulerefs() {
@@ -127,9 +127,9 @@ gMainApp.component( "index-sr", {
             let target = getPrimaryTarget( this.sr ) ;
             if ( ! target )
                 return null ;
-            target = target.target ;
-            if ( isRuleid( target ) )
-                return target[0] ;
+            let ruleid = target.ruleid ;
+            if ( isRuleid( ruleid ) )
+                return ruleid[0] ; // nb: we assume the 1st letter of the ruleid is the chapter ID
             return null ;
         },
 
@@ -143,11 +143,11 @@ gMainApp.component( "ruleid", {
 
     props: [ "csetId", "ruleId" ],
     data() { return {
-        cdocId: null, target: null,
+        cdocId: null, ruleid: null,
     } ; },
 
     // NOTE: This bit of HTML is sensitive to spaces :-/
-    template: `<span class="ruleid" :class="{unknown:!target}">[<a v-if=target @click=onClick>{{ruleId}}</a><span v-else>{{ruleId}}</span>]</span>`,
+    template: `<span class="ruleid" :class="{unknown:!ruleid}">[<a v-if=ruleid @click=onClick>{{ruleId}}</a><span v-else>{{ruleId}}</span>]</span>`,
 
     created() {
         // check if the rule is one we know about
@@ -157,14 +157,14 @@ gMainApp.component( "ruleid", {
             // ever adds Chapter Z stuff to the main index, but we'll cross that bridge if and when we come to it.
             // TBH, that stuff would probably be better off as a separate content set, anyway.
             this.cdocId = targets[0].cdoc_id ;
-            this.target = targets[0].target ;
+            this.ruleid = targets[0].ruleid ;
         }
     },
 
     methods: {
         onClick() {
             // show the target
-            gEventBus.emit( "show-target", this.cdocId, this.target ) ;
+            gEventBus.emit( "show-target", this.cdocId, this.ruleid ) ;
         },
     },
 

@@ -115,14 +115,14 @@ gMainApp.component( "main-app", {
             Object.values( contentDocs ).forEach( (cdoc) => {
                 if ( ! cdoc.targets )
                     return ;
-                for ( let target in cdoc.targets ) {
-                    let key = target.toLowerCase() ;
-                    if ( ! gTargetIndex[ key ] )
-                        gTargetIndex[ key ] = [] ;
-                    gTargetIndex[ key ].push( {
+                for ( let ruleid in cdoc.targets ) {
+                    let ruleidLC = ruleid.toLowerCase() ;
+                    if ( ! gTargetIndex[ ruleidLC ] )
+                        gTargetIndex[ ruleidLC ] = [] ;
+                    gTargetIndex[ ruleidLC ].push( {
                         cset_id: cdoc.parent_cset_id,
                         cdoc_id: cdoc.cdoc_id,
-                        target: target
+                        ruleid: ruleid
                     } ) ;
                 }
             } ) ;

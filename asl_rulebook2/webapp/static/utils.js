@@ -16,15 +16,21 @@ export function getPrimaryTarget( indexSearchResult )
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-export function findTargets( target, csetId )
+export function findTargets( ruleid, csetId )
 {
-    // check if the target is known to us
-    let pos = target.indexOf( "-" ) ;
+    // NOTE: A "ruleid" is a rule ID (e.g. "A1.23") within a specific document. Hopefully, these will
+    // be unique across the entire corpus, but we can't guarantee that (Chapter Z, anyone? :-/), so we
+    // also have the concept of a "target", which is a ruleid plus the content set it's in.
+    // One can only hope that ruleid's are unique in this context, even if there are multiple documents
+    // in each content set...
+
+    // check if the ruleid is known to us
+    let pos = ruleid.indexOf( "-" ) ;
     if ( pos >= 0 ) {
         // NOTE: For ruleid's of the form "A12.3-.4", we want to target "A12.3".
-        target = target.substring( 0, pos ) ;
+        ruleid = ruleid.substring( 0, pos ) ;
     }
-    let targets = gTargetIndex[ target.toLowerCase() ] ;
+    let targets = gTargetIndex[ ruleid.toLowerCase() ] ;
     if ( targets && csetId )
         targets = targets.filter( (m) => m.cset_id == csetId ) ;
     return targets ;

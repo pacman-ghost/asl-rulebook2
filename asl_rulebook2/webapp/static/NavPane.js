@@ -25,21 +25,21 @@ gMainApp.component( "nav-pane", {
     created() {
 
         // show any Q+A and annotations when a target is opened
-        gEventBus.on( "show-target", (cdocId, target) => {
+        gEventBus.on( "show-target", (cdocId, ruleid) => {
             if ( gAppConfig.DISABLE_AUTO_SHOW_RULE_INFO )
                 return ;
             // get the rule info for the target being opened
-            // NOTE: Targets are associated with a content doc, but the Q+A is global, which is not quite
-            // the right thing to do - what if there is a ruleid that is the same multiple content docs,
+            // NOTE: Targets are associated with a content set, but the Q+A is global, which is not quite
+            // the right thing to do - what if there is a ruleid that exists in multiple content set,
             // but is referenced in the Q+A? Hopefully, this will never happen... :-/
-            let url = gGetRuleInfoUrl.replace( "RULEID", target ) ; //eslint-disable-line no-undef
+            let url = gGetRuleInfoUrl.replace( "RULEID", ruleid ) ; //eslint-disable-line no-undef
             $.getJSON( url, (resp) => {
                 if ( resp.length > 0 ) {
                     // install the rule info entries
                     this.ruleInfo = resp ;
                 }
             } ).fail( (xhr, status, errorMsg) => {
-                showWarningMsg( "Couldn't get the Q+A for " + target + ". <div class='pre'>" + errorMsg + "</div>" ) ;
+                showWarningMsg( "Couldn't get the Q+A for " + ruleid + ". <div class='pre'>" + errorMsg + "</div>" ) ;
             } ) ;
         } ) ;
 

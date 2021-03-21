@@ -73,12 +73,12 @@ gMainApp.component( "search-results", {
                 Vue.nextTick( () => { gEventBus.emit( "search-done" ) ; } ) ;
             }
 
-            // check if the query string is just a target
+            // check if the query string is just a ruleid
             let targets = findTargets( queryString, null ) ;
             if ( targets && targets.length > 0 ) {
                 // yup - just show it directly (first one, if multiple)
                 this.searchResults = null ;
-                gEventBus.emit( "show-target", targets[0].cdoc_id, targets[0].target ) ;
+                gEventBus.emit( "show-target", targets[0].cdoc_id, targets[0].ruleid ) ;
                 onSearchDone() ;
                 return ;
             }
@@ -106,7 +106,7 @@ gMainApp.component( "search-results", {
                 if ( resp.length > 0 && resp[0].sr_type == "index" ) {
                     let target = getPrimaryTarget( resp[0] ) ;
                     if ( target )
-                        gEventBus.emit( "show-target", target.cdoc_id, target.target ) ;
+                        gEventBus.emit( "show-target", target.cdoc_id, target.ruleid ) ;
                 }
                 // flag that the search was completed
                 onSearchDone() ;

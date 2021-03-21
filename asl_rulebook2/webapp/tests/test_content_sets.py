@@ -51,7 +51,7 @@ def test_targets( webapp, webdriver ):
         ruleid_elems[ ruleid ].click()
         wait_for( 2, lambda: get_curr_target() == (expected, ruleid) )
 
-    # test clicking on ruleid targets
+    # test clicking on ruleid's
     do_test( "4b", "content-set-1!linked" )
     do_test( "1a", "content-set-1" )
     do_test( "cs2d", "content-set-2" )
@@ -91,7 +91,7 @@ def test_chapters( webapp, webdriver ):
         },
     ]
 
-    # check that the chapter section with a missing ruleid is not clickable
+    # check that the chapter section with a missing target is not clickable
     elems = find_children( "#nav .tabbed-page[data-tabid='chapters'] .accordian-pane" )
     assert len(elems) == 6
     elems = find_children( ".entry", elems[1] )
@@ -120,7 +120,7 @@ def test_chapters( webapp, webdriver ):
     do_test( 2, 1, ( "content-set-1!linked", "2b" ) )
 
     # try to show an unknown target
-    do_test( 3, 3, "Unknown target:" )
+    do_test( 3, 3, "Unknown ruleid:" )
 
 # ---------------------------------------------------------------------
 

@@ -81,10 +81,10 @@ def get_curr_target():
     if not elem:
         return ( None, None )
     tab_id = elem.get_attribute( "data-tabid" )
-    # check the current target
+    # check the current ruleid
     elem = find_child( "#content .tabbed-page[data-tabid='{}'] .content-doc".format( tab_id ) )
-    target = elem.get_attribute( "data-target" )
-    return ( tab_id, target )
+    ruleid = elem.get_attribute( "data-ruleid" )
+    return ( tab_id, ruleid )
 
 # ---------------------------------------------------------------------
 

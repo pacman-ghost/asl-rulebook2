@@ -18,24 +18,31 @@
 .ruleinfo-slide-leave-active  { transition: opacity .1s linear ; }
 .ruleinfo-slide-leave-to { opacity: 0 ; }
 
-/* NOTE: Q+A entries can appear in the rule info popup *and* search results, so the following rules need to be global. */
+/* NOTE: Rule info entries can appear in the rule info popup *and* search results, so the following rules need to be global. */
+
+.rule-info p { margin-top: 5px ; }
+.rule-info br { margin-top: 3px ; }
+.rule-info ul, .qa ol { margin-left: 20px ; }
+.rule-info .quote { font-style: italic ; color: #406040 ; }
+.rule-info .exc { font-style: italic ; color: #666 ; }
+
 .qa { margin: 2px ; background: white ; padding: 5px ; }
-.qa img.icon { float: left ; margin: 0 6px 0 0 ; height: 22px ; }
+.qa img.icon { float: left ; margin: 0 6px 0 0 ; height: 18px ; }
 .qa .content { clear: left ; margin-top: 5px ; }
 .qa .caption { margin-bottom: 2px ; background: #60b0ff ; border-radius: 3px ; padding: 2px 5px ; font-weight: bold ; color: #002850 ; }
 .qa .question { margin-bottom: 5px ; color: #002850 ; }
-.qa .question .quote { font-style: italic ; color: #404060 ; }
 .qa .question img { float: right ; margin: 0 0 5px 5px ; height: 100px ; }
 .qa .answer { clear: left ; padding-bottom: 2px ; font-style: italic ; color: #0c6905 ; }
-.qa .answer em, #qa .answer i { font-style: normal ; }
-.qa .answer .quote { font-style: italic ; color: #406040 ; }
+.qa .answer em, .qa .answer i { font-style: normal ; }
 .qa .answer .note { font-size: 80% ; font-style: italic ; color: #666 ; }
 .qa .info { margin-bottom: 8px ; color: #2050a0 ; }
-.qa .info .quote { font-style: italic ; color: #406040 ; }
 .qa .info .note { font-size: 80% ; font-style: italic ; color: #666 ; }
 .qa .info .note a { color: #666 ; }
 .qa .see-other { font-size: 80% ; font-style: italic ; color: #0c6905 ; }
-.qa p { margin-top: 5px ; }
-.qa br { margin-top: 3px ; }
-.qa ul, .qa ol { margin-left: 20px ; }
-.qa .exc { font-style: italic ; color: #666 ; }
+
+.anno { margin: 2px ; background: white ; padding: 5px ; color: #002850 ; }
+.anno img.icon { float: left ; margin: 0 6px 0 0 ; height: 18px ; }
+.anno .caption { margin-bottom: 2px ; border-radius: 3px ; padding: 2px 5px ; font-weight: bold ; }
+.anno .caption.errata { background: #ffc020 ; }
+.anno .caption.user-anno { background: #20ff20 ; }
+.anno .content { clear: left ; margin-top: 5px ; }

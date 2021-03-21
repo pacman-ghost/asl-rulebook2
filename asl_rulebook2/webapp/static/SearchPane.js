@@ -52,8 +52,10 @@ gMainApp.component( "search-results", {
 <div v-else-if="searchResults != null && searchResults.length == 0" class="no-results"> Nothing was found. </div>
 <div v-else v-for="sr in searchResults" :key=sr >
     <index-sr v-if="sr.sr_type == 'index'" :sr=sr />
-    <qa-entry v-else-if="sr.sr_type == 'q+a'" :qaEntry=sr class="sr" />
-    <div v-else> ??? </div>
+    <qa-entry v-else-if="sr.sr_type == 'q+a'" :qaEntry=sr class="sr rule-info" />
+    <annotation v-else-if="sr.sr_type == 'errata'" :anno=sr class="sr rule-info" />
+    <annotation v-else-if="sr.sr_type == 'user-anno'" :anno=sr class="sr rule-info" />
+    <div v-else> ???:{{sr.sr_type}} </div>
 </div>
 </div>`,
 
@@ -132,6 +134,8 @@ gMainApp.component( "search-results", {
                         } ) ;
                     }
                 } ) ;
+            } else if( sr.sr_type == "errata" || sr.sr_type == "user-anno" ) {
+                sr.content = fixupSearchHilites( sr.content ) ;
             } else {
                 console.log( "INTERNAL ERROR: Unknown search result type:", sr.sr_type ) ;
             }

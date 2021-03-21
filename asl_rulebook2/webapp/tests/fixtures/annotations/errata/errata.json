@@ -1,0 +1,11 @@
+[
+
+{ "ruleid": "E1",
+  "content": "This is a test erratum.",
+  "source": "Test Fixture"
+},
+
+{ "ruleid": "E0"
+}
+
+]

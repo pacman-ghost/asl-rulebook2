@@ -4,7 +4,7 @@
 
 { "caption": "Bad question",
   "content": [
-    { "question": "foo <a href='foo'>link</a> foo"
+    { "question": "<i>foo</i> <a href='foo'>link</a> <i>foo</i>"
     }
   ]
 },
@@ -13,7 +13,7 @@
   "content": [
     { "question": "The question.",
       "answers": [
-          [ "bar <a href='bar'>link</a> bar", "test" ]
+          [ "<u>..bar..</u> <a href='bar'>link</a> <u> bar </u>", "test" ]
       ]
     }
   ]

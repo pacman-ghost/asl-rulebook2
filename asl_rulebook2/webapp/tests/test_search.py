@@ -190,7 +190,7 @@ def test_bad_sr_highlights( webapp, webdriver ):
     # bring up a Q+A entry with a problem in one of its answers
     results = do_search( "bar" )
     assert len(results) == 1
-    assert results[0]["content"][0]["answers"][0][0] == "((bar)) link ((bar))"
+    assert results[0]["content"][0]["answers"][0][0] == "..((bar)).. link  ((bar))"
 
 # ---------------------------------------------------------------------
 
@@ -344,12 +344,17 @@ def _unload_search_results():
         from asl_rulebook2.webapp.tests.test_qa import unload_qa
         return unload_qa( sr )
 
+    def unload_anno_sr( sr ): #pylint: disable=possibly-unused-variable
+        """Unload an "anno" search result."""
+        from asl_rulebook2.webapp.tests.test_annotations import unload_anno
+        return unload_anno( sr )
+
     # unload the search results
     results = []
     for sr in find_children( "#search-results .sr"):
         classes = get_classes( sr )
         classes.remove( "sr" )
-        classes = [ c for c in classes if c in ["index-sr","qa"] ]
+        classes = [ c for c in classes if c in ["index-sr","qa","anno"] ]
         assert len(classes) == 1
         sr_type = classes[0]
         if sr_type.endswith( "-sr" ):

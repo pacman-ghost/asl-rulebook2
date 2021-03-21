@@ -1,8 +1,9 @@
-""" Manage the Q+A. """
+""" Manage the Q+A and annotations. """
 
 import os
 import glob
 import re
+import copy
 import logging
 from collections import defaultdict
 
@@ -14,6 +15,8 @@ from asl_rulebook2.webapp.utils import load_data_file
 
 _qa_index = None
 _qa_images_dir = None
+_errata = None
+_user_anno = None
 
 # ---------------------------------------------------------------------
 
@@ -62,14 +65,6 @@ def init_qa( startup_msgs, logger ):
                 else:
                     _qa_index[ ruleid ] = [ qa_entry ]
 
-    fixups = None
-    def apply_fixups( val ):
-        """Fix-up Q+A content."""
-        for search_for, replace_with in fixups.get( "replace", {} ).items():
-            val = val.replace( search_for, replace_with )
-        val = re.sub( r"\[EXC: .*?\]", r"<span class='exc'>\g<0></span>", val )
-        return val
-
     # fixup the Q+A content
     fname = os.path.join( base_dir, "fixups.json" )
     if os.path.isfile( fname ):
@@ -79,9 +74,9 @@ def init_qa( startup_msgs, logger ):
             for qa_entry in qa_entries:
                 for content in qa_entry.get( "content", [] ):
                     if "question" in content:
-                        content["question"] = apply_fixups( content["question"] )
+                        content["question"] = _apply_fixups( content["question"], fixups )
                     for answer in content.get( "answers", [] ):
-                        answer[0] = apply_fixups( answer[0] )
+                        answer[0] = _apply_fixups( answer[0], fixups )
 
     # load the Q+A sources
     sources = {}
@@ -117,12 +112,113 @@ def init_qa( startup_msgs, logger ):
 
 # ---------------------------------------------------------------------
 
-@app.route( "/qa/<ruleid>" )
-def get_qa( ruleid ):
-    """Get the Q+A for the specified ruleid."""
-    ruleid = ruleid.upper()
-    qa_entries = _qa_index.get( ruleid, [] )
-    return jsonify( qa_entries )
+def init_annotations( startup_msgs, logger ):
+    """Initialize the user-defined annoations."""
+
+    # initialize
+    global _user_anno
+    _user_anno = {}
+
+    # get the data directory
+    data_dir = app.config.get( "DATA_DIR" )
+    if not data_dir:
+        return None
+
+    # load the user-defined annotations
+    fname = os.path.join( data_dir, "annotations.json" )
+    if os.path.isfile( fname ):
+        _load_anno( fname, "annotations", _user_anno, logger, startup_msgs )
+
+    return _user_anno
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def init_errata( startup_msgs, logger ):
+    """Initialize the errata."""
+
+    # NOTE: Internally, errata are identical to user-defined annotations - they're just a bit of
+    # free-form content, associated with a ruleid. The only difference is how they're loaded
+    # into the program, and how they're presented to the user.
+
+    # initialize
+    global _errata
+    _errata = {}
+
+    # get the data directory
+    data_dir = app.config.get( "DATA_DIR" )
+    if not data_dir:
+        return None
+    base_dir = os.path.join( data_dir, "errata" )
+
+    # load the errata
+    fspec = os.path.join( base_dir, "*.json" )
+    for fname in sorted( glob.glob( fspec ) ):
+        if os.path.basename( fname ) in ("sources.json", "fixups.json"):
+            continue
+        _load_anno( fname, "errata", _errata, logger, startup_msgs )
+
+    # apply any fixups
+    fname = os.path.join( base_dir, "fixups.json" )
+    if os.path.isfile( fname ):
+        logger.info( "Loading errata fixups: %s", fname )
+        fixups = load_data_file( fname, "fixups", False, logger, startup_msgs.warning )
+        for ruleid in _errata:
+            for anno in _errata[ruleid]:
+                anno["content"] = _apply_fixups( anno["content"], fixups )
+
+    # load the errata sources
+    sources = {}
+    fname = os.path.join( base_dir, "sources.json" )
+    if os.path.isfile( fname ):
+        logger.info( "Loading errata sources: %s", fname )
+        sources = load_data_file( fname, "sources", False, logger, startup_msgs.warning )
+        if sources:
+            logger.info( "- Loaded %s.", plural(len(sources),"source","sources") )
+
+    # fixup all the errata entries with their real source
+    for ruleid in _errata:
+        for anno in _errata[ruleid]:
+            if "source" in anno:
+                anno["source"] = sources.get( anno["source"], anno["source"] )
+
+    return _errata
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def _load_anno( fname, atype, save_loc, logger, startup_msgs ):
+    """Load annotations from a data file."""
+    logger.info( "Loading %s: %s", atype, fname )
+    anno_entries = load_data_file( fname, atype, False, logger, startup_msgs.warning )
+    for anno in anno_entries:
+        if anno["ruleid"] in save_loc:
+            save_loc[ anno["ruleid"] ].append( anno )
+        else:
+            save_loc[ anno["ruleid"] ] = [ anno ]
+
+# ---------------------------------------------------------------------
+
+def _apply_fixups( val, fixups ):
+    """Apply used-defined fixups to a value."""
+    for search_for, replace_with in fixups.get( "replace", {} ).items():
+        val = val.replace( search_for, replace_with )
+    val = re.sub( r"\[EXC: .*?\]", r"<span class='exc'>\g<0></span>", val )
+    return val
+
+# ---------------------------------------------------------------------
+
+@app.route( "/rule-info/<ruleid>" )
+def get_rule_info( ruleid ):
+    """Get the Q+A and annotations for the specified ruleid."""
+    results = []
+    def get_entries( index, ri_type ):
+        for entry in index.get( ruleid.upper(), [] ):
+            entry = copy.deepcopy( entry )
+            entry[ "ri_type" ] = ri_type
+            results.append( entry )
+    get_entries( _user_anno, "user-anno" )
+    get_entries( _errata, "errata" )
+    get_entries( _qa_index, "qa" )
+    return jsonify( results )
 
 # ---------------------------------------------------------------------
 

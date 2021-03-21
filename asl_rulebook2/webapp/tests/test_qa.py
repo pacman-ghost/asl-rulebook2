@@ -23,7 +23,7 @@ def test_full_qa_entry( webapp, webdriver ):
         "caption": "F1",
         "content": [ {
             "question": "This is a full question about something [EXC: those other things].",
-            "icon": "question.gif",
+            "icon": "question.png",
             "image": "thought-bubble.png",
             "answers": [
                 [ "On the one hand, it could be this.", "Perry Sez" ],
@@ -32,7 +32,7 @@ def test_full_qa_entry( webapp, webdriver ):
             "see_other": "See other errata: Your guru."
         }, {
             "question": "As a follow-up, what is the meaning of life?",
-            "icon": "question.gif",
+            "icon": "question.png",
             "answers": [
                 [ "It is what you make of it [EXC: See above].", "_unknown_" ]
             ]
@@ -64,14 +64,14 @@ def test_info_qa_entry( webapp, webdriver ):
     expected = {
         "caption": "I1",
         "content": [ {
-            "icon": "info.gif",
+            "icon": "info.png",
             "source": "GameSquad",
             "info": [
                 "This Q+A has no question, just answers.",
                 "And another one"
             ],
         }, {
-            "icon": "info.gif",
+            "icon": "info.png",
             "source": "GameSquad",
             "info": [ "And yet another one" ],
         } ]
@@ -118,7 +118,7 @@ def test_missing_answer( webapp, webdriver ):
         "caption": "N1",
         "content": [ {
             "question": "An ((unanswerable)) question.",
-            "icon": "question.gif",
+            "icon": "question.png",
         } ]
     }
     assert len(results) == 1
@@ -175,8 +175,6 @@ def unload_qa( qa_elem ):
         qa_entry["content"] = qa_content
 
     return qa_entry
-
-# ---------------------------------------------------------------------
 
 def _unload_rule_info_qa():
     """Unload a Q+A entry from the rule info popup."""

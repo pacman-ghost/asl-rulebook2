@@ -44,8 +44,8 @@ _FIXUP_TEXT_REGEXES = [
 # NOTE: The content has cases of naked <'s e.g. "move < 2 MP", so we need to be careful not to get tripped up
 # by these.
 _HILITES_INSIDE_HTML_TAG_REGEXES = [
-    re.compile( r"\<\S.*?({}).*?\>".format( _BEGIN_HIGHLIGHT ) ),
-    re.compile( r"\<\S.*?({}).*?\>".format( _END_HIGHLIGHT ) ),
+    re.compile( r"\<\S[^>]*?({}).*?\>".format( _BEGIN_HIGHLIGHT ) ),
+    re.compile( r"\<\S[^>]*?({}).*?\>".format( _END_HIGHLIGHT ) ),
 ]
 
 # these are used to separate ruleref's in the FTS table
@@ -121,6 +121,10 @@ def _do_search( args ):
             result = _unload_index_sr( row )
         elif row[1] == "q+a":
             result = _unload_qa_sr( row )
+        elif row[1] == "errata":
+            result = _unload_anno_sr( row, "errata" )
+        elif row[1] == "user-anno":
+            result = _unload_anno_sr( row, "user-anno" )
         else:
             _logger.error( "Unknown searchable row type (rowid=%d): %s", row[0], row[1] )
             continue
@@ -178,7 +182,7 @@ def _unload_index_sr( row ):
     return result
 
 def _unload_qa_sr( row ):
-    """Unload Q+A search result from the database."""
+    """Unload a Q+A search result from the database."""
     qa_entry = _fts_index["q+a"][ row[0] ] # nb: our copy of the Q+A entry (must remain unchanged)
     result = copy.deepcopy( qa_entry ) # nb: the Q+A entry we will return to the caller (will be changed)
     # replace the content in the Q+A entry we will return to the caller with the values
@@ -198,6 +202,13 @@ def _unload_qa_sr( row ):
             result["content"][content_no]["question"] = fields[0]
         for answer_no, _ in enumerate(answers):
             result["content"][content_no]["answers"][answer_no][0] = fields[ 1+answer_no ]
+    return result
+
+def _unload_anno_sr( row, atype ):
+    """Unload an annotation search result from the database."""
+    anno = _fts_index[atype][ row[0] ] # nb: our copy of the annotation (must remain unchanged)
+    result = copy.deepcopy( anno ) # nb: the Q+A entry we will return to the caller (will be changed)
+    _get_result_col( result, "content", row[6] )
     return result
 
 def _fixup_text( val ):
@@ -386,12 +397,12 @@ def _adjust_sort_order( results ):
 
 # ---------------------------------------------------------------------
 
-def init_search( content_sets, qa, startup_msgs, logger ):
+def init_search( content_sets, qa, errata, user_anno, startup_msgs, logger ):
     """Initialize the search engine."""
 
     # initialize
     global _fts_index
-    _fts_index = { "index": {}, "q+a": {} }
+    _fts_index = { "index": {}, "q+a": {}, "errata": {}, "user-anno": {} }
 
     # initialize the database
     global _sqlite_path
@@ -422,10 +433,16 @@ def init_search( content_sets, qa, startup_msgs, logger ):
         _init_content_sets( conn, curs, content_sets, logger )
     if qa:
         _init_qa( curs, qa, logger )
+    if errata:
+        _init_errata( curs, errata, logger )
+    if user_anno:
+        _init_user_anno( curs, user_anno, logger )
     conn.commit()
 
     # load the search config
     load_search_config( startup_msgs, logger )
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def _init_content_sets( conn, curs, content_sets, logger ):
     """Add the content sets to the search index."""
@@ -452,6 +469,8 @@ def _init_content_sets( conn, curs, content_sets, logger ):
             nrows += 1
         logger.info( "  - Added %s.", plural(nrows,"index entry","index entries"),  )
     assert len(_fts_index[sr_type]) == _get_row_count( conn, "searchable" )
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def _init_qa( curs, qa, logger ):
     """Add the Q+A to the search index."""
@@ -480,6 +499,35 @@ def _init_qa( curs, qa, logger ):
             qa_entry["_fts_rowid"] = curs.lastrowid
             nrows += 1
     logger.info( "  - Added %s.", plural(nrows,"Q+A entry","Q+A entries"),  )
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def _init_errata( curs, errata, logger ):
+    """Add the errata to the search index."""
+    logger.info( "- Adding the errata." )
+    nrows = _do_init_anno( curs, errata, "errata" )
+    logger.info( "  - Added %s.", plural(nrows,"errata entry","errata entries"),  )
+
+def _init_user_anno( curs, user_anno, logger ):
+    """Add the user-defined annotations to the search index."""
+    logger.info( "- Adding the annotations." )
+    nrows = _do_init_anno( curs, user_anno, "user-anno" )
+    logger.info( "  - Added %s.", plural(nrows,"annotation","annotations"),  )
+
+def _do_init_anno( curs, anno, atype ):
+    """Add the annotations to the search index."""
+    nrows = 0
+    sr_type = atype
+    for ruleid in anno:
+        for a in anno[ruleid]:
+            curs.execute(
+                "INSERT INTO searchable ( sr_type, content ) VALUES ( ?, ? )", (
+                sr_type, a.get("content")
+            ) )
+            _fts_index[sr_type][ curs.lastrowid ] = a
+            a["_fts_rowid"] = curs.lastrowid
+            nrows += 1
+    return nrows
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

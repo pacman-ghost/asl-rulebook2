@@ -5,12 +5,15 @@ import { makeImagesZoomable } from "./utils.js" ;
 
 gMainApp.component( "rule-info", {
 
-    props: [ "qaEntries" ],
+    props: [ "ruleInfo" ],
 
     template: `
 <div id="rule-info">
-    <div v-for="e in qaEntries" :key=e >
-        <qa-entry :qaEntry=e />
+    <div v-for="ri in ruleInfo" :key=ri >
+        <annotation v-if="ri.ri_type == 'errata'" :anno=ri />
+        <annotation v-else-if="ri.ri_type == 'user-anno'" :anno=ri />
+        <qa-entry v-else-if="ri.ri_type == 'qa'" :qaEntry=ri />
+        <div v-else> ???:{{ri.ri_type}} </div>
     </div>
 </div>`,
 
@@ -22,13 +25,13 @@ gMainApp.component( "qa-entry", {
 
     props: [ "qaEntry" ],
     data() { return {
-        questionImageUrl: gImagesBaseUrl + "question.gif", //eslint-disable-line no-undef
-        infoImageUrl: gImagesBaseUrl + "info.gif", //eslint-disable-line no-undef
-        answerImageUrl: gImagesBaseUrl + "answer.gif", //eslint-disable-line no-undef
+        questionImageUrl: gImagesBaseUrl + "question.png", //eslint-disable-line no-undef
+        infoImageUrl: gImagesBaseUrl + "info.png", //eslint-disable-line no-undef
+        answerImageUrl: gImagesBaseUrl + "answer.png", //eslint-disable-line no-undef
     } ; },
 
     template: `
-<div class="qa">
+<div class="qa rule-info">
     <div class="caption"> {{qaEntry.caption}} </div>
     <div v-for="content in qaEntry.content" :key=content class="content">
         <div v-if="content.question">
@@ -65,6 +68,34 @@ gMainApp.component( "qa-entry", {
         makeQAImageUrl( fname ) {
             // return the URL to an image associated with a Q+A entry
             return gGetQAImageUrl.replace( "FNAME", fname ) ; //eslint-disable-line no-undef
+        },
+    },
+
+} ) ;
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+gMainApp.component( "annotation", {
+
+    props: [ "anno" ],
+    data() { return {
+        annoType: this.anno.sr_type || this.anno.ri_type,
+    } ; },
+
+    template: `
+<div class="anno rule-info">
+    <div :class=annoType class="caption" > {{anno.ruleid}} </div>
+    <div class="content">
+        <img :src=makeIconImageUrl() :title=anno.source class="icon" />
+        <div v-html=anno.content />
+    </div>
+</div>`,
+
+    methods: {
+        makeIconImageUrl() {
+            if ( this.annoType )
+                return gImagesBaseUrl + this.annoType+".png" ; //eslint-disable-line no-undef
+            else
+                return null ;
         },
     },
 

@@ -22,7 +22,7 @@ gMainApp.component( "nav-pane", {
 gMainApp.component( "nav-pane-search", {
 
     data() { return {
-        qaEntries: [],
+        ruleInfo: [],
         seqNo: 0, // nb: for the test suite
         closeRuleInfoImageUrl: gImagesBaseUrl + "cross.png", //eslint-disable-line no-undef
         ruleInfoTransitionName: gUrlParams.get("no-animations") ? "" : "ruleinfo-slide",
@@ -37,11 +37,11 @@ gMainApp.component( "nav-pane-search", {
   It doesn't look so good when the v-scrollbar appears, but we can live with that.
 -->
 <transition :name=ruleInfoTransitionName @after-enter=onAfterEnterRuleInfoTransition >
-    <div v-show="qaEntries.length > 0" >
+    <div v-show="ruleInfo.length > 0" >
         <img :src=closeRuleInfoImageUrl @click=closeRuleInfo ref="closeRuleInfoButton"
           title="Close the rule info" class="close-rule-info"
         />
-        <rule-info :qaEntries=qaEntries ref="rule-info" />
+        <rule-info :ruleInfo=ruleInfo ref="rule-info" />
     </div>
 </transition>
 `,
@@ -57,11 +57,11 @@ gMainApp.component( "nav-pane-search", {
         gEventBus.on( "show-target", (cdocId, target) => {
             if ( gAppConfig.DISABLE_AUTO_SHOW_RULE_INFO )
                 return ;
-            // get the Q+A for the target being opened
+            // get the Q+A and annotations for the target being opened
             // NOTE: Targets are associated with a content doc, but the Q+A is global, which is not quite
             // the right thing to do - what if there is a ruleid that is the same multiple content docs,
             // but is referenced in the Q+A? Hopefully, this will never happen... :-/
-            let url = gGetQAUrl.replace( "RULEID", target ) ; //eslint-disable-line no-undef
+            let url = gGetRuleInfoUrl.replace( "RULEID", target ) ; //eslint-disable-line no-undef
             $.getJSON( url, (resp) => {
                 if ( resp.length > 0 )
                     this.showRuleInfo( resp ) ;
@@ -79,19 +79,19 @@ gMainApp.component( "nav-pane-search", {
 
         onSearch( queryString ) {
             // run the search (handled elsewhere)
-            if ( this.qaEntries.length > 0 )
+            if ( this.ruleInfo.length > 0 )
                 return ; // nb: dont respond to key-presses if the rule info popup is open
             gEventBus.emit( "search", queryString ) ;
         },
 
-        showRuleInfo( qaEntries ) {
-            // install the Q+A entries
-            this.qaEntries = qaEntries ;
+        showRuleInfo( ruleInfo ) {
+            // install the rule info entries
+            this.ruleInfo = ruleInfo ;
             $( this.$refs.closeRuleInfoButton ).hide() ;
         },
         closeRuleInfo() {
             // close the rule info popup
-            this.qaEntries = [] ;
+            this.ruleInfo = [] ;
         },
         onAfterEnterRuleInfoTransition() {
             // FUDGE! We have to wait until the rule info popup is open before we can check

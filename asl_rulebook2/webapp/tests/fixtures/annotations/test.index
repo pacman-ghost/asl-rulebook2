@@ -1,0 +1,18 @@
+[
+
+{ "title": "Test index entry",
+  "subtitle": "This index entry has errata associated with it.",
+  "ruleids": [ "E1" ]
+},
+
+{ "title": "Empty errata",
+  "subtitle": "This one has an empty errata associated with it.",
+  "ruleids": [ "E0" ]
+},
+
+{ "title": "User-defined annotation",
+  "subtitle": "This one has a user-defined annotation associated with it.",
+  "ruleids": [ "U1" ]
+}
+
+]

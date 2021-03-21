@@ -24,19 +24,16 @@ gMainApp.component( "tabbed-pages", {
 </div>`,
 
     created() {
-        // FUDGE! It's nice to have the parent manage the TabbedPage's, and we just show the content
-        // as a slot, but that makes it tricky for us to create the tab strip, since we don't know anything
-        // about the tabs themselves. We work around this by having each TabbedPage emit an event when
-        // they mount, but since we ourself mount only after all our children have mounted, it's tricky
-        // for us to catch these events ($on() was remove in Vue 3 :-/). So, we emit the event on the
-        // global event bus, and check if they're for one of our TabbedPage's when we receive them.
-        gEventBus.on( "tab-loaded", (tabbedPage) => {
-            if ( ! tabbedPage.$el.parentNode.isSameNode( this.$el ) )
+        gEventBus.on( "activate-tab", (sel, tabId) => {
+            // check if this event is for us
+            if ( sel.substring( 0, 1 ) == "#" )
+                sel = sel.substring( 1 ) ;
+            else
+                console.log( "INTERNAL ERROR: Tabs should be activated via a selector ID." ) ;
+            if ( this.$el.getAttribute( "id" ) != sel )
                 return ;
-            // one of our TabbedPage's has just mounted - show it in our tab strip
-            this.tabs.push( {
-                tabId: tabbedPage.tabId, caption: tabbedPage.caption
-            } ) ;
+            // yup - activate the specified tab
+            this.activateTab( tabId ) ;
         } ) ;
     },
 
@@ -76,8 +73,11 @@ gMainApp.component( "tabbed-page", {
     <div class="wrapper"> <slot /> </div>
 </div>`,
 
-    mounted() {
-        gEventBus.emit( "tab-loaded", this ) ;
+    created() {
+        // add ourself to the parent's list of child tabs
+        this.$parent.tabs.push( {
+            tabId: this.tabId, caption: this.caption
+        } ) ;
     },
 
 } ) ;

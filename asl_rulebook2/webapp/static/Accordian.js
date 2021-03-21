@@ -36,14 +36,16 @@ gMainApp.component( "accordian-pane", {
 </div>`,
 
     created() {
-        gEventBus.on( "expand-pane", (pane, entry, isExpanded) => {
+
+        // handle panes being expanded
+        gEventBus.on( "expand-pane", (entry) => {
             // check if we are in the same accordian as the pane being toggled
-            if ( pane != this.$parent )
+            if ( entry.$parent != this.$parent )
                 return ;
             // yup - check if we are the pane being toggled
             if ( entry == this ) {
                 // yup - update our state
-                this.isExpanded = isExpanded ;
+                this.isExpanded = ! this.isExpanded ;
             } else {
                 // nope - always close up (only one pane can be open at a time)
                 this.isExpanded = false ;
@@ -62,7 +64,7 @@ gMainApp.component( "accordian-pane", {
                 this.$emit( "pane-expanded" ) ;
             // NOTE: Every accordian pane will receive this event, but each one
             // will figure out if it applies to them.
-            gEventBus.emit( "expand-pane", this.$parent, this, !this.isExpanded ) ;
+            gEventBus.emit( "expand-pane", this ) ;
         },
     },
 

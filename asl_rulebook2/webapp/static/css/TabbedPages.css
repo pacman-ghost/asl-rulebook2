@@ -1,4 +1,4 @@
-.tabbed-pages { display: flex ; flex-direction: column ; }
+.tabbed-pages { display: flex ; flex-direction: column ; height: 100% ; }
 .tabbed-pages .tabbed-page { height: calc(100% - 35px) ; display: flex ; flex-direction: column ; }
 .tabbed-pages .tabbed-page .wrapper { flex-grow: 1 ; margin: 5px 0 2px 0 ; height: calc(100% - 10px) ; overflow-y: auto ; }
 .tabbed-pages .tab-strip { height: 24px ; display: flex ; font-size: 10pt ; font-style: italic ; }

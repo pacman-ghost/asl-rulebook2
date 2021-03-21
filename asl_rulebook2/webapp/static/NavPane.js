@@ -1,70 +1,43 @@
-import { gMainApp, gAppConfig, gContentDocs, gEventBus, gUrlParams } from "./MainApp.js" ;
+import { gMainApp, gAppConfig, gContentDocs, gEventBus } from "./MainApp.js" ;
 import { showWarningMsg } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
 gMainApp.component( "nav-pane", {
 
-    template: `
-<tabbed-pages>
-    <tabbed-page tabId="search" caption="Search" >
-        <nav-pane-search />
-    </tabbed-page>
-    <tabbed-page tabId="chapters" caption="Chapters" >
-        <nav-pane-chapters />
-    </tabbed-page>
-</tabbed-pages>`,
-
-} ) ;
-
-// --------------------------------------------------------------------
-
-gMainApp.component( "nav-pane-search", {
-
     data() { return {
         ruleInfo: [],
-        seqNo: 0, // nb: for the test suite
-        closeRuleInfoImageUrl: gImagesBaseUrl + "cross.png", //eslint-disable-line no-undef
-        ruleInfoTransitionName: gUrlParams.get("no-animations") ? "" : "ruleinfo-slide",
     } ; },
 
     template: `
-<search-box id="search-box" @search=onSearch />
-<search-results :data-seqno=seqNo id="search-results" />
-<!-- FUDGE! We want the "close" button to stay in the top-right corner of the rule info popup.
-  If we put it inside the <rule-info> element with an absolute position, it scrolls with the content,
-  so we place it outside the <rule-info> element, with an absolute position, and a larger z-index.
-  It doesn't look so good when the v-scrollbar appears, but we can live with that.
--->
-<transition :name=ruleInfoTransitionName @after-enter=onAfterEnterRuleInfoTransition >
-    <div v-show="ruleInfo.length > 0" >
-        <img :src=closeRuleInfoImageUrl @click=closeRuleInfo ref="closeRuleInfoButton"
-          title="Close the rule info" class="close-rule-info"
-        />
-        <rule-info :ruleInfo=ruleInfo ref="rule-info" />
-    </div>
-</transition>
-`,
+<div>
+    <tabbed-pages>
+        <tabbed-page tabId="search" caption="Search" >
+            <nav-pane-search />
+        </tabbed-page>
+        <tabbed-page tabId="chapters" caption="Chapters" >
+            <nav-pane-chapters />
+        </tabbed-page>
+    </tabbed-pages>
+    <rule-info :ruleInfo=ruleInfo @close=closeRuleInfo />
+</div>`,
 
     created() {
 
-        // notify the test suite that the search results are now available
-        gEventBus.on( "search-done", () => {
-            this.seqNo += 1 ;
-        } ) ;
-
-        // show any Q+A when a target is opened
+        // show any Q+A and annotations when a target is opened
         gEventBus.on( "show-target", (cdocId, target) => {
             if ( gAppConfig.DISABLE_AUTO_SHOW_RULE_INFO )
                 return ;
-            // get the Q+A and annotations for the target being opened
+            // get the rule info for the target being opened
             // NOTE: Targets are associated with a content doc, but the Q+A is global, which is not quite
             // the right thing to do - what if there is a ruleid that is the same multiple content docs,
             // but is referenced in the Q+A? Hopefully, this will never happen... :-/
             let url = gGetRuleInfoUrl.replace( "RULEID", target ) ; //eslint-disable-line no-undef
             $.getJSON( url, (resp) => {
-                if ( resp.length > 0 )
-                    this.showRuleInfo( resp ) ;
+                if ( resp.length > 0 ) {
+                    // install the rule info entries
+                    this.ruleInfo = resp ;
+                }
             } ).fail( (xhr, status, errorMsg) => {
                 showWarningMsg( "Couldn't get the Q+A for " + target + ". <div class='pre'>" + errorMsg + "</div>" ) ;
             } ) ;
@@ -76,38 +49,41 @@ gMainApp.component( "nav-pane-search", {
     },
 
     methods: {
-
-        onSearch( queryString ) {
-            // run the search (handled elsewhere)
-            if ( this.ruleInfo.length > 0 )
-                return ; // nb: dont respond to key-presses if the rule info popup is open
-            gEventBus.emit( "search", queryString ) ;
-        },
-
-        showRuleInfo( ruleInfo ) {
-            // install the rule info entries
-            this.ruleInfo = ruleInfo ;
-            $( this.$refs.closeRuleInfoButton ).hide() ;
-        },
         closeRuleInfo() {
             // close the rule info popup
             this.ruleInfo = [] ;
         },
-        onAfterEnterRuleInfoTransition() {
-            // FUDGE! We have to wait until the rule info popup is open before we can check
-            // if it has a v-scrollbar or not, and hence where we should put the close button.
-            this.$nextTick( () => {
-                let ruleInfo = this.$refs[ "rule-info" ].$el ;
-                let closeButton = this.$refs.closeRuleInfoButton ;
-                if ( ruleInfo.clientHeight >= ruleInfo.scrollHeight )
-                    $(closeButton).css( "right", "6px" ) ;
-                else {
-                    // FUDGE! The v-scrollbar is visible, so we move the "close" button left a bit.
-                    // This adjustment won't update if the pane is resized, but we can live with that.
-                    $(closeButton).css( "right", "18px" ) ;
-                }
-                $(closeButton).fadeIn( 200 ) ;
-            } ) ;
+    },
+
+} ) ;
+
+// --------------------------------------------------------------------
+
+gMainApp.component( "nav-pane-search", {
+
+    data() { return {
+        seqNo: 0, // nb: for the test suite
+    } ; },
+
+    template: `
+<search-box id="search-box" @search=onSearch />
+<search-results :data-seqno=seqNo id="search-results" />
+`,
+
+    created() {
+        // notify the test suite that the search results are now available
+        gEventBus.on( "search-done", () => {
+            this.seqNo += 1 ;
+        } ) ;
+    },
+
+    methods: {
+
+        onSearch( queryString ) {
+            // run the search (handled elsewhere)
+            if ( $("#rule-info").css( "display" ) != "none" )
+                return ; // nb: dont respond to key-presses if the rule info popup is open
+            gEventBus.emit( "search", queryString ) ;
         },
 
     },

@@ -1,4 +1,4 @@
-import { gMainApp } from "./MainApp.js" ;
+import { gMainApp, gUrlParams } from "./MainApp.js" ;
 import { makeImagesZoomable } from "./utils.js" ;
 
 // --------------------------------------------------------------------
@@ -6,16 +6,60 @@ import { makeImagesZoomable } from "./utils.js" ;
 gMainApp.component( "rule-info", {
 
     props: [ "ruleInfo" ],
+    data() { return {
+        closeRuleInfoImageUrl: gImagesBaseUrl + "cross.png", //eslint-disable-line no-undef
+        ruleInfoTransitionName: gUrlParams.get("no-animations") ? "" : "ruleinfo-slide",
+    } ; },
 
+    // FUDGE! We want the "close" button to stay in the top-right corner of the rule info popup as the user
+    // scrolls around. If we put it in together with the content itself, with an absolute position, it scrolls
+    // with the content, so we place it outside the content, with an absolute position, and a larger z-index.
+    // It doesn't look so good when the v-scrollbar appears, but we can live with that.
     template: `
-<div id="rule-info">
-    <div v-for="ri in ruleInfo" :key=ri >
-        <annotation v-if="ri.ri_type == 'errata'" :anno=ri />
-        <annotation v-else-if="ri.ri_type == 'user-anno'" :anno=ri />
-        <qa-entry v-else-if="ri.ri_type == 'qa'" :qaEntry=ri />
-        <div v-else> ???:{{ri.ri_type}} </div>
-    </div>
+<div>
+    <img :src=closeRuleInfoImageUrl style="display:none;"
+      @click="$emit('close')" ref="closeRuleInfoButton"
+      title="Close the rule info" class="close-rule-info"
+    />
+    <transition :name=ruleInfoTransitionName @after-enter=onAfterEnterRuleInfoTransition >
+        <div v-show="ruleInfo.length > 0" id="rule-info" ref="ruleInfo" >
+            <div class="content" ref="content">
+                <div v-for="ri in ruleInfo" :key=ri >
+                    <annotation v-if="ri.ri_type == 'errata'" :anno=ri />
+                    <annotation v-else-if="ri.ri_type == 'user-anno'" :anno=ri />
+                    <qa-entry v-else-if="ri.ri_type == 'qa'" :qaEntry=ri />
+                    <div v-else> ???:{{ri.ri_type}} </div>
+                </div>
+            </div>
+        </div>
+    </transition>
 </div>`,
+
+    beforeUpdate() {
+        // hide the close button until the "enter" transition has completed
+        $( this.$refs.closeRuleInfoButton ).hide() ;
+    },
+
+    methods: {
+
+        onAfterEnterRuleInfoTransition() {
+            // FUDGE! We have to wait until the rule info popup is open before we can check
+            // if it has a v-scrollbar or not, and hence where we should put the close button.
+            this.$nextTick( () => {
+                let ruleInfo = this.$refs.ruleInfo ;
+                let closeButton = this.$refs.closeRuleInfoButton ;
+                if ( ruleInfo.clientHeight >= ruleInfo.scrollHeight )
+                    $(closeButton).css( "right", "6px" ) ;
+                else {
+                    // FUDGE! The v-scrollbar is visible, so we move the "close" button left a bit.
+                    // This adjustment won't update if the pane is resized, but we can live with that.
+                    $(closeButton).css( "right", "18px" ) ;
+                }
+                $(closeButton).fadeIn( 200 ) ;
+            } ) ;
+        },
+
+    },
 
 } ) ;
 

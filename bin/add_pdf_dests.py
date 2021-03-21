@@ -44,6 +44,10 @@ def main( pdf_file, title, targets_fname, yoffset, output_fname, gs_path ):
             xpos, ypos = target.get( "pos", ["null","null"] )
             if isinstance( ypos, int ):
                 ypos += yoffset
+            if " " in ruleid:
+                # NOTE: We are supposed to be able to quote things using parenthese (e.g. "(foo bar)"
+                # but it doesn't seem to work here :-(
+                raise RuntimeError( "PDF destinations cannot have spaces." )
             print( "[ /Dest /{} /Page {} /View [/XYZ {} {}] /DEST pdfmark".format(
                 ruleid, target["page_no"], xpos, ypos
             ), file=temp_file )

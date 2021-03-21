@@ -1,4 +1,4 @@
-import { gMainApp, gEventBus } from "./MainApp.js" ;
+import { gMainApp, gAppConfig, gEventBus } from "./MainApp.js" ;
 import { findTargets, getPrimaryTarget, fixupSearchHilites } from "./utils.js" ;
 
 // --------------------------------------------------------------------
@@ -22,6 +22,19 @@ gMainApp.component( "search-box", {
     <input type="text" id="query-string" @keyup=onKeyUp v-model.trim="queryString" ref="queryString" autofocus >
     <button @click="$emit('search',this.queryString)" ref="submit"> Go </button>
 </div>`,
+
+    created() {
+        // check if we should start off with a query (for debugging porpoises)
+        gEventBus.on( "app-loaded", () => {
+            if ( gAppConfig.INITIAL_QUERY_STRING )
+                gEventBus.emit( "search-for", gAppConfig.INITIAL_QUERY_STRING ) ;
+        } ) ;
+        gEventBus.on( "search-for", (queryString) => {
+            // search for the specified query string
+            this.queryString = queryString ;
+            this.$refs.submit.click() ;
+        } ) ;
+    },
 
     mounted: function() {
         // initialize

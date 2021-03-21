@@ -40,7 +40,7 @@ def init_webapp():
 def get_app_config():
     """Return the app config."""
     result = {}
-    for key in [ "DISABLE_AUTO_SHOW_RULE_INFO" ]:
+    for key in [ "INITIAL_QUERY_STRING", "DISABLE_AUTO_SHOW_RULE_INFO" ]:
         val = app.config.get( key )
         if val is not None:
             result[ key ] = parse_int( val, val )

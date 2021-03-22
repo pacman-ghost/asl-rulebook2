@@ -70,13 +70,14 @@ def init_qa( startup_msgs, logger ):
     if os.path.isfile( fname ):
         logger.info( "Loading Q+A fixups: %s", fname )
         fixups = load_data_file( fname, "fixups", False, logger, startup_msgs.warning )
-        for qa_entries in qa.values():
-            for qa_entry in qa_entries:
-                for content in qa_entry.get( "content", [] ):
-                    if "question" in content:
-                        content["question"] = _apply_fixups( content["question"], fixups )
-                    for answer in content.get( "answers", [] ):
-                        answer[0] = _apply_fixups( answer[0], fixups )
+        if fixups:
+            for qa_entries in qa.values():
+                for qa_entry in qa_entries:
+                    for content in qa_entry.get( "content", [] ):
+                        if "question" in content:
+                            content["question"] = _apply_fixups( content["question"], fixups )
+                        for answer in content.get( "answers", [] ):
+                            answer[0] = _apply_fixups( answer[0], fixups )
 
     # load the Q+A sources
     sources = {}
@@ -162,9 +163,10 @@ def init_errata( startup_msgs, logger ):
     if os.path.isfile( fname ):
         logger.info( "Loading errata fixups: %s", fname )
         fixups = load_data_file( fname, "fixups", False, logger, startup_msgs.warning )
-        for ruleid in _errata:
-            for anno in _errata[ruleid]:
-                anno["content"] = _apply_fixups( anno["content"], fixups )
+        if fixups:
+            for ruleid in _errata:
+                for anno in _errata[ruleid]:
+                    anno["content"] = _apply_fixups( anno["content"], fixups )
 
     # load the errata sources
     sources = {}
@@ -189,6 +191,8 @@ def _load_anno( fname, atype, save_loc, logger, startup_msgs ):
     """Load annotations from a data file."""
     logger.info( "Loading %s: %s", atype, fname )
     anno_entries = load_data_file( fname, atype, False, logger, startup_msgs.warning )
+    if not anno_entries:
+        return
     for anno in anno_entries:
         if anno["ruleid"] in save_loc:
             save_loc[ anno["ruleid"] ].append( anno )

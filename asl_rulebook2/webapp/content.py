@@ -10,6 +10,7 @@ from asl_rulebook2.webapp import app
 from asl_rulebook2.webapp.utils import load_data_file, slugify
 
 _content_sets = None
+_footnote_index = None
 _chapter_resources = None
 
 # ---------------------------------------------------------------------
@@ -27,8 +28,8 @@ def load_content_sets( startup_msgs, logger ):
     #   in the MMP eASLRB index, and have their own index.
 
     # initialize
-    global _content_sets, _chapter_resources
-    _content_sets = {}
+    global _content_sets, _footnote_index, _chapter_resources
+    _content_sets, _footnote_index = {}, {}
     _chapter_resources = { "background": {}, "icon": {} }
 
     # get the data directory
@@ -47,12 +48,25 @@ def load_content_sets( startup_msgs, logger ):
                 return fname2
         return None
 
-    def load_content_doc( fname_stem, title ):
+    def load_content_doc( fname_stem, title, cdoc_id ):
         # load the content doc files
-        content_doc = { "title": title }
+        content_doc = { "cdoc_id": cdoc_id, "title": title }
         load_file( fname_stem+".targets", content_doc, "targets", startup_msgs.warning )
         load_file( fname_stem+".chapters", content_doc, "chapters", startup_msgs.warning )
-        load_file( fname_stem+".footnotes", content_doc, "footnotes", startup_msgs.warning )
+        if load_file( fname_stem+".footnotes", content_doc, "footnotes", startup_msgs.warning ):
+            # update the footnote index
+            # NOTE: The front-end doesn't care about what chapter a footnote belongs to,
+            # and we rework things a bit to make it easier to map ruleid's to footnotes.
+            if cdoc_id not in _footnote_index:
+                _footnote_index[ cdoc_id ] = {}
+            for chapter_id, footnotes in content_doc.get( "footnotes", {} ).items():
+                for footnote_id, footnote in footnotes.items():
+                    for caption in footnote.get( "captions", [] ):
+                        footnote[ "display_name" ] = "{}{}".format( chapter_id, footnote_id )
+                        ruleid = caption[ "ruleid" ]
+                        if ruleid not in _footnote_index[ cdoc_id ]:
+                            _footnote_index[ cdoc_id ][ ruleid ] = []
+                        _footnote_index[ cdoc_id ][ ruleid ].append( footnote )
         load_file( fname_stem+".pdf", content_doc, "content", startup_msgs.warning, binary=True )
         # locate any chapter backgrounds and icons
         resource_dirs = [
@@ -112,19 +126,18 @@ def load_content_sets( startup_msgs, logger ):
             continue # nb: we can't do anything without an index file
         # load the main content doc
         fname_stem = os.path.splitext( fname2 )[0]
-        content_doc = load_content_doc( fname_stem, fname_stem )
         cdoc_id = cset_id # nb: because this the main content document
-        content_doc[ "cdoc_id" ] = cdoc_id
+        content_doc = load_content_doc( fname_stem, fname_stem, cdoc_id )
         content_set[ "content_docs" ][ cdoc_id ] = content_doc
         # load any associated content docs
         for fname_stem2 in find_assoc_cdocs( fname_stem ):
             # nb: we assume there's only one space between the two filename stems :-/
+            cdoc_id2 = "{}!{}".format( cdoc_id, slugify(fname_stem2) )
             content_doc = load_content_doc(
                 "{} ({})".format( fname_stem, fname_stem2 ),
-                fname_stem2
+                fname_stem2,
+                cdoc_id2
             )
-            cdoc_id2 = "{}!{}".format( cdoc_id, slugify(fname_stem2) )
-            content_doc[ "cdoc_id" ] = cdoc_id2
             content_set[ "content_docs" ][ cdoc_id2 ] = content_doc
         # save the new content set
         _content_sets[ content_set["cset_id"] ] = content_set
@@ -176,6 +189,13 @@ def get_content( cdoc_id ):
                 return send_file( buf, mimetype="application/pdf" )
     abort( 404 )
     return None # stupid pylint :-/
+
+# ---------------------------------------------------------------------
+
+@app.route( "/footnotes" )
+def get_footnotes():
+    """Return the footnote index."""
+    return jsonify( _footnote_index )
 
 # ---------------------------------------------------------------------
 

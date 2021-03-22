@@ -1,0 +1,16 @@
+{
+
+"Y": {
+
+"1": {
+    "captions": [ { "caption": "Mike", "ruleid": "2.1" } ],
+    "content": "This footnote is for ruleid 2.1."
+},
+"2": {
+    "captions": [ { "caption": "November", "ruleid": "2.2" } ],
+    "content": "This footnote is for ruleid 2.2."
+}
+
+}
+
+}

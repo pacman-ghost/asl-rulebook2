@@ -9,6 +9,7 @@
  button { height: 24px ; padding: 0 5px !important ; }
 
  /* notification balloons */
+.growl { cursor: pointer ; }
 .growl .growl-close { position: absolute ; top: 0 ; right: 6px ; }
 .growl .growl-title { display: none ; }
 .growl .pre { font-family: monospace ; }

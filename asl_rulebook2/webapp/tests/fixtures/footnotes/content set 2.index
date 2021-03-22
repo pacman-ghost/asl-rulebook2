@@ -1,0 +1,12 @@
+[
+
+{ "title": "Content Set 2",
+  "rulerefs": [
+    { "caption": "The only document", "ruleids": [
+        "2.1", "2.2"
+      ]
+    }
+  ]
+}
+
+]

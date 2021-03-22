@@ -1,5 +1,5 @@
 import { gMainApp, gAppConfig, gEventBus } from "./MainApp.js" ;
-import { findTargets, getPrimaryTarget, fixupSearchHilites } from "./utils.js" ;
+import { findTargets, getPrimaryTarget, fixupSearchHilites, hideFootnotes } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -82,6 +82,7 @@ gMainApp.component( "search-results", {
 
             // initialize
             this.errorMsg = null ;
+            hideFootnotes() ;
             function onSearchDone() {
                 Vue.nextTick( () => { gEventBus.emit( "search-done" ) ; } ) ;
             }

@@ -1,5 +1,5 @@
-import { gMainApp, gEventBus, gUrlParams } from "./MainApp.js" ;
-import { findTargets, showErrorMsg } from "./utils.js" ;
+import { gMainApp, gFootnoteIndex, gEventBus, gUrlParams } from "./MainApp.js" ;
+import { findTargets, showErrorMsg, showNotificationMsg } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -14,6 +14,21 @@ gMainApp.component( "content-pane", {
     </tabbed-page>
 </tabbed-pages>`,
 
+    created() {
+
+        gEventBus.on( "show-target", (cdocId, ruleid) => {
+            // check if the target has footnote(s) associated with it
+            if ( gFootnoteIndex[ cdocId ] ) {
+                let footnotes = gFootnoteIndex[ cdocId ][ ruleid ] ;
+                if ( footnotes ) {
+                    // yup - show them to the user
+                    this.showFootnotes( footnotes ) ;
+                }
+            }
+        } ) ;
+
+    },
+
     mounted() {
         const showContentDoc = (cdocId) => {
             this.$refs.tabbedPages.activateTab( cdocId ) ; // nb: tabId == cdocId
@@ -24,6 +39,76 @@ gMainApp.component( "content-pane", {
         gEventBus.on( "show-page", (cdocId, pageNo) => { //eslint-disable-line no-unused-vars
             showContentDoc( cdocId ) ;
         } ) ;
+    },
+
+    methods: {
+
+        showFootnotes( footnotes ) {
+
+            // show the footnote in a notification balloon
+            let msg = this.makeFootnoteContent( footnotes ) ;
+            let $growl = showNotificationMsg( "footnote", msg ) ;
+
+            // adjust the width of the balloon (based on the available width)
+            // NOTE: The longest footnote is ~7K (A25.8), so we try to hit the max width at ~3K.
+            let $contentPane = $( this.$el ) ;
+            let width = Math.min( 50 + 30 * (msg.length / 3000), 80 ) ;
+            width *= $contentPane.width() / 100 ;
+            $growl.css( "width", Math.floor(width)+"px" ) ;
+
+            // FUDGE! We want to limit how tall the notification balloon can get, and show a v-scrollbar
+            // for the content if there's too much. However, max-height only works if one of the parent elements
+            // has a specific height set for it, so we set a timer to configure the height of the balloon
+            // to whatever it is after it has appeared on-screen. Sigh...
+            setTimeout( () => {
+                let height = $growl.height() ;
+                let maxHeight = $contentPane.height() * 0.4 ; // nb: CSS max-height of #growls-br is 40%
+                if ( height > maxHeight )
+                    height = maxHeight - 40 ;
+                // FIXME! This is really jerky, but I can't get it to animate :-/ But it's only a problem
+                // when the v-scrollbar comes into play, and there's stuff moving around as that happens,
+                // so it's a bit less visually annoying. The footnote balloons are on a light background,
+                // which also helps.
+                $growl.css( "height", Math.floor(height)+"px" ) ;
+            }, 500 ) ; // nb: yes, this needs to be this large :-/
+        },
+
+        makeFootnoteContent( footnotes ) {
+
+            let buf = [] ;
+            function addCaption( footnote, caption, style ) {
+                buf.push( "<div class='header' ", style ? "style='"+style+"'" : "", ">",
+                    "<span class='caption'>", caption.caption, " ("+caption.ruleid+")", "</span>", " ",
+                    "<span class='footnote-id'>", "["+footnote.display_name+"]", "</span>",
+                "</div>" ) ;
+            }
+
+            if ( footnotes.length == 1 ) {
+                // there is only 1 footnote - we make only its content v-scrollable
+                let footnote = footnotes[0] ;
+                buf.push( "<div class='footnote'>" ) ;
+                footnote.captions.forEach( (caption) => {
+                    addCaption( footnote, caption, "padding: 0 5px;" ) ;
+                } ) ;
+                buf.push( "<div class='content'>", footnote.content, "</div>" ) ;
+                buf.push( "</div>" ) ;
+            } else {
+                // there are multiple footnotes - we make the entire content scrollable
+                buf.push( "<div class='content'>" ) ;
+                footnotes.forEach( (footnote) => {
+                    buf.push( "<div class='footnote'>" ) ;
+                    footnote.captions.forEach( (caption) => {
+                        addCaption( footnote, caption ) ;
+                    } ) ;
+                    buf.push( footnote.content ) ;
+                    buf.push( "</div>" ) ;
+                } ) ;
+                buf.push( "</div>" ) ;
+            }
+
+            return buf.join( "" ) ;
+        },
+
     },
 
 } ) ;

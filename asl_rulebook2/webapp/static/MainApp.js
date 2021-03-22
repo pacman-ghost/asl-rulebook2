@@ -17,6 +17,7 @@ $(document).ready( () => {
 export let gAppConfig = null ;
 export let gContentDocs = null ;
 export let gTargetIndex = null ;
+export let gFootnoteIndex = null ;
 export let gChapterResources = null ;
 
 // --------------------------------------------------------------------
@@ -45,8 +46,9 @@ gMainApp.component( "main-app", {
 
         // initialze the webapp
         Promise.all( [
-            this.getAppConfig( this ),
+            this.getAppConfig(),
             this.getContentDocs( this ),
+            this.getFootnoteIndex(),
         ] ).then( () => {
             this.isLoaded = true ;
             gEventBus.emit( "app-loaded" ) ;
@@ -62,6 +64,11 @@ gMainApp.component( "main-app", {
             if ( evt.keyCode == 27 ) {
                 if ( $(".jquery-image-zoom").length >= 1 )
                     return ; // an image is zoomed - ignore the Escape
+                // close any notification balloons
+                $( ".growl-close" ).each( function() {
+                    $(this).trigger( "click" ) ;
+                } ) ;
+                // notify the rest of the application
                 gEventBus.emit( "escape-pressed" ) ;
             }
         } ) ;
@@ -101,6 +108,20 @@ gMainApp.component( "main-app", {
                     resolve() ;
                 } ).fail( (xhr, status, errorMsg) => {
                     let msg = "Couldn't get the content docs." ;
+                    showErrorMsg( msg + " <div class='pre'>" + errorMsg + "</div>" ) ;
+                    reject( msg )
+                } ) ;
+            } ) ;
+        },
+
+        getFootnoteIndex() {
+            return new Promise( (resolve, reject) => {
+                // get the footnotes
+                $.getJSON( gGetFootnotesUrl, (resp) => { //eslint-disable-line no-undef
+                    gFootnoteIndex = resp ;
+                    resolve() ;
+                } ).fail( (xhr, status, errorMsg) => {
+                    let msg = "Couldn't get the footnote index." ;
                     showErrorMsg( msg + " <div class='pre'>" + errorMsg + "</div>" ) ;
                     reject( msg )
                 } ) ;

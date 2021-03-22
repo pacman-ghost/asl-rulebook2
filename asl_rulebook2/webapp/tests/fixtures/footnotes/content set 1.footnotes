@@ -1,0 +1,29 @@
+{
+
+"X": {
+
+"1": {
+    "captions": [ { "caption": "Alpha", "ruleid": "1a.1" } ],
+    "content": "This footnote is for ruleid 1a.1."
+},
+"2": {
+    "captions": [ { "caption": "Bravo", "ruleid": "1a.2" } ],
+    "content": "This footnote is for ruleid 1a.2."
+},
+
+"10": {
+    "captions": [ { "caption": "Charlie", "ruleid": "1b.1" } ],
+    "content": "This footnote is for ruleid 1b1.1."
+},
+"11": {
+    "captions": [ { "caption": "Delta", "ruleid": "1b.1" } ],
+    "content": "This footnote is also for ruleid 1b1.1."
+},
+
+"20": {
+    "captions": [ { "ruleid": "1b.2" } ]
+}
+
+}
+
+}

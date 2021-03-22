@@ -1,0 +1,16 @@
+[
+
+{ "title": "Content Set 1",
+  "rulerefs": [
+    { "caption": "Main document", "ruleids": [
+        "1a.1", "1a.2"
+      ]
+    },
+    { "caption": "Linked document", "ruleids": [
+        "1b.1", "1b.2"
+      ]
+    }
+  ]
+}
+
+]

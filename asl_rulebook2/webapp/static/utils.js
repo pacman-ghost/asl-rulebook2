@@ -96,14 +96,26 @@ export function showNotificationMsg( msgType, msg )
     }
 
     // show the notification message
-    $.growl( {
+    let $growl = $.growl( {
         style: (msgType == "info") ? "notice" : msgType,
         title: null,
         message: msg,
         location: "br",
-        duration: (msgType == "warning") ? 15*1000 : 5*1000,
+        duration: (msgType == "warning" || msgType == "footnote") ? 15*1000 : 5*1000,
         fixed: (msgType == "error"),
-    } ) ;
+    } ).$growl() ;
+    function onClick() {
+        $growl.off( "click", onClick ) ;
+        $(this).find( ".growl-close" ).click() ;
+    }
+    $growl.on( "click", onClick ) ;
+    return $growl ;
+}
+
+export function hideFootnotes()
+{
+    // hide the footnotes balloon
+    $( ".growl-footnote" ).find( ".growl-close" ).click() ;
 }
 
 // --------------------------------------------------------------------

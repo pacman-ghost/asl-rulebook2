@@ -24,11 +24,10 @@ gMainApp.component( "nav-pane", {
 
     created() {
 
-        // show any Q+A and annotations when a target is opened
         gEventBus.on( "show-target", (cdocId, ruleid) => {
             if ( gAppConfig.DISABLE_AUTO_SHOW_RULE_INFO )
                 return ;
-            // get the rule info for the target being opened
+            // get the Q+A and annotations for the target being opened
             // NOTE: Targets are associated with a content set, but the Q+A is global, which is not quite
             // the right thing to do - what if there is a ruleid that exists in multiple content set,
             // but is referenced in the Q+A? Hopefully, this will never happen... :-/
@@ -44,7 +43,11 @@ gMainApp.component( "nav-pane", {
         } ) ;
 
         // close the rule info popup if Escape is pressed
-        gEventBus.on( "escape-pressed", this.closeRuleInfo ) ;
+        gEventBus.on( "escape-pressed", () => {
+            if ( $( ".growl-footnote" ).length > 0 )
+                return ; // nb: unless a footnote on-screen (let the Escape close that instead)
+            this.closeRuleInfo() ;
+        } ) ;
 
     },
 

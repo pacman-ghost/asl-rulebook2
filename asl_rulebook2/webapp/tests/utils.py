@@ -92,6 +92,7 @@ def get_curr_target():
 def get_last_info(): return get_stored_msg( "info" )
 def get_last_warning_msg(): return get_stored_msg( "warning" )
 def get_last_error_msg(): return get_stored_msg( "error" )
+def get_last_footnote_msg(): return get_stored_msg( "footnote" )
 #pylint: enable=multiple-statements,missing-function-docstring
 
 def get_stored_msg( msg_type ):

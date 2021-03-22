@@ -8,3 +8,14 @@
 
 #content .content-doc iframe { position: absolute ; width: 100% ; height: calc(100% - 40px) ;  border: none ; }
 #content .content-doc .disabled { margin-top: 1em ; text-align: center ; font-style: italic ; color: #888 ; }
+
+#growls-br {  max-height: 40% ;}
+.growl-footnote { background: #f0f0d0 ; border: 1px solid #ccc ; color: black ; width: 120px ; }
+/* FUDGE! We would like to set the opacity to 1 on :hover, but it breaks the click handler!?!? :wtf: */
+.growl-footnote { opacity: 1 ; }
+.growl-footnote .footnote { margin-top: 10px ; height: 100% ; display: flex ; flex-direction: column ; }
+.growl-footnote .footnote:first-of-type { margin-top: 0 ; }
+.growl-footnote .header { font-weight: bold ; }
+.growl-footnote .header .footnote-id { font-size: 90% ; font-style: italic ; color: #666 ; }
+.growl-footnote .growl-message { height: 100% ; display: flex ; flex-direction: column ; }
+.growl-footnote .growl-message .content { flex-grow: 1 ; overflow-y: auto ; padding: 0 5px 5px 5px ; text-align: justify ; }

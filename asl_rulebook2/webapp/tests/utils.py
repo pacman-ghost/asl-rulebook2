@@ -2,6 +2,8 @@
 
 import sys
 import os
+import urllib.request
+import json
 import uuid
 
 from selenium.webdriver.support.ui import WebDriverWait
@@ -16,6 +18,10 @@ _webdriver = None
 
 def init_webapp( webapp, webdriver, **options ):
     """Initialize the webapp."""
+
+    # initialize
+    expected_warnings = options.pop( "warnings", [] )
+    expected_errors = options.pop( "errors", [] )
 
     # initialize
     global _webapp, _webdriver
@@ -36,6 +42,18 @@ def init_webapp( webapp, webdriver, **options ):
     options["reload"] = 1 # nb: force the webapp to reload
     webdriver.get( webapp.url_for( "main", **options ) )
     _wait_for_webapp()
+
+    # make sure there were no errors or warnings
+    startup_msgs = json.load(
+        urllib.request.urlopen( webapp.url_for( "get_startup_msgs" ) )
+    )
+    errors = startup_msgs.pop( "error", [] )
+    errors = [ e[0] for e in errors ]
+    assert set( errors ) == set( expected_errors )
+    warnings = startup_msgs.pop( "warning", [] )
+    warnings = [ w[0] for w in warnings ]
+    assert set( warnings ) == set( expected_warnings )
+    assert not startup_msgs
 
     # reset the user settings
     webdriver.delete_all_cookies()

@@ -6,7 +6,8 @@
 #search-results .index-sr .subtitle { padding: 2px 5px ; font-weight: normal ; font-size: 80% ; font-style: italic ; }
 #search-results .index-sr .body { padding: 2px 5px 0 5px ; }
 #search-results .index-sr .content { color: #444 ; }
-#search-results .index-sr .see-also { color: #444 ; }
+#search-results .index-sr .see-also { color: #444 ; font-style: italic ; cursor: pointer ; }
+#search-results .index-sr .see-also a { border-bottom: 1px dotted #888 ; }
 #search-results .index-sr img.toggle-rulerefs { float: right ; margin: 0 0 0.25em 0.25em ; height: 1.25em ; cursor: pointer ; }
 #search-results .index-sr ul.rulerefs { margin-left: 1.2em ; }
 #search-results .index-sr ul.rulerefs .caption { padding-right: 0.5em ; }

@@ -26,7 +26,12 @@ gMainApp.component( "index-sr", {
           :title="expandRulerefs ? 'Hide non-matching rule references. ': 'Show all rule references.'"
         />
         <div v-if=sr.content class="content" v-html=sr.content />
-        <div v-if=makeSeeAlso v-html=makeSeeAlso class="see-also" />
+        <div v-if=sr.see_also class="see-also" > See also:
+            <span v-for="(sa, sa_no) in sr.see_also" >
+                {{sa_no == 0 ? "" : ", "}}
+                <a @click=onSeeAlso(sa) title="Search for this" > {{sa}} </a>
+            </span>
+        </div>
         <div v-if=sr.ruleids class="ruleids" >
             <ruleid v-for="rid in sr.ruleids" :csetId=sr.cset_id :ruleId=rid :key=rid />
         </div>
@@ -65,22 +70,20 @@ gMainApp.component( "index-sr", {
     },
 
     computed: {
-
-        makeSeeAlso() {
-            // generate the "see also" text
-            if ( this.sr.see_also )
-                return "See also: " + this.sr.see_also.join( ", " ) ;
-            return null ;
-        },
-
         getToggleRulerefsImageUrl() {
             // return the image URL for the "toggle ruleref's" button
             return gImagesBaseUrl + (this.expandRulerefs ? "collapse" : "expand") + "-rulerefs.png" ; //eslint-disable-line no-undef
         },
-
     },
 
     methods: {
+
+        onSeeAlso( see_also ) {
+            // search for the specified text
+            if ( see_also.indexOf( " " ) >= 0 )
+                see_also = '"' + see_also + '"' ;
+            gEventBus.emit( "search-for", see_also ) ;
+        },
 
         onClickIcon() {
             // open the search result's primary target

@@ -167,6 +167,46 @@ def test_target_search( webapp, webdriver ):
 
 # ---------------------------------------------------------------------
 
+def test_see_also( webapp, webdriver ):
+    """Test searching for "see also" fields."""
+
+    # initialize
+    webapp.control_tests.set_data_dir( "see-also" )
+    init_webapp( webapp, webdriver )
+
+    # do a search
+    results = do_search( "foo" )
+    assert results == [ {
+        "sr_type": "index",
+        "title": "((Foo))",
+        "see_also": [ "Bar", "Baz Baz" ]
+    } ]
+
+    def click_see_also( caption ):
+        elems = {
+            e.text: e
+            for e in find_children( "#search-results .see-also a" )
+        }
+        assert len(elems) == 2
+        elems[ caption ].click()
+        expected = '"{}"'.format( caption ) if " " in caption else caption
+        wait_for( 2, lambda: find_child( "input#query-string" ).get_attribute( "value" ) == expected )
+        return _unload_search_results()
+
+    # click on the "Bar" link and check that it gets searched for
+    results = click_see_also( "Bar" )
+    assert results == [ {
+        "sr_type": "index",
+        "title": "((Bar))"
+    } ]
+
+    # search for "foo" again, and click on the "Baz Baz" link
+    do_search( "foo" )
+    results = click_see_also( "Baz Baz" )
+    assert results is None
+
+# ---------------------------------------------------------------------
+
 def test_bad_sr_highlights( webapp, webdriver ):
     """Test fixing up highlight markers that have been incorrectly inserted into search result content."""
 
@@ -287,6 +327,12 @@ def do_search( query_string ):
 
     # unload the results
     wait_for( 2, lambda: get_seq_no() > seq_no )
+    return _unload_search_results()
+
+def _unload_search_results():
+    """Unload the search results."""
+
+    # check if there were any search results
     elem = find_child( "#search-results .error" )
     if elem:
         return elem.text # nb: string = error message
@@ -294,12 +340,6 @@ def do_search( query_string ):
     if elem:
         assert elem.text == "Nothing was found."
         return None # nb: None = no results
-    results = _unload_search_results()
-    assert isinstance( results, list ) # nb: list = search results
-    return results
-
-def _unload_search_results():
-    """Unload the search results."""
 
     def unload_ruleids( result, key, parent ):
         """Unload a list of ruleid's."""

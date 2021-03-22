@@ -30,7 +30,7 @@ gMainApp.component( "main-app", {
     } ; },
 
     template: `
-<nav-pane id="nav" />
+<nav-pane id="nav" ref="navPane" />
 <content-pane id="content" :contentDocs=contentDocs />
 <div v-if=isLoaded id="_mainapp-loaded_" />
 `,
@@ -61,16 +61,8 @@ gMainApp.component( "main-app", {
 
         // add a global keypress handler
         $(document).on( "keyup", (evt) => {
-            if ( evt.keyCode == 27 ) {
-                if ( $(".jquery-image-zoom").length >= 1 )
-                    return ; // an image is zoomed - ignore the Escape
-                // close any notification balloons
-                $( ".growl-close" ).each( function() {
-                    $(this).trigger( "click" ) ;
-                } ) ;
-                // notify the rest of the application
-                gEventBus.emit( "escape-pressed" ) ;
-            }
+            if ( evt.keyCode == 27 )
+                this.onEscapePressed() ;
         } ) ;
 
     },
@@ -176,6 +168,31 @@ gMainApp.component( "main-app", {
             } ).fail( (xhr, status, errorMsg) => { //eslint-disable-line no-unused-vars
                 showErrorMsg( "Couldn't get the startup messages." ) ;
             } ) ;
+        },
+
+        onEscapePressed() {
+            // check if an image is currently zoomed
+            if ( $(".jquery-image-zoom").length > 0 ) {
+                // yup - no need to do anything (the image will un-zoom itself)
+                return ;
+            }
+            // close any notification balloons
+            let isFootnoteOpen = $( ".growl-footnote" ).length > 0 ;
+            $( ".growl-close" ).each( function() {
+                $(this).trigger( "click" ) ;
+            } ) ;
+            // check if a footnotes balloon is open
+            if ( isFootnoteOpen ) {
+                // yup - let it "consume" the Escape key
+                return ;
+            }
+            // check if the rule info popup is open
+            if ( this.$refs.navPane.closeRuleInfo() ) {
+                // yup - let the Escape close it
+                return ;
+            }
+            // if one of the non-search nav panes are open, switch to the search pane
+            gEventBus.emit( "activate-tab", "#nav", "search" ) ;
         },
 
     },

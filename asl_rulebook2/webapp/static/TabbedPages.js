@@ -26,11 +26,12 @@ gMainApp.component( "tabbed-pages", {
     created() {
         gEventBus.on( "activate-tab", (sel, tabId) => {
             // check if this event is for us
+            let $sel = $( sel ) ;
             if ( sel.substring( 0, 1 ) == "#" )
                 sel = sel.substring( 1 ) ;
             else
                 console.log( "INTERNAL ERROR: Tabs should be activated via a selector ID." ) ;
-            if ( this.$el.getAttribute( "id" ) != sel )
+            if ( this.$el.getAttribute("id") != sel && ! $.contains( $sel[0], this.$el ) )
                 return ;
             // yup - activate the specified tab
             this.activateTab( tabId ) ;

@@ -54,7 +54,9 @@ gMainApp.component( "nav-pane", {
     methods: {
         closeRuleInfo() {
             // close the rule info popup
+            let isOpen = this.ruleInfo.length > 0 ;
             this.ruleInfo = [] ;
+            return isOpen ;
         },
     },
 

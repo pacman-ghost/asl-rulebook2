@@ -127,7 +127,7 @@ gMainApp.component( "annotation", {
 
     template: `
 <div class="anno rule-info">
-    <div :class=annoType class="caption" > {{anno.ruleid}} </div>
+    <div :class=annoType class="caption" > {{anno.ruleid || '(no rule ID)'}} </div>
     <div class="content">
         <img :src=makeIconImageUrl() :title=anno.source class="icon" />
         <div v-html=anno.content />

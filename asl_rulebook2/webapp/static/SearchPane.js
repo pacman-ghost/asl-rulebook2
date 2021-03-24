@@ -1,5 +1,5 @@
 import { gMainApp, gAppConfig, gEventBus } from "./MainApp.js" ;
-import { findTargets, getPrimaryTarget, fixupSearchHilites, hideFootnotes } from "./utils.js" ;
+import { postURL, findTargets, getPrimaryTarget, fixupSearchHilites, hideFootnotes } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -103,10 +103,9 @@ gMainApp.component( "search-results", {
                 this.errorMsg = errorMsg ;
                 onSearchDone() ;
             } ;
-            $.ajax( { url: gSearchUrl, type: "POST", //eslint-disable-line no-undef
-                data: { queryString: queryString },
-                dataType: "json",
-            } ).done( (resp) => {
+            postURL( gSearchUrl, //eslint-disable-line no-undef
+                { queryString: queryString }
+            ).then( (resp) => {
                 // check if there was an error
                 if ( resp.error !== undefined ) {
                     onError( resp.error || "Unknown error." ) ;
@@ -125,7 +124,7 @@ gMainApp.component( "search-results", {
                 }
                 // flag that the search was completed
                 onSearchDone() ;
-            } ).fail( (xhr, status, errorMsg) => {
+            } ).catch( (errorMsg) => {
                 onError( errorMsg ) ;
             } ) ;
         },

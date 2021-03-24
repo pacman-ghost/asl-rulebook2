@@ -1,5 +1,5 @@
 import { gMainApp, gASOPChapterIndex, gASOPSectionIndex, gEventBus } from "./MainApp.js" ;
-import { getASOPChapterIdFromSectionId, wrapMatches, isChildOf } from "./utils.js" ;
+import { getURL, getASOPChapterIdFromSectionId, wrapMatches, isChildOf } from "./utils.js" ;
 
 let gSectionContentOverrides = {} ;
 
@@ -65,9 +65,9 @@ gMainApp.component( "asop", {
             this.sections = [] ;
             this.isSingleSection = true ;
             this.chapterId = "intro" ;
-            $.get( gGetASOPIntroUrl, (resp) => { //eslint-disable-line no-undef
+            getURL( gGetASOPIntroUrl ).then( (resp) => { //eslint-disable-line no-undef
                 this.sections = [ this.fixupContent( resp ) ] ;
-            } ).fail( (xhr, status, errorMsg) => {
+            } ).catch( (errorMsg) => {
                 // NOTE: We show the error in the content, not as a notification balloon.
                 this.sections = [ "Couldn't get the ASOP intro." + " <div class='pre'>" + errorMsg + "</div>" ] ;
             } ) ;
@@ -99,18 +99,14 @@ gMainApp.component( "asop", {
                     addSectionContent( sectionNo, contentOverride ) ;
                 } else {
                     // nope - download the section from the backend
-                    new Promise( (resolve, reject) => {
-                        let url = gGetASOPSectionUrl.replace( "SECTION_ID", sectionId ) ; //eslint-disable-line no-undef
-                        $.get( url, (resp) => {
-                            addSectionContent( sectionNo, resp ) ;
-                            resolve() ;
-                        } ).fail( (xhr, status, errorMsg) => {
-                            // NOTE: We show the error in the content, not as a notification balloon.
-                            this.sections[ sectionNo ] =
-                                "Couldn't get ASOP section <tt>" + sectionId + "</tt>."
-                                + " <div class='pre'>" + errorMsg + "</div>" ;
-                            reject() ;
-                        } ) ;
+                    let url = gGetASOPSectionUrl.replace( "SECTION_ID", sectionId ) ; //eslint-disable-line no-undef
+                    getURL( url ).then( (resp) => {
+                        addSectionContent( sectionNo, resp ) ;
+                    } ).catch( (errorMsg) => {
+                        // NOTE: We show the error in the content, not as a notification balloon.
+                        this.sections[ sectionNo ] =
+                            "Couldn't get ASOP section <tt>" + sectionId + "</tt>."
+                            + " <div class='pre'>" + errorMsg + "</div>" ;
                     } ) ;
                 }
             } ) ;
@@ -121,9 +117,9 @@ gMainApp.component( "asop", {
             // show the specified ASOP section
             let sectionId = section.section_id ;
             let url = gGetASOPSectionUrl.replace( "SECTION_ID", sectionId ) ; //eslint-disable-line no-undef
-            $.get( url, (resp) => {
+            getURL( url ).then( (resp) => {
                 this.doShowASOPSection( chapter, section, resp ) ;
-            } ).fail( (xhr, status, errorMsg) => {
+            } ).catch( (errorMsg) => {
                 // NOTE: We show the error in the content, not as a notification balloon.
                 this.sections = [
                     "Couldn't get ASOP section <tt>"+sectionId+"</tt>." + " <div class='pre'>" + errorMsg + "</div>"

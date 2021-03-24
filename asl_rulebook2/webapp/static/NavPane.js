@@ -1,5 +1,5 @@
 import { gMainApp, gAppConfig, gContentDocs, gEventBus } from "./MainApp.js" ;
-import { getASOPChapterIdFromSectionId, showWarningMsg } from "./utils.js" ;
+import { getJSON, getURL, getASOPChapterIdFromSectionId, showWarningMsg } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -38,12 +38,12 @@ gMainApp.component( "nav-pane", {
             // the right thing to do - what if there is a ruleid that exists in multiple content set,
             // but is referenced in the Q+A? Hopefully, this will never happen... :-/
             let url = gGetRuleInfoUrl.replace( "RULEID", ruleid ) ; //eslint-disable-line no-undef
-            $.getJSON( url, (resp) => {
+            getJSON( url ).then( (resp) => {
                 if ( resp.length > 0 ) {
                     // install the rule info entries
                     this.ruleInfo = resp ;
                 }
-            } ).fail( (xhr, status, errorMsg) => {
+            } ).catch( (errorMsg) => {
                 showWarningMsg( "Couldn't get the Q+A for " + ruleid + ". <div class='pre'>" + errorMsg + "</div>" ) ;
             } ) ;
         } ) ;
@@ -178,9 +178,9 @@ gMainApp.component( "nav-pane-asop", {
     created() {
 
         // get the ASOP footer
-        $.get( gGetASOPFooterUrl, (resp) => { //eslint-disable-line no-undef
+        getURL( gGetASOPFooterUrl ).then( (resp) => { //eslint-disable-line no-undef
             this.footer = resp ;
-        } ).fail( (xhr, status, errorMsg) => {
+        } ).catch( (errorMsg) => {
             console.log( "Couldn't get the ASOP footer: " + errorMsg ) ;
         } ) ;
 

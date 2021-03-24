@@ -1,4 +1,4 @@
-import { showErrorMsg, showNotificationMsg } from "./utils.js" ;
+import { getJSON, showErrorMsg, showNotificationMsg } from "./utils.js" ;
 
 // parse any URL parameters
 export let gUrlParams = new URLSearchParams( window.location.search.substring(1) ) ;
@@ -74,80 +74,62 @@ gMainApp.component( "main-app", {
     methods: {
 
         getAppConfig() {
-            return new Promise( (resolve, reject) => {
-                // get the app config
-                $.getJSON( gGetAppConfigUrl, (resp) => { //eslint-disable-line no-undef
-                    gAppConfig = resp ;
-                    resolve() ;
-                } ).fail( (xhr, status, errorMsg) => {
-                    let msg = "Couldn't get the app config." ;
-                    showErrorMsg( msg + " <div class='pre'>" + errorMsg + "</div>" ) ;
-                    reject( msg )
-                } ) ;
+            // get the app config
+            return getJSON( gGetAppConfigUrl ).then( (resp) => { //eslint-disable-line no-undef
+                gAppConfig = resp ;
+            } ).catch( (errorMsg) => {
+                this.showErrorMsg( "Couldn't get the app config.", errorMsg ) ;
             } ) ;
         },
 
         getContentDocs( self ) {
-            return new Promise( (resolve, reject) => {
-                // get the content docs
-                $.getJSON( gGetContentDocsUrl, (resp) => { //eslint-disable-line no-undef
-                    if ( gUrlParams.get( "add-empty-doc" ) )
-                        resp["empty"] = { "cdoc_id": "empty", "title": "Empty document" } ; // nb: for testing porpoises
-                    self.contentDocs = resp ;
-                    self.installContentDocs( resp ) ;
-                    let cdocIds = Object.keys( resp ) ;
-                    if ( cdocIds.length > 0 ) {
-                        Vue.nextTick( () => {
-                            gEventBus.emit( "show-page", cdocIds[0], 1 ) ; // FIXME! which cdoc do we choose?
-                        } ) ;
-                    }
-                    resolve() ;
-                } ).fail( (xhr, status, errorMsg) => {
-                    let msg = "Couldn't get the content docs." ;
-                    showErrorMsg( msg + " <div class='pre'>" + errorMsg + "</div>" ) ;
-                    reject( msg )
-                } ) ;
+            // get the content docs
+            return getJSON( gGetContentDocsUrl ).then( (resp) => { //eslint-disable-line no-undef
+                // install the content docs
+                if ( gUrlParams.get( "add-empty-doc" ) )
+                    resp["empty"] = { "cdoc_id": "empty", "title": "Empty document" } ; // nb: for testing porpoises
+                self.contentDocs = resp ;
+                self.installContentDocs( resp ) ;
+                // start off showing the first content doc
+                let cdocIds = Object.keys( resp ) ;
+                if ( cdocIds.length > 0 ) {
+                    Vue.nextTick( () => {
+                        gEventBus.emit( "show-page", cdocIds[0], 1 ) ; // FIXME! which cdoc do we choose?
+                    } ) ;
+                }
+            } ).catch( (errorMsg) => {
+                this.showErrorMsg( "Couldn't get the content docs.", errorMsg ) ;
             } ) ;
         },
 
         getFootnoteIndex() {
-            return new Promise( (resolve, reject) => {
-                // get the footnotes
-                $.getJSON( gGetFootnotesUrl, (resp) => { //eslint-disable-line no-undef
-                    gFootnoteIndex = resp ;
-                    resolve() ;
-                } ).fail( (xhr, status, errorMsg) => {
-                    let msg = "Couldn't get the footnote index." ;
-                    showErrorMsg( msg + " <div class='pre'>" + errorMsg + "</div>" ) ;
-                    reject( msg )
-                } ) ;
+            // get the footnotes
+            return getJSON( gGetFootnotesUrl ).then( (resp) => { //eslint-disable-line no-undef
+                gFootnoteIndex = resp ;
+            } ).catch( (errorMsg) => {
+                this.showErrorMsg( "Couldn't get the footnote index.", errorMsg ) ;
             } ) ;
         },
 
         getASOP() {
-            return new Promise( (resolve, reject) => {
-                // get the ASOP
-                $.getJSON( gGetASOPUrl, (resp) => { //eslint-disable-line no-undef
-                    this.asop = resp ;
-                    // build an index of the ASOP chapters and sections
-                    gASOPChapterIndex = {} ;
-                    gASOPSectionIndex = {} ;
-                    if ( resp.chapters ) {
-                        resp.chapters.forEach( (chapter) => {
-                            gASOPChapterIndex[ chapter.chapter_id ] = chapter ;
-                            if ( chapter.sections ) {
-                                chapter.sections.forEach( (section) => {
-                                    gASOPSectionIndex[ section.section_id ] = section ;
-                                } ) ;
-                            }
-                        } ) ;
-                    }
-                    resolve() ;
-                } ).fail( (xhr, status, errorMsg) => {
-                    let msg = "Couldn't get the ASOP." ;
-                    showErrorMsg( msg + " <div class='pre'>" + errorMsg + "</div>" ) ;
-                    reject( msg )
-                } ) ;
+            // get the ASOP
+            return getJSON( gGetASOPUrl ).then( (resp) => { //eslint-disable-line no-undef
+                this.asop = resp ;
+                // build an index of the ASOP chapters and sections
+                gASOPChapterIndex = {} ;
+                gASOPSectionIndex = {} ;
+                if ( resp.chapters ) {
+                    resp.chapters.forEach( (chapter) => {
+                        gASOPChapterIndex[ chapter.chapter_id ] = chapter ;
+                        if ( chapter.sections ) {
+                            chapter.sections.forEach( (section) => {
+                                gASOPSectionIndex[ section.section_id ] = section ;
+                            } ) ;
+                        }
+                    } ) ;
+                }
+            } ).catch( (errorMsg) => {
+                this.showErrorMsg( "Couldn't get the ASOP.", errorMsg ) ;
             } ) ;
         },
 
@@ -185,8 +167,8 @@ gMainApp.component( "main-app", {
         },
 
         showStartupMsgs() {
-            $.getJSON( gGetStartupMsgsUrl, (resp) => { //eslint-disable-line no-undef
-                // show any startup messages
+            // show any startup messages
+            return getJSON( gGetStartupMsgsUrl ).then( (resp) => { //eslint-disable-line no-undef
                 [ "info", "warning", "error" ].forEach( (msgType) => {
                     if ( ! resp[msgType] )
                         return ;
@@ -196,9 +178,14 @@ gMainApp.component( "main-app", {
                         showNotificationMsg( msgType, msg ) ;
                     } ) ;
                 } ) ;
-            } ).fail( (xhr, status, errorMsg) => { //eslint-disable-line no-unused-vars
-                showErrorMsg( "Couldn't get the startup messages." ) ;
+            } ).catch( (errorMsg) => {
+                this.showErrorMsg( "Couldn't get the startup messages.", errorMsg ) ;
             } ) ;
+        },
+
+        showErrorMsg( msg, errorMsg ) {
+            // show an error notification balloon
+            showErrorMsg( msg + " <div class='pre'>" + errorMsg + "</div>" ) ;
         },
 
         onEscapePressed() {

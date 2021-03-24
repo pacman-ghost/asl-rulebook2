@@ -145,6 +145,47 @@ export function makeImagesZoomable( $elem )
 
 // --------------------------------------------------------------------
 
+export function getJSON( url )
+{
+    // get the specified URL
+    return new Promise( (resolve, reject) => {
+        $.getJSON( url, (resp) => {
+            resolve( resp ) ;
+        } ).fail( (xhr, status, errorMsg) => {
+            reject( errorMsg ) ;
+        } ) ;
+    } ) ;
+}
+
+export function getURL( url )
+{
+    // get the specified URL
+    return new Promise( (resolve, reject) => {
+        $.get( url, (resp) => {
+            resolve( resp ) ;
+        } ).fail( (xhr, status, errorMsg) => {
+            reject( errorMsg ) ;
+        } ) ;
+    } ) ;
+}
+
+export function postURL( url, data )
+{
+    // post the data to the specified URL
+    return new Promise( (resolve, reject) => {
+        $.ajax( {
+            url: url, type: "POST",
+            data: data, dataType: "json"
+        } ).done( (resp) => {
+            resolve( resp ) ;
+        } ).fail( (xhr, status, errorMsg) => {
+            reject( errorMsg ) ;
+        } ) ;
+    } ) ;
+}
+
+// --------------------------------------------------------------------
+
 export function wrapMatches( val, searchFor, delim1, delim2 )
 {
     // search for a regex and wrap all matches with the specified delimiters

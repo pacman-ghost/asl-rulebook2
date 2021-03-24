@@ -22,7 +22,7 @@ def test_asop_nav( webdriver, webapp ):
         asop_index = json.load( fp )
 
     # check the nav
-    select_tabbed_page( "#nav", "asop" )
+    select_tabbed_page( "nav", "asop" )
     nav = _unload_nav( False )
     chapters = asop_index["chapters"]
     for chapter_no, chapter in enumerate( chapters ):
@@ -54,7 +54,7 @@ def test_asop_content( webdriver, webapp ):
     # initialize
     webapp.control_tests.set_data_dir( "asop" )
     init_webapp( webapp, webdriver )
-    select_tabbed_page( "#nav", "asop" )
+    select_tabbed_page( "nav", "asop" )
     nav = _unload_nav( True )
 
     def load_asop_file( fname, as_json ):
@@ -228,14 +228,14 @@ def test_asop_entries( webdriver, webapp ):
 
             # check the nav pane
             panes = [
-                c for c in find_children( "#nav .accordian-pane" )
+                c for c in find_children( "#accordian-asop .accordian-pane" )
                 if find_child( ".entries", c ).value_of_css_property( "display" ) != "none"
             ]
             assert len(panes) == 1
             assert panes[0].get_attribute( "data-chapterid" ) == expected[sr_no][2]
 
             # return back to the Search nav pane
-            select_tabbed_page( "#nav", "search" )
+            select_tabbed_page( "nav", "search" )
 
     # do the tests
     do_test( "napalm", [
@@ -263,7 +263,7 @@ def _unload_nav( include_elems ):
     """Unload the ASOP nav."""
 
     chapters = []
-    for chapter_elem in find_children( "#nav .accordian-pane" ):
+    for chapter_elem in find_children( "#accordian-asop .accordian-pane" ):
 
         # unload the next chapter
         chapter = {

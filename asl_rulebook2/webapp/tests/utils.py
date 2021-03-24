@@ -69,9 +69,10 @@ def _wait_for_webapp():
 
 # ---------------------------------------------------------------------
 
-def select_tabbed_page( parent_sel, tab_id ):
+def select_tabbed_page( tabbed_pages_id, tab_id ):
     """Select a tabbed page."""
-    tabbed_pages = find_child( ".tabbed-pages", find_child(parent_sel) )
+    tabbed_pages = find_child( "#tabbed-pages-" + tabbed_pages_id )
+    assert tabbed_pages
     btn = find_child( ".tab-strip .tab[data-tabid='{}']".format( tab_id ), tabbed_pages )
     btn.click()
     def find_tabbed_page():

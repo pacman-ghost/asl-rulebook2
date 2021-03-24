@@ -205,7 +205,7 @@ gMainApp.component( "main-app", {
                 return ;
             }
             // if one of the non-search nav panes are open, switch to the search pane
-            gEventBus.emit( "activate-tab", "#nav", "search" ) ;
+            gEventBus.emit( "activate-tab", "nav", "search" ) ;
         },
 
     },

@@ -55,7 +55,7 @@ def test_targets( webapp, webdriver ):
     do_test( "4b", "content-set-1!linked" )
     do_test( "1a", "content-set-1" )
     do_test( "cs2d", "content-set-2" )
-    select_tabbed_page( "#content", "empty" )
+    select_tabbed_page( "content", "empty" )
     do_test( "1b", "content-set-1!linked" )
 
 # ---------------------------------------------------------------------
@@ -68,7 +68,7 @@ def test_chapters( webapp, webdriver ):
     init_webapp( webapp, webdriver )
 
     # check the chapters have been loaded correctly
-    select_tabbed_page( "#nav", "chapters" )
+    select_tabbed_page( "nav", "chapters" )
     chapters = _unload_chapters()
     assert chapters == [
         { "title": "Page 1",
@@ -92,7 +92,7 @@ def test_chapters( webapp, webdriver ):
     ]
 
     # check that the chapter section with a missing target is not clickable
-    elems = find_children( "#nav .tabbed-page[data-tabid='chapters'] .accordian-pane" )
+    elems = find_children( "#accordian-chapters .accordian-pane" )
     assert len(elems) == 6
     elems = find_children( ".entry", elems[1] )
     assert len(elems) == 4
@@ -101,7 +101,7 @@ def test_chapters( webapp, webdriver ):
 
     def do_test( chapter_no, entry_no, expected ):
         """Click on a chapter entry."""
-        elems = find_children( "#nav .tabbed-page[data-tabid='chapters'] .accordian-pane" )
+        elems = find_children( "#accordian-chapters .accordian-pane" )
         chapter_elem = elems[ chapter_no ]
         _select_chapter( chapter_elem )
         entries = find_children( ".entries .entry a", chapter_elem )
@@ -127,7 +127,7 @@ def test_chapters( webapp, webdriver ):
 def _unload_chapters():
     """Unload the chapters and their entries."""
     chapters = []
-    for chapter_elem in find_children( "#nav .tabbed-page[data-tabid='chapters'] .accordian-pane" ):
+    for chapter_elem in find_children( "#accordian-chapters .accordian-pane" ):
         _select_chapter( chapter_elem ) # nb: panes need to be expanded to unload their content
         chapters.append( {
             "title": find_child( ".title", chapter_elem ).text,

@@ -17,7 +17,7 @@ def test_hello( webapp, webdriver ):
     assert nav_panels == [ "search", "chapters" ]
 
     # check that there are no chapters
-    select_tabbed_page( "#nav", "search" )
+    select_tabbed_page( "nav", "search" )
     assert find_child( "#nav .tabbed-page[data-tabid='chapters'] .no-chapters" )
 
     # check that the content docs loaded correctly

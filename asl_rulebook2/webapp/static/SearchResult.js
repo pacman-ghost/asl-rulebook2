@@ -154,7 +154,7 @@ gMainApp.component( "asop-entry-sr", {
 
     methods: {
         onClickCaption() {
-            gEventBus.emit( "activate-tab", "#nav", "asop" ) ;
+            gEventBus.emit( "activate-tab", "nav", "asop" ) ;
             gEventBus.emit( "show-asop-entry-sr", this.sr.section_id, this.sr.content ) ;
         },
     },

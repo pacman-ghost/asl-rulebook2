@@ -1,17 +1,17 @@
 import { gMainApp, gEventBus } from "./MainApp.js" ;
-import { isChildOf } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
 gMainApp.component( "tabbed-pages", {
 
+    props: [ "tabbedPagesId" ],
     data: function() { return {
         tabs: [],
         activeTabId: null,
     } ; },
 
     template: `
-<div class="tabbed-pages">
+<div class="tabbed-pages" :id="'tabbed-pages-'+tabbedPagesId" >
     <slot />
     <div class="tab-strip">
         <div v-for="tab in tabs"
@@ -25,14 +25,9 @@ gMainApp.component( "tabbed-pages", {
 </div>`,
 
     created() {
-        gEventBus.on( "activate-tab", (sel, tabId) => {
+        gEventBus.on( "activate-tab", (tabbedPagesId, tabId) => {
             // check if this event is for us
-            let $sel = $( sel ) ;
-            if ( sel.substring( 0, 1 ) == "#" )
-                sel = sel.substring( 1 ) ;
-            else
-                console.log( "INTERNAL ERROR: Tabs should be activated via a selector ID." ) ;
-            if ( ! isChildOf( this.$el, $sel[0], false ) )
+            if ( tabbedPagesId != this.tabbedPagesId )
                 return ;
             // yup - activate the specified tab
             this.activateTab( tabId ) ;

@@ -96,7 +96,7 @@ def test_targets( webapp, webdriver ):
     def do_test( query_string, sel, expected ):
 
         # select the dummy document
-        select_tabbed_page( "#content", "empty" )
+        select_tabbed_page( "content", "empty" )
 
         # do the search
         do_search( query_string )
@@ -316,7 +316,7 @@ def do_search( query_string ):
         return find_child( "#search-results" ).get_attribute( "data-seqno" )
 
     # submit the search
-    select_tabbed_page( "#nav", "search" )
+    select_tabbed_page( "nav", "search" )
     elem = find_child( "input#query-string" )
     elem.clear()
     elem.send_keys( query_string )

@@ -10,7 +10,7 @@ gMainApp.component( "accordian", {
     } ; },
 
     template: `
-<div class="accordian">
+<div class="accordian" :id="'accordian-'+accordianId" >
     <slot />
 </div>`,
 

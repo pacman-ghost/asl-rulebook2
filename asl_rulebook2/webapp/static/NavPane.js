@@ -12,7 +12,7 @@ gMainApp.component( "nav-pane", {
 
     template: `
 <div>
-    <tabbed-pages>
+    <tabbed-pages tabbedPagesId="nav" >
         <tabbed-page tabId="search" caption="Search" >
             <nav-pane-search />
         </tabbed-page>

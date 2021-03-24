@@ -9,7 +9,7 @@ gMainApp.component( "content-pane", {
 
     template: `
 <div>
-    <tabbed-pages ref="tabbedPages">
+    <tabbed-pages tabbedPagesId="content" ref="tabbedPages">
         <tabbed-page v-for="cdoc in contentDocs" :tabId=cdoc.cdoc_id :caption=cdoc.title :key=cdoc.cdoc_id >
             <content-doc :cdoc=cdoc />
         </tabbed-page>

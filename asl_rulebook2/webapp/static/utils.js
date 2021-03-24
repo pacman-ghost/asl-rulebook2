@@ -93,11 +93,14 @@ export function getChapterResource( rtype, chapterId )
 // --------------------------------------------------------------------
 
 export function showInfoMsg( msg ) { showNotificationMsg( "notice", msg ) ; }
-export function showWarningMsg( msg ) { showNotificationMsg( "warning", msg ) ; }
-export function showErrorMsg( msg ) { showNotificationMsg( "error", msg ) ; }
+export function showWarningMsg( msg, info ) { showNotificationMsg( "warning", msg, info ) ; }
+export function showErrorMsg( msg, info ) { showNotificationMsg( "error", msg, info ) ; }
 
-export function showNotificationMsg( msgType, msg )
+export function showNotificationMsg( msgType, msg, info )
 {
+    if ( info )
+        msg += " <div class='pre'>" + info + "</div>" ;
+
     if ( gUrlParams.get( "store-msgs" ) ) {
         // store the message for the test suite
         $( "#_last-" + msgType + "-msg_" ).val( msg ) ;

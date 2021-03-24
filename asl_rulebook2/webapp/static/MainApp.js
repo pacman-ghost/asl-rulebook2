@@ -78,7 +78,7 @@ gMainApp.component( "main-app", {
             return getJSON( gGetAppConfigUrl ).then( (resp) => { //eslint-disable-line no-undef
                 gAppConfig = resp ;
             } ).catch( (errorMsg) => {
-                this.showErrorMsg( "Couldn't get the app config.", errorMsg ) ;
+                showErrorMsg( "Couldn't get the app config.", errorMsg ) ;
             } ) ;
         },
 
@@ -98,7 +98,7 @@ gMainApp.component( "main-app", {
                     } ) ;
                 }
             } ).catch( (errorMsg) => {
-                this.showErrorMsg( "Couldn't get the content docs.", errorMsg ) ;
+                showErrorMsg( "Couldn't get the content docs.", errorMsg ) ;
             } ) ;
         },
 
@@ -107,7 +107,7 @@ gMainApp.component( "main-app", {
             return getJSON( gGetFootnotesUrl ).then( (resp) => { //eslint-disable-line no-undef
                 gFootnoteIndex = resp ;
             } ).catch( (errorMsg) => {
-                this.showErrorMsg( "Couldn't get the footnote index.", errorMsg ) ;
+                showErrorMsg( "Couldn't get the footnote index.", errorMsg ) ;
             } ) ;
         },
 
@@ -129,7 +129,7 @@ gMainApp.component( "main-app", {
                     } ) ;
                 }
             } ).catch( (errorMsg) => {
-                this.showErrorMsg( "Couldn't get the ASOP.", errorMsg ) ;
+                showErrorMsg( "Couldn't get the ASOP.", errorMsg ) ;
             } ) ;
         },
 
@@ -179,13 +179,8 @@ gMainApp.component( "main-app", {
                     } ) ;
                 } ) ;
             } ).catch( (errorMsg) => {
-                this.showErrorMsg( "Couldn't get the startup messages.", errorMsg ) ;
+                showErrorMsg( "Couldn't get the startup messages.", errorMsg ) ;
             } ) ;
-        },
-
-        showErrorMsg( msg, errorMsg ) {
-            // show an error notification balloon
-            showErrorMsg( msg + " <div class='pre'>" + errorMsg + "</div>" ) ;
         },
 
         onEscapePressed() {

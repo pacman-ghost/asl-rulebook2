@@ -44,7 +44,7 @@ gMainApp.component( "nav-pane", {
                     this.ruleInfo = resp ;
                 }
             } ).catch( (errorMsg) => {
-                showWarningMsg( "Couldn't get the Q+A for " + ruleid + ". <div class='pre'>" + errorMsg + "</div>" ) ;
+                showWarningMsg( "Couldn't get the Q+A for " + ruleid + ".", errorMsg ) ;
             } ) ;
         } ) ;
 

@@ -1,4 +1,5 @@
 import { gMainApp, gEventBus } from "./MainApp.js" ;
+import { isChildOf } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -31,7 +32,7 @@ gMainApp.component( "tabbed-pages", {
                 sel = sel.substring( 1 ) ;
             else
                 console.log( "INTERNAL ERROR: Tabs should be activated via a selector ID." ) ;
-            if ( this.$el.getAttribute("id") != sel && ! $.contains( $sel[0], this.$el ) )
+            if ( ! isChildOf( this.$el, $sel[0], false ) )
                 return ;
             // yup - activate the specified tab
             this.activateTab( tabId ) ;
@@ -57,6 +58,7 @@ gMainApp.component( "tabbed-pages", {
             $( this.$el ).find( ".tabbed-page" ).each( function() {
                 $(this).css( "display", ($(this).data("tabid") == tabId) ? "block" : "none" ) ;
             } ) ;
+            gEventBus.emit( "tab-activated", this, tabId ) ;
         },
 
     },

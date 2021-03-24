@@ -4,11 +4,13 @@ import sys
 import os
 import urllib.request
 import json
+import re
 import uuid
 
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
+from asl_rulebook2.utils import strip_html
 from asl_rulebook2.webapp import tests as webapp_tests
 
 _webapp = None
@@ -160,12 +162,44 @@ def has_class( elem, class_name ):
     """Check if an element has a specified CSS class."""
     return class_name in get_classes( elem )
 
-def get_image_filename( elem ):
+def unload_elem( save_loc, key, elem, adjust_hilites=False ):
+    """Unload a single element."""
+    if not elem:
+        return False
+    if elem.tag_name in ("div", "span"):
+        val = unload_sr_text( elem ) if adjust_hilites else elem.text
+    elif elem.tag_name == "img":
+        val = get_image_filename( elem )
+    else:
+        assert False, "Unknown element type: " + elem.tag_name
+        return False
+    if not val:
+        return False
+    save_loc[ key ] = val
+    return True
+
+def unload_sr_text( elem ):
+    """Unload a text value that is part of a search result."""
+    val = elem.get_attribute( "innerHTML" )
+    # change how highlighted content is represented
+    matches = list( re.finditer( r'<span class="hilite">(.*?)</span>', val ) )
+    for mo in reversed(matches):
+        val = val[:mo.start()] + "((" + mo.group(1) + "))" + val[mo.end():]
+    # remove HTML tags
+    val = strip_html( val ).strip()
+    return val
+
+def get_image_filename( elem, full=False ):
     """Get the filename of an <img> element."""
     if elem is None:
         return None
     assert elem.tag_name == "img"
-    return os.path.basename( elem.get_attribute( "src" ) )
+    src = elem.get_attribute( "src" )
+    if full:
+        src = re.sub( r"^http://[^/]+", "", src )
+    else:
+        src = os.path.basename( src )
+    return re.sub( r"/+", "/", src )
 
 # ---------------------------------------------------------------------
 

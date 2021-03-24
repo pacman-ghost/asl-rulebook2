@@ -1,0 +1,78 @@
+{
+
+"chapters": [
+
+    { "caption": "Pre-Game Sequence", "chapter_id": "pre-game",
+      "sections": [
+        { "caption": "First steps" },
+        { "caption": "First side set up" },
+        { "caption": "Interlude" },
+        { "caption": "Second side set up" },
+        { "caption": "Final steps" }
+    ] },
+    { "caption": "1. Rally Phase", "chapter_id": "rally",
+      "sections": [
+        { "caption": "1.1: START of RPh" },
+        { "caption": "1.2: DURING RPh" },
+        { "caption": "1.3: END of RPh" }
+    ] },
+    { "caption": "2. Prep Fire Phase", "chapter_id": "prep-fire",
+      "sniper_phase": true,
+      "sections": [
+        { "caption": "2.1: START of PFPh" },
+        { "caption": "2.2: DURING PFPh" },
+        { "caption": "2.3: END of PFPh" }
+    ] },
+    { "caption": "3. Movement Phase", "chapter_id": "movement",
+      "sniper_phase": true,
+      "sections": [
+        { "caption": "3.1: START of the MPh" },
+        { "caption": "3.2: START of ITS MPh" },
+        { "caption": "3.3: DURING ITS MPh" },
+        { "caption": "3.4: END of ITS MPh" },
+        { "caption": "3.5: END of the MPh" }
+    ] },
+    { "caption": "4. Defensive Fire Phase", "chapter_id": "defensive-fire",
+      "sniper_phase": true,
+      "sections": [
+        { "caption": "4.1: START of DFPh" },
+        { "caption": "4.2: DURING DFPh" },
+        { "caption": "4.3: END of DFPh" }
+    ] },
+    { "caption": "5. Advancing Fire Phase", "chapter_id": "advancing-fire",
+      "sniper_phase": true,
+      "sections": [
+        { "caption": "5.1: START of AFPh" },
+        { "caption": "5.2: DURING AFPh" },
+        { "caption": "5.3: END of AFPh" }
+    ] },
+    { "caption": "6. Rout Phase", "chapter_id": "rout",
+      "sections": [
+        { "caption": "6.1: START of RtPh" },
+        { "caption": "6.2: DURING RtPh" },
+        { "caption": "6.3: END of RtPh" }
+    ] },
+    { "caption": "7. Advance Phase", "chapter_id": "advance",
+      "sections": [
+        { "caption": "7.1: START of AFPh" },
+        { "caption": "7.2: DURING AFPh" }
+    ] },
+    { "caption": "8. Close Combat Phase", "chapter_id": "close-combat",
+      "sections": [
+        { "caption": "8.1: START of LOCATION's CCPh" },
+        { "caption": "8.2: DURING LOCATION's CCPh" },
+        { "caption": "8.3: END of LOCATION's CCPh" },
+        { "caption": "8.4: END of CCPh" }
+    ] },
+
+    { "chapter_id": "empty",
+      "_comment_": "This is used for testing porpoises only."
+    }
+
+],
+
+"template_args": {
+    "CONTENT_REMOVED": "<div class='content-removed'> ...content removed... </div>"
+}
+
+}

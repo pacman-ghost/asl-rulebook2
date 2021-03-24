@@ -68,6 +68,7 @@ gMainApp.component( "search-results", {
     <qa-entry v-else-if="sr.sr_type == 'q+a'" :qaEntry=sr class="sr rule-info" />
     <annotation v-else-if="sr.sr_type == 'errata'" :anno=sr class="sr rule-info" />
     <annotation v-else-if="sr.sr_type == 'user-anno'" :anno=sr class="sr rule-info" />
+    <asop-entry-sr v-else-if="sr.sr_type == 'asop-entry'" :sr=sr class="sr" />
     <div v-else> ???:{{sr.sr_type}} </div>
 </div>
 </div>`,
@@ -148,7 +149,9 @@ gMainApp.component( "search-results", {
                         } ) ;
                     }
                 } ) ;
-            } else if( sr.sr_type == "errata" || sr.sr_type == "user-anno" ) {
+            } else if ( sr.sr_type == "errata" || sr.sr_type == "user-anno" ) {
+                sr.content = fixupSearchHilites( sr.content ) ;
+            } else if ( sr.sr_type == "asop-entry" ) {
                 sr.content = fixupSearchHilites( sr.content ) ;
             } else {
                 console.log( "INTERNAL ERROR: Unknown search result type:", sr.sr_type ) ;

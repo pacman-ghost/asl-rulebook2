@@ -4,10 +4,34 @@ import { gMainApp, gEventBus } from "./MainApp.js" ;
 
 gMainApp.component( "accordian", {
 
+    props: [ "accordianId" ],
+    data() { return {
+        panes: [],
+    } ; },
+
     template: `
 <div class="accordian">
     <slot />
 </div>`,
+
+    mounted() {
+
+        // expand the specified pane
+        gEventBus.on( "expand-pane", (accordianId, paneKey, isClick) => {
+            if ( this.accordianId != accordianId )
+                return ;
+            // update the state for each child pane
+            this.panes.forEach( (pane) => {
+                let newIsExpanded = (paneKey != null && pane.paneKey == paneKey) ;
+                if ( pane.isExpanded && ! newIsExpanded )
+                    pane.$emit( "pane-collapsed", pane.paneKey, isClick ) ;
+                else if ( ! pane.isExpanded && newIsExpanded )
+                    pane.$emit( "pane-expanded", pane.paneKey, isClick ) ;
+                pane.isExpanded = newIsExpanded ;
+            } ) ;
+        } ) ;
+
+    },
 
 } ) ;
 
@@ -15,10 +39,10 @@ gMainApp.component( "accordian", {
 
 gMainApp.component( "accordian-pane", {
 
-    props: [ "paneKey", "title", "entries", "iconUrl", "backgroundUrl" ],
+    props: [ "paneKey", "title", "entries", "getEntryKey", "iconUrl", "backgroundUrl" ],
     data() { return {
         isExpanded: false,
-        cssBackground: this.backgroundUrl ? "url(" + this.backgroundUrl + ")": "#ccc",
+        cssBackground: this.backgroundUrl ? "url(" + this.backgroundUrl + ")": null,
     } ; },
 
     template: `
@@ -28,29 +52,16 @@ gMainApp.component( "accordian-pane", {
         {{title}}
     </div>
     <ul v-show=isExpanded :class="{entries: true}" >
-        <li v-for="e in entries" :key=e class="entry" :class="{disabled: !e.ruleid}" >
-            <a v-if=e.ruleid @click=onClickEntry(e) > {{e.caption}} </a>
+        <li v-for="e in entries" :key=e class="entry" :data-key=getEntryKey(e) :class="{disabled: !getEntryKey(e)}" >
+            <a v-if=getEntryKey(e) @click=onClickEntry(e) > {{e.caption}} </a>
             <span v-else> {{e.caption}} </span>
         </li>
     </ul>
 </div>`,
 
     created() {
-
-        // handle panes being expanded
-        gEventBus.on( "expand-pane", (entry) => {
-            // check if we are in the same accordian as the pane being toggled
-            if ( entry.$parent != this.$parent )
-                return ;
-            // yup - check if we are the pane being toggled
-            if ( entry == this ) {
-                // yup - update our state
-                this.isExpanded = ! this.isExpanded ;
-            } else {
-                // nope - always close up (only one pane can be open at a time)
-                this.isExpanded = false ;
-            }
-        } ) ;
+        // notify the parent
+        this.$parent.panes.push( this ) ;
     },
 
     methods: {
@@ -59,12 +70,11 @@ gMainApp.component( "accordian-pane", {
             this.$emit( "entry-clicked", this.paneKey, entry ) ;
         },
         onToggleExpand() {
-            // notify the parent that a pane was expanded
-            if ( ! this.isExpanded )
-                this.$emit( "pane-expanded" ) ;
-            // NOTE: Every accordian pane will receive this event, but each one
-            // will figure out if it applies to them.
-            gEventBus.emit( "expand-pane", this ) ;
+            // notify the parent
+            gEventBus.emit( "expand-pane", this.$parent.accordianId,
+                this.isExpanded ? null : this.paneKey,
+                true
+            ) ;
         },
     },
 

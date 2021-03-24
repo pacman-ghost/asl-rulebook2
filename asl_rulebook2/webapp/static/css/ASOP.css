@@ -1,0 +1,39 @@
+/* NOTE: This file defines general CSS for the ASOP. Any user-defined settings that are specific
+ * to the user's ASOP files can be defined in a file called asop.css, in the ASOP directory.
+ *
+ * "#asop" refers to the ASOP popup window that overlays the content pane, but anything
+ * that styles the ASOP content itself should be referenced via ".asop" (since ASOP content
+ * can also appear as a search result in the left sidebar).
+ * */
+
+#asop {
+    position: absolute ; top: 5px ; left: 5px ; bottom: 5px ; right: 5px ; z-index: 20 ;
+    display: flex ; flex-direction: column ;
+    border: 1px solid #444 ; border-radius: 5px ; background: white ;
+    padding: 10px ;
+}
+
+#nav .tabbed-page[data-tabid="asop"] .wrapper { display: flex ; flex-direction: column ; }
+#nav .tabbed-page[data-tabid="asop"] .accordian { flex-grow: 1 ; overflow-y: auto ; }
+#nav .tabbed-page[data-tabid="asop"] .accordian-pane .title { background: #f6edda ; border: 1px solid #e5cea0 ; font-size: 110% ; }
+#nav .tabbed-page[data-tabid="asop"] .accordian-pane[data-chapterid="pre-game"] .title { background: #fff6e2 ; }
+#nav .tabbed-page[data-tabid="asop"] .accordian .entry { margin: 6px 0 ; }
+#asop-footer { border-top: 1px solid #ccc ;  margin-top: 5px ; padding: 5px ; }
+
+#asop>.title { background: #f6edda ; border: 1px solid #e5cea0 }
+#asop[data-chapterid="pre-game"]>.title { background: #fff6e2 ; }
+
+.asop .pre { margin-left: 30px ; font-family: monospace ; }
+.asop .exc { font-style: italic ; color: #666 ; }
+.asop .hilite { padding: 0 2px ; background: #ffa ; }
+
+.asop .title { border: 1px solid #666 ; border-radius: 2px ; background: #eee ; font-size: 125% ; font-weight: bold ; padding: 2px 5px ; }
+
+.asop .preamble { margin-bottom: 5px ;  padding: 2px 5px ; font-size: 90% ; font-style: italic ; }
+.asop .preamble i, #asop .preamble em { font-style: normal ; }
+
+.asop .sections { flex-grow: 1 ; overflow-y: auto ; }
+.asop .section { margin-top: 10px ; border: 1px solid #444 ; border-radius: 5px; padding: 10px ; }
+.asop .section:first-of-type { margin-top: 0 ; }
+.asop .sections.single .section { border: none ; padding: 0 5px ; }
+.asop .section .caption { font-weight: bold ; }

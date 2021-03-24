@@ -1,10 +1,11 @@
 import { gMainApp, gAppConfig, gContentDocs, gEventBus } from "./MainApp.js" ;
-import { showWarningMsg } from "./utils.js" ;
+import { getASOPChapterIdFromSectionId, showWarningMsg } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
 gMainApp.component( "nav-pane", {
 
+    props: [ "asop" ],
     data() { return {
         ruleInfo: [],
     } ; },
@@ -17,6 +18,11 @@ gMainApp.component( "nav-pane", {
         </tabbed-page>
         <tabbed-page tabId="chapters" caption="Chapters" >
             <nav-pane-chapters />
+        </tabbed-page>
+        <tabbed-page v-if="asop.chapters && asop.chapters.length > 0"
+          tabId="asop" caption="ASOP" ref="asop"
+        >
+            <nav-pane-asop :asop=asop />
         </tabbed-page>
     </tabbed-pages>
     <rule-info :ruleInfo=ruleInfo @close=closeRuleInfo />
@@ -104,12 +110,13 @@ gMainApp.component( "nav-pane-chapters", {
     } ; },
 
     template: `
-<accordian>
+<accordian accordianId="chapters" >
     <accordian-pane v-if="chapters.length > 0" v-for="c in chapters"
-      :key=c :paneKey=c[0] :entries=c[1].sections
+      :key=c :paneKey=c
+      :entries=c[1].sections :getEntryKey=getEntryKey
       :title=c[1].title :iconUrl=c[1].icon :backgroundUrl=c[1].background
-      @pane-expanded=onChapterPaneExpanded(c[0],c[1])
-      @entry-clicked=onChapterSectionClicked
+      @pane-expanded=onChapterPaneExpanded
+      @entry-clicked=onChapterEntryClicked
     />
     <div v-else class="no-chapters"> No chapters. </div>
 </accordian>
@@ -130,16 +137,72 @@ gMainApp.component( "nav-pane-chapters", {
 
     methods: {
 
-        onChapterPaneExpanded( cdocId, chapter ) {
+        onChapterPaneExpanded( chapter, isClick ) { //eslint-disable-line no-unused-vars
             // show the first page of the specified chapter
-            gEventBus.emit( "show-page", cdocId, chapter.page_no ) ;
+            gEventBus.emit( "show-page", chapter[0], chapter[1].page_no ) ;
         },
 
-        onChapterSectionClicked( cdocId, entry ) {
-            // show the chapter section's target
-            gEventBus.emit( "show-target", cdocId, entry.ruleid ) ;
+        onChapterEntryClicked( paneKey, entry ) {
+            // show the chapter entry's target
+            gEventBus.emit( "show-target", paneKey[0], entry.ruleid ) ;
 
         },
+
+        getEntryKey( entry ) { return entry.ruleid ; },
+
+    },
+
+} ) ;
+
+// --------------------------------------------------------------------
+
+gMainApp.component( "nav-pane-asop", {
+
+    props: [ "asop" ],
+    data() { return {
+        footer: null,
+    } ; },
+
+    template: `
+<accordian accordianId="asop" >
+    <accordian-pane v-if="asop.chapters.length > 0" v-for="c in asop.chapters"
+      :key=c :paneKey=c :data-chapterid=c.chapter_id
+      :entries=c.sections :getEntryKey=getEntryKey
+      :title=c.caption
+      @pane-expanded=onPaneExpanded @entry-clicked=onEntryClicked
+    />
+</accordian>
+<div v-show=footer v-html=footer id="asop-footer" />
+`,
+
+    created() {
+
+        // get the ASOP footer
+        $.get( gGetASOPFooterUrl, (resp) => { //eslint-disable-line no-undef
+            this.footer = resp ;
+        } ).fail( (xhr, status, errorMsg) => {
+            console.log( "Couldn't get the ASOP footer: " + errorMsg ) ;
+        } ) ;
+
+        // open the appropriate chapter pane when the user clicks on an ASOP section search result
+        gEventBus.on( "show-asop-entry-sr", (sectionId, content) => { //eslint-disable-line no-unused-vars
+            let chapterId = getASOPChapterIdFromSectionId( sectionId ) ;
+            this.asop.chapters.forEach( (chapter) => {
+                if ( chapter.chapter_id == chapterId )
+                    gEventBus.emit( "expand-pane", "asop", chapter ) ;
+            } ) ;
+        } ) ;
+
+    },
+
+    methods: {
+
+        // NOTE: We forward events to the ASOP popup for processing.
+        onPaneExpanded( chapter, isClick ) { gEventBus.emit( "asop-chapter-expanded", chapter, isClick ) ; },
+        onEntryClicked( chapter, section  ) { gEventBus.emit( "show-asop-section", chapter, section ) ; },
+
+        getEntryKey( section ) { return section.section_id ; },
+
     },
 
 } ) ;

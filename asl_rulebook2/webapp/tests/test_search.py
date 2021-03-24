@@ -1,15 +1,13 @@
 """ Test search. """
 
-import re
 import logging
 
 from selenium.webdriver.common.keys import Keys
 
-from asl_rulebook2.utils import strip_html
 from asl_rulebook2.webapp.search import load_search_config, _make_fts_query_string
 from asl_rulebook2.webapp.startup import StartupMsgs
 from asl_rulebook2.webapp.tests.utils import init_webapp, select_tabbed_page, get_curr_target, get_classes, \
-    wait_for, find_child, find_children, get_image_filename
+    wait_for, find_child, find_children, unload_elem, unload_sr_text
 
 # ---------------------------------------------------------------------
 
@@ -347,7 +345,7 @@ def _unload_search_results():
             return
         ruleids = []
         for elem in find_children( ".ruleid", parent ):
-            ruleid = get_elem_text( elem )
+            ruleid = unload_sr_text( elem )
             assert ruleid.startswith( "[" ) and ruleid.endswith( "]" )
             ruleids.append( ruleid[1:-1] )
         if ruleids:
@@ -360,7 +358,7 @@ def _unload_search_results():
         rulerefs = []
         for elem in find_children( "li", parent ):
             ruleref = {}
-            unload_elem( ruleref, "caption", find_child(".caption",elem) )
+            unload_elem( ruleref, "caption", find_child(".caption",elem), adjust_hilites=True )
             unload_ruleids( ruleref, "ruleids", elem )
             rulerefs.append( ruleref )
         if rulerefs:
@@ -369,9 +367,9 @@ def _unload_search_results():
     def unload_index_sr( sr ): #pylint: disable=possibly-unused-variable
         """Unload an "index" search result."""
         result = {}
-        unload_elem( result, "title", find_child("span.title",sr) )
-        unload_elem( result, "subtitle", find_child(".subtitle",sr) )
-        unload_elem( result, "content", find_child(".content",sr) )
+        unload_elem( result, "title", find_child("span.title",sr), adjust_hilites=True )
+        unload_elem( result, "subtitle", find_child(".subtitle",sr), adjust_hilites=True )
+        unload_elem( result, "content", find_child(".content",sr), adjust_hilites=True )
         if unload_elem( result, "see_also", find_child(".see-also",sr) ):
             assert result["see_also"].startswith( "See also:" )
             result["see_also"] = [ s.strip() for s in result["see_also"][9:].split( "," ) ]
@@ -389,48 +387,29 @@ def _unload_search_results():
         from asl_rulebook2.webapp.tests.test_annotations import unload_anno
         return unload_anno( sr )
 
+    def unload_asop_entry_sr( sr ): #pylint: disable=possibly-unused-variable
+        """Unload an "ASOP entry" search result."""
+        result = {}
+        unload_elem( result, "caption", find_child(".caption",sr), adjust_hilites=True )
+        unload_elem( result, "content", find_child(".content",sr), adjust_hilites=True )
+        return result
+
     # unload the search results
     results = []
     for sr in find_children( "#search-results .sr"):
         classes = get_classes( sr )
         classes.remove( "sr" )
-        classes = [ c for c in classes if c in ["index-sr","qa","anno"] ]
+        classes = [ c for c in classes if c in ["index-sr","qa","anno","asop-entry-sr"] ]
         assert len(classes) == 1
         sr_type = classes[0]
         if sr_type.endswith( "-sr" ):
             sr_type = sr_type[:-3]
-        func = locals()[ "unload_{}_sr".format( sr_type ) ]
+        func = locals()[ "unload_{}_sr".format( sr_type.replace("-","_") ) ]
         sr = func( sr )
         sr["sr_type"] = sr_type
         results.append( sr )
 
     return results
-
-def unload_elem( save_loc, key, elem ):
-    """Unload a single element."""
-    if not elem:
-        return False
-    if elem.tag_name in ("div", "span"):
-        val = get_elem_text( elem )
-    elif elem.tag_name == "img":
-        val = get_image_filename( elem )
-    else:
-        assert False, "Unknown element type: " + elem.tag_name
-        return False
-    if not val:
-        return False
-    save_loc[ key ] = val
-    return True
-
-def get_elem_text( elem ):
-    """Get the element's text content."""
-    val = elem.get_attribute( "innerHTML" )
-    # change how highlighted content is represented
-    matches = list( re.finditer( r'<span class="hilite">(.*?)</span>', val ) )
-    for mo in reversed(matches):
-        val = val[:mo.start()] + "((" + mo.group(1) + "))" + val[mo.end():]
-    # remove HTML tags
-    return strip_html( val ).strip()
 
 # ---------------------------------------------------------------------
 

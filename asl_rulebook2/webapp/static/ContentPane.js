@@ -8,11 +8,14 @@ gMainApp.component( "content-pane", {
     props: [ "contentDocs" ],
 
     template: `
-<tabbed-pages ref="tabbedPages">
-    <tabbed-page v-for="cdoc in contentDocs" :tabId=cdoc.cdoc_id :caption=cdoc.title :key=cdoc.cdoc_id >
-        <content-doc :cdoc=cdoc />
-    </tabbed-page>
-</tabbed-pages>`,
+<div>
+    <tabbed-pages ref="tabbedPages">
+        <tabbed-page v-for="cdoc in contentDocs" :tabId=cdoc.cdoc_id :caption=cdoc.title :key=cdoc.cdoc_id >
+            <content-doc :cdoc=cdoc />
+        </tabbed-page>
+    </tabbed-pages>
+    <asop />
+</div>`,
 
     created() {
 

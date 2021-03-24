@@ -44,6 +44,15 @@ export function isRuleid( val )
     return val.match( /^[A-Z](\.|CG)?\d/ ) ;
 }
 
+export function getASOPChapterIdFromSectionId( sectionId )
+{
+    // NOTE: Section ID's have the form "XXX-#", where XXX is the chapter ID and # is the sequence number.
+    let pos = sectionId.lastIndexOf( "-" ) ;
+    if ( pos < 0 )
+        return null ;
+    return sectionId.substring( 0, pos ) ;
+}
+
 // --------------------------------------------------------------------
 
 const BEGIN_HIGHLIGHT = "!@:" ;
@@ -135,6 +144,33 @@ export function makeImagesZoomable( $elem )
 }
 
 // --------------------------------------------------------------------
+
+export function wrapMatches( val, searchFor, delim1, delim2 )
+{
+    // search for a regex and wrap all matches with the specified delimiters
+    if ( val == null || val == undefined )
+        return null ;
+    let buf = [] ;
+    let pos = 0 ;
+    for ( let match of val.matchAll( searchFor ) ) {
+        buf.push(
+            val.substring( pos, match.index ),
+            delim1, match[0], delim2
+        ) ;
+        pos = match.index + match[0].length ;
+    }
+    buf.push( val.substring( pos ) ) ;
+    return buf.join("") ;
+}
+
+export function isChildOf( elem, elemParent, strict )
+{
+    // check if an element is a child of another element
+    if ( $.contains( elemParent, elem ) )
+        return true ;
+    if ( ! strict && elem.isSameNode( elemParent ) )
+        return true ;
+}
 
 export function getCssSize( elem, attr )
 {

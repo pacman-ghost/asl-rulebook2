@@ -9,6 +9,7 @@ from asl_rulebook2.webapp import app
 from asl_rulebook2.webapp.content import load_content_sets
 from asl_rulebook2.webapp.search import init_search
 from asl_rulebook2.webapp.rule_info import init_qa, init_errata, init_annotations
+from asl_rulebook2.webapp.asop import init_asop
 from asl_rulebook2.webapp.utils import parse_int
 
 _logger = logging.getLogger( "startup" )
@@ -32,7 +33,11 @@ def init_webapp():
     qa = init_qa( _startup_msgs, _logger )
     errata = init_errata( _startup_msgs, _logger )
     user_anno = init_annotations( _startup_msgs, _logger )
-    init_search( content_sets, qa, errata, user_anno, _startup_msgs, _logger )
+    asop, asop_content = init_asop( _startup_msgs, _logger )
+    init_search(
+        content_sets, qa, errata, user_anno, asop, asop_content,
+        _startup_msgs, _logger
+    )
 
 # ---------------------------------------------------------------------
 

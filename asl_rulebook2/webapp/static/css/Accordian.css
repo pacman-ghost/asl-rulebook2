@@ -11,5 +11,6 @@
 .accordian-pane .title .icon { height: 20px ; margin-right: 10px ; }
 
 .accordian-pane .entries { margin: 0 0 5px 15px ; list-style-type: none ; }
+.accordian-pane .entries .entry { margin: 2px 0 ; }
 .accordian-pane .entries .entry a { cursor: pointer ; }
 .accordian-pane .entries .entry.disabled { color: #666 ; }

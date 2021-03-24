@@ -60,8 +60,8 @@ def test_empty_errata( webapp, webdriver ):
 def unload_anno( anno_elem ):
     """Unload an annotation from the UI."""
     anno = {}
-    unload_elem( anno, "caption", find_child(".caption",anno_elem) )
-    unload_elem( anno, "content", find_child(".content",anno_elem) )
+    unload_elem( anno, "caption", find_child(".caption",anno_elem), adjust_hilites=True )
+    unload_elem( anno, "content", find_child(".content",anno_elem), adjust_hilites=True )
     img = find_child( "img.icon", anno_elem )
     unload_elem( anno, "icon", img )
     source = img.get_attribute( "title" )

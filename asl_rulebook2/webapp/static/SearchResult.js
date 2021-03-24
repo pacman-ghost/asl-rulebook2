@@ -142,6 +142,27 @@ gMainApp.component( "index-sr", {
 
 // --------------------------------------------------------------------
 
+gMainApp.component( "asop-entry-sr", {
+
+    props: [ "sr" ],
+
+    template: `
+<div class="sr asop-entry-sr asop" >
+    <div v-html="sr.caption+' (ASOP)'" @click=onClickCaption class="caption" title="Go to the ASOP" />
+    <div class="content" v-html=sr.content />
+</div>`,
+
+    methods: {
+        onClickCaption() {
+            gEventBus.emit( "activate-tab", "#nav", "asop" ) ;
+            gEventBus.emit( "show-asop-entry-sr", this.sr.section_id, this.sr.content ) ;
+        },
+    },
+
+} ) ;
+
+// --------------------------------------------------------------------
+
 gMainApp.component( "ruleid", {
 
     props: [ "csetId", "ruleId" ],

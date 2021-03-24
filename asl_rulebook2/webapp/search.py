@@ -12,6 +12,7 @@ import logging
 import traceback
 
 from flask import request, jsonify
+import lxml.html
 
 from asl_rulebook2.utils import plural
 from asl_rulebook2.webapp import app
@@ -125,6 +126,8 @@ def _do_search( args ):
             result = _unload_anno_sr( row, "errata" )
         elif row[1] == "user-anno":
             result = _unload_anno_sr( row, "user-anno" )
+        elif row[1] == "asop-entry":
+            result = _unload_asop_entry_sr( row )
         else:
             _logger.error( "Unknown searchable row type (rowid=%d): %s", row[0], row[1] )
             continue
@@ -207,7 +210,14 @@ def _unload_qa_sr( row ):
 def _unload_anno_sr( row, atype ):
     """Unload an annotation search result from the database."""
     anno = _fts_index[atype][ row[0] ] # nb: our copy of the annotation (must remain unchanged)
-    result = copy.deepcopy( anno ) # nb: the Q+A entry we will return to the caller (will be changed)
+    result = copy.deepcopy( anno ) # nb: the annotation we will return to the caller (will be changed)
+    _get_result_col( result, "content", row[6] )
+    return result
+
+def _unload_asop_entry_sr( row ):
+    """Unload an ASOP entry search result from the database."""
+    section = _fts_index["asop-entry"][ row[0] ] # nb: our copy of the ASOP section (must remain unchanged)
+    result = copy.deepcopy( section ) # nb: the ASOP section we will return to the caller (will be changed)
     _get_result_col( result, "content", row[6] )
     return result
 
@@ -397,12 +407,12 @@ def _adjust_sort_order( results ):
 
 # ---------------------------------------------------------------------
 
-def init_search( content_sets, qa, errata, user_anno, startup_msgs, logger ):
+def init_search( content_sets, qa, errata, user_anno, asop, asop_content, startup_msgs, logger ):
     """Initialize the search engine."""
 
     # initialize
     global _fts_index
-    _fts_index = { "index": {}, "q+a": {}, "errata": {}, "user-anno": {} }
+    _fts_index = { "index": {}, "q+a": {}, "errata": {}, "user-anno": {}, "asop-entry": {} }
 
     # initialize the database
     global _sqlite_path
@@ -437,6 +447,8 @@ def init_search( content_sets, qa, errata, user_anno, startup_msgs, logger ):
         _init_errata( curs, errata, logger )
     if user_anno:
         _init_user_anno( curs, user_anno, logger )
+    if asop:
+        _init_asop( curs, asop, asop_content, logger )
     conn.commit()
 
     # load the search config
@@ -528,6 +540,46 @@ def _do_init_anno( curs, anno, atype ):
             a["_fts_rowid"] = curs.lastrowid
             nrows += 1
     return nrows
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def _init_asop( curs, asop, asop_content, logger ):
+    """Add the ASOP to the search index."""
+    logger.info( "- Adding the ASOP." )
+    sr_type = "asop-entry"
+    nentries = 0
+    for chapter in asop.get( "chapters", [] ):
+        for section in chapter.get( "sections", [] ):
+            content =  asop_content.get( section["section_id"] )
+            if not content:
+                continue
+            entries = _extract_section_entries( content )
+            # NOTE: The way we manage the FTS index for ASOP entries is a little different to normal,
+            # since they don't exist as individual entities (this is the only place where they do,
+            # so that we can return them as individual search results). Each database row points
+            # to the parent section, and the section has a list of FTS rows for its child entries.
+            section[ "_fts_rowids" ] = []
+            for entry in entries:
+                curs.execute(
+                    "INSERT INTO searchable ( sr_type, content ) VALUES ( ?, ? )", (
+                    sr_type, entry
+                ) )
+                _fts_index[sr_type][ curs.lastrowid ] = section
+                section[ "_fts_rowids" ].append( curs.lastrowid )
+            nentries += 1
+    logger.info( "  - Added %s.", plural(nentries,"entry","entries") )
+
+def _extract_section_entries( content ):
+    """Separate out each entry from the section's content."""
+    entries = []
+    fragment = lxml.html.fragment_fromstring(
+        "<div> {} </div>".format( content )
+    )
+    for elem in fragment.xpath( ".//div[contains(@class,'entry')]" ):
+        if "entry" not in elem.attrib["class"].split():
+            continue
+        entries.append( lxml.html.tostring( elem ) )
+    return entries
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

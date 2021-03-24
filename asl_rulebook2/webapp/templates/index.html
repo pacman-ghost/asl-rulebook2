@@ -17,8 +17,12 @@
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/SearchResult.css' ) }}" />
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/RuleInfo.css' ) }}" />
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/ContentPane.css' ) }}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/ASOP.css' ) }}" />
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/TabbedPages.css' ) }}" />
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/Accordian.css' ) }}" />
+{%if ASOP_CSS_URL%}
+    <link rel="stylesheet" type="text/css" href="{{ASOP_CSS_URL}}" />
+{%endif%}
 </head>
 
 <body>
@@ -51,6 +55,10 @@
 gImagesBaseUrl = "{{ url_for( 'static', filename='images/' ) }}" ;
 gGetAppConfigUrl = "{{ url_for( 'get_app_config' ) }}" ;
 gGetContentDocsUrl = "{{ url_for( 'get_content_docs' ) }}" ;
+gGetASOPUrl = "{{ url_for( 'get_asop' ) }}" ;
+gGetASOPIntroUrl = "{{ url_for( 'get_asop_intro' ) }}" ;
+gGetASOPFooterUrl = "{{ url_for( 'get_asop_footer' ) }}" ;
+gGetASOPSectionUrl = "{{ url_for( 'get_asop_section', section_id='SECTION_ID' ) }}" ;
 gGetStartupMsgsUrl = "{{ url_for( 'get_startup_msgs' ) }}" ;
 gSearchUrl = "{{ url_for( 'search' ) }}" ;
 gGetRuleInfoUrl = "{{ url_for( 'get_rule_info', ruleid='RULEID' ) }}" ;
@@ -64,6 +72,7 @@ gGetFootnotesUrl = "{{ url_for( 'get_footnotes' ) }}" ;
 <script type="module" src="{{ url_for( 'static', filename='SearchResult.js' ) }}"></script>
 <script type="module" src="{{ url_for( 'static', filename='RuleInfo.js' ) }}"></script>
 <script type="module" src="{{ url_for( 'static', filename='ContentPane.js' ) }}"></script>
+<script type="module" src="{{ url_for( 'static', filename='ASOP.js' ) }}"></script>
 <script type="module" src="{{ url_for( 'static', filename='TabbedPages.js' ) }}"></script>
 <script type="module" src="{{ url_for( 'static', filename='Accordian.js' ) }}"></script>
 <script type="module" src="{{ url_for( 'static', filename='utils.js' ) }}"></script>

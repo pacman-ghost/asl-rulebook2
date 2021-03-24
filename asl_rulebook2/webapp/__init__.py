@@ -54,6 +54,9 @@ app = Flask( __name__ )
 _load_config( "app.cfg", "System" )
 _load_config( "site.cfg", "Site Config" )
 _load_config( "debug.cfg", "Debug" )
+for key, val in app.config.items():
+    if str( val ).isdigit():
+        app.config[ key ] = int( val )
 
 # initialize logging
 _fname = os.path.join( CONFIG_DIR, "logging.yaml" )

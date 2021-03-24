@@ -1,8 +1,8 @@
 """ Test Q+A. """
 
 from asl_rulebook2.webapp.tests.utils import init_webapp, \
-    find_child, find_children, wait_for_elem, get_image_filename
-from asl_rulebook2.webapp.tests.test_search import do_search, unload_elem, get_elem_text
+    find_child, find_children, wait_for_elem, get_image_filename, unload_elem, unload_sr_text
+from asl_rulebook2.webapp.tests.test_search import do_search
 
 # ---------------------------------------------------------------------
 
@@ -135,7 +135,7 @@ def unload_qa( qa_elem ):
     qa_entry = {}
 
     # unload the top-level fields
-    unload_elem( qa_entry, "caption", find_child(".caption",qa_elem) )
+    unload_elem( qa_entry, "caption", find_child(".caption",qa_elem), adjust_hilites=True )
 
     # unload each content node
     qa_content = []
@@ -145,15 +145,15 @@ def unload_qa( qa_elem ):
         content = {
             "icon": get_image_filename( find_child( "img.icon", content_elem ) ),
         }
-        unload_elem( content, "question", find_child(".question",content_elem) )
+        unload_elem( content, "question", find_child(".question",content_elem), adjust_hilites=True )
         unload_elem( content, "image", find_child("img.imageZoom",content_elem) )
-        unload_elem( content, "see_other", find_child(".see-other",content_elem) )
+        unload_elem( content, "see_other", find_child(".see-other",content_elem), adjust_hilites=True )
 
         # unload the answers (if any)
         answers = []
         for answer_elem in find_children( ".answer", content_elem ):
             answers.append( [
-                get_elem_text( answer_elem ),
+                unload_sr_text( answer_elem ),
                 find_child( "img.icon", answer_elem ).get_attribute( "title" ),
             ] )
         if answers:

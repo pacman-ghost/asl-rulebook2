@@ -1,0 +1,24 @@
+.asop .A {
+    padding-left: 1.5em ; background: url(images/attacker.png) no-repeat ; background-size: 1.1em ;
+    margin-top: 0.5em ; font-weight: bold ;
+}
+.asop .D {
+    padding-left: 1.5em ; background: url(images/defender.png) no-repeat ; background-size: 1.1em ;
+    margin-top: 0.5em ; font-weight: bold ;
+}
+.asop .B {
+    padding-left: 1.5em ; background: url(images/both-players.png) no-repeat ; background-size: 1.1em ;
+    margin-top: 0.5em ; font-weight: bold ;
+}
+
+.asop img.icon { height: 1em ; margin-bottom: -2px ; }
+.asop .content-removed { margin: 5px 0 ; font-style: italic ; color: #aaa ; }
+
+.asop p { margin-top: 0.5em ; }
+.asop p:first-of-type { margin-top: 0 ; }
+.asop li { margin-top: 0.25em ; }
+.asop li li { margin-top: 0.1em ; }
+.asop li li li { margin-top: 0.1em ; }
+
+#asop-footer { font-size: 80% ; font-style: italic ; }
+#asop-footer img { height: 1.2em ; margin-right: 0.25em ; }

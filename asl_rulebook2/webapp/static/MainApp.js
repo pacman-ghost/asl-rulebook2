@@ -19,6 +19,8 @@ export let gContentDocs = null ;
 export let gTargetIndex = null ;
 export let gFootnoteIndex = null ;
 export let gChapterResources = null ;
+export let gASOPChapterIndex = null ;
+export let gASOPSectionIndex = null ;
 
 // --------------------------------------------------------------------
 
@@ -26,11 +28,12 @@ gMainApp.component( "main-app", {
 
     data() { return {
         contentDocs: [],
+        asop: {},
         isLoaded: false,
     } ; },
 
     template: `
-<nav-pane id="nav" ref="navPane" />
+<nav-pane id="nav" :asop=asop ref="navPane" />
 <content-pane id="content" :contentDocs=contentDocs />
 <div v-if=isLoaded id="_mainapp-loaded_" />
 `,
@@ -49,6 +52,7 @@ gMainApp.component( "main-app", {
             this.getAppConfig(),
             this.getContentDocs( this ),
             this.getFootnoteIndex(),
+            this.getASOP(),
         ] ).then( () => {
             this.isLoaded = true ;
             gEventBus.emit( "app-loaded" ) ;
@@ -114,6 +118,33 @@ gMainApp.component( "main-app", {
                     resolve() ;
                 } ).fail( (xhr, status, errorMsg) => {
                     let msg = "Couldn't get the footnote index." ;
+                    showErrorMsg( msg + " <div class='pre'>" + errorMsg + "</div>" ) ;
+                    reject( msg )
+                } ) ;
+            } ) ;
+        },
+
+        getASOP() {
+            return new Promise( (resolve, reject) => {
+                // get the ASOP
+                $.getJSON( gGetASOPUrl, (resp) => { //eslint-disable-line no-undef
+                    this.asop = resp ;
+                    // build an index of the ASOP chapters and sections
+                    gASOPChapterIndex = {} ;
+                    gASOPSectionIndex = {} ;
+                    if ( resp.chapters ) {
+                        resp.chapters.forEach( (chapter) => {
+                            gASOPChapterIndex[ chapter.chapter_id ] = chapter ;
+                            if ( chapter.sections ) {
+                                chapter.sections.forEach( (section) => {
+                                    gASOPSectionIndex[ section.section_id ] = section ;
+                                } ) ;
+                            }
+                        } ) ;
+                    }
+                    resolve() ;
+                } ).fail( (xhr, status, errorMsg) => {
+                    let msg = "Couldn't get the ASOP." ;
                     showErrorMsg( msg + " <div class='pre'>" + errorMsg + "</div>" ) ;
                     reject( msg )
                 } ) ;

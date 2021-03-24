@@ -15,7 +15,10 @@ from asl_rulebook2.webapp.utils import parse_int
 @app.route( "/" )
 def main():
     """Return the main page."""
-    return render_template( "index.html" )
+    from asl_rulebook2.webapp.asop import user_css_url
+    return render_template( "index.html",
+        ASOP_CSS_URL = user_css_url
+    )
 
 # ---------------------------------------------------------------------
 

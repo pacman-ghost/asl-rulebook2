@@ -189,7 +189,7 @@ def test_see_also( webapp, webdriver ):
         elems[ caption ].click()
         expected = '"{}"'.format( caption ) if " " in caption else caption
         wait_for( 2, lambda: find_child( "input#query-string" ).get_attribute( "value" ) == expected )
-        return _unload_search_results()
+        return unload_search_results()
 
     # click on the "Bar" link and check that it gets searched for
     results = click_see_also( "Bar" )
@@ -325,9 +325,9 @@ def do_search( query_string ):
 
     # unload the results
     wait_for( 2, lambda: get_seq_no() > seq_no )
-    return _unload_search_results()
+    return unload_search_results()
 
-def _unload_search_results():
+def unload_search_results():
     """Unload the search results."""
 
     # check if there were any search results
@@ -336,8 +336,9 @@ def _unload_search_results():
         return elem.text # nb: string = error message
     elem = find_child( "#search-results .no-results" )
     if elem:
-        assert elem.text == "Nothing was found."
-        return None # nb: None = no results
+        if elem.text == "Nothing was found.":
+            return None # nb: None = no results
+        return elem.text
 
     def unload_ruleids( result, key, parent ):
         """Unload a list of ruleid's."""
@@ -397,6 +398,8 @@ def _unload_search_results():
     # unload the search results
     results = []
     for sr in find_children( "#search-results .sr"):
+        if not sr.is_displayed():
+            continue
         classes = get_classes( sr )
         classes.remove( "sr" )
         classes = [ c for c in classes if c in ["index-sr","qa","anno","asop-entry-sr"] ]

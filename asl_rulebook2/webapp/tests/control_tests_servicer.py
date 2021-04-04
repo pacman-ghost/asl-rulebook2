@@ -62,6 +62,18 @@ class ControlTestsServicer( BaseControlTestsServicer ):
             self._webapp.config.pop( "DATA_DIR", None )
         return Empty()
 
+    def setAppConfigVal( self, request, context ):
+        """Set an app config value."""
+        self._log_request( request, context )
+        # set the app config setting
+        for val_type in ( "strVal", "intVal", "boolVal" ):
+            if request.HasField( val_type ):
+                key, val = request.key, getattr(request,val_type)
+                _logger.debug( "- Setting app config: %s = %s (%s)", key, str(val), type(val).__name__ )
+                self._webapp.config[ key ] = val
+                return Empty()
+        raise RuntimeError( "Can't find app config key." )
+
     @staticmethod
     def _log_request( req, ctx ): #pylint: disable=unused-argument
         """Log a request."""

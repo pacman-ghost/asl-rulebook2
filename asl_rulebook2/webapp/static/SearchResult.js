@@ -13,7 +13,7 @@ gMainApp.component( "index-sr", {
     } ; },
 
     template: `
-<div class="sr index-sr" >
+<div class="index-sr" >
     <div v-if="sr.title || sr.subtitle" :style="{background: cssBackground}" class="title" >
         <a v-if=iconUrl href="#" @click=onClickIcon >
             <img :src=iconUrl class="icon" />
@@ -147,7 +147,7 @@ gMainApp.component( "asop-entry-sr", {
     props: [ "sr" ],
 
     template: `
-<div class="sr asop-entry-sr asop" >
+<div class="asop-entry-sr asop" >
     <div v-html="sr.caption+' (ASOP)'" @click=onClickCaption class="caption" title="Go to the ASOP" />
     <div class="content" v-html=sr.content />
 </div>`,

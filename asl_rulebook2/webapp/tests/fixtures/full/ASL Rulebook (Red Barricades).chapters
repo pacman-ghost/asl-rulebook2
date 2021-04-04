@@ -1,0 +1,13 @@
+[
+
+{ "title": "Red Barricades",
+  "chapter_id": "O",
+  "page_no": 1,
+  "sections": [
+    { "caption": "1. Debris", "ruleid": "O1" },
+    { "caption": "2. Railway Embankment", "ruleid": "O2" },
+    { "caption": "3. Printed Rubble", "ruleid": "O3" }
+  ]
+}
+
+]

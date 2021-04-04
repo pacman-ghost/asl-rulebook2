@@ -1,7 +1,7 @@
 """ Test Q+A. """
 
 from asl_rulebook2.webapp.tests.utils import init_webapp, \
-    find_child, find_children, wait_for_elem, get_image_filename, unload_elem, unload_sr_text
+    check_sr_filters, find_child, find_children, wait_for_elem, get_image_filename, unload_elem, unload_sr_text
 from asl_rulebook2.webapp.tests.test_search import do_search
 
 # ---------------------------------------------------------------------
@@ -12,6 +12,7 @@ def test_full_qa_entry( webapp, webdriver ):
     # initialize
     webapp.control_tests.set_data_dir( "qa" )
     init_webapp( webapp, webdriver )
+    check_sr_filters( [ "index", "qa" ] )
 
     # bring up the Q+A entry
     results = do_search( "full" )

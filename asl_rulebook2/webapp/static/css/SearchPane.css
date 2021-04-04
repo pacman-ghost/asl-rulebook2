@@ -1,9 +1,17 @@
+#nav .tabbed-page[data-tabid='search'] .wrapper {
+    display: flex ; flex-direction: column ;
+    overflow-y: none ;
+}
+
 /* search box */
-#search-box { display: flex ; padding: 1px ; margin-bottom: 8px ; }
+#search-box { display: flex ; flex-direction: column ; padding: 1px ; margin-bottom: 8px ; }
+#search-box .row { display: flex ; }
 #search-box input#query-string { margin-right: 5px ; flex-grow: 1 ; }
+#search-box .sr-filters { margin-top: 4px ; font-size: 80% ; }
+#search-box .sr-filters input[type="checkbox"] { margin: 0 2px 0 6px ; }
+#search-box .sr-count { flex-grow: 1 ; text-align: right ; font-style: italic ; color: #888 ; }
 
 /* search results */
-#nav .tabbed-page[data-tabid='search'] .wrapper { overflow-y: none ; }
-#search-results { height: calc(100% - 35px) ; overflow-y: auto ;  }
+#search-results { height: 100% ; overflow-y: auto ;  }
 #search-results .no-results { font-style: italic ; color: #666 ; }
 #search-results .error .pre { font-family: monospace ; margin: 0.25em 0 0 0.5em ; }

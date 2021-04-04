@@ -1,0 +1,53 @@
+{
+
+"Chapter A": [
+
+{ "caption": "A4.63 & A11.8",
+  "ruleids": [ "A4.63", "A11.8" ],
+  "content": [
+    { "question": "In the image (RB map), wherein Rubble is eligible for Street-Fighting Ambush like a building. would a unit in G7 be eligible for Street-Fighting Ambush against an AFV in G8? <p> Could a unit in G7 Dash (through G8) to F8 or H8?",
+      "image": "a4.63, a11.8.png",
+      "answers": [
+        [ "No to both.", "ps" ]
+      ]
+    }
+  ]
+},
+
+{ "caption": "A7.7",
+  "ruleids": [ "A7.7" ],
+  "content": [
+    { "question": "All German units combine as a Fire Group to take a 30/+3 shot at the Russian 447. Given that the 247 is one of two units in the Fire Group that potentially enable the shot to cause Encirclement, and that the 247's shot alone is not sufficient to be an Encirclement-causing shot, does the shot from this Fire Group cause Encirclement?",
+      "image": "a7.7.png",
+      "answers": [
+        [ "Yes.", "ps" ]
+      ]
+    }
+  ]
+},
+
+{ "caption": "A7.7 & A23.3",
+  "ruleids": [ "A7.7", "A23.3" ],
+  "content": [
+    { "question": "Does a placed DC attack count for encirclement (using the hexside it was placed through as its direction)?",
+      "answers": [
+        [ "No.", "ps" ]
+      ]
+    }
+  ]
+},
+
+{ "caption": "A24.31",
+  "ruleids": [ "A24.31" ],
+  "content": [
+    { "question": "May a MMC attempt to throw WP grenades into its own location? <p> Into an adjacent location solely occupied by friendly units?",
+      "answers": [
+        [ "Yes to both; A24.31", "ps" ]
+      ]
+    }
+  ]
+}
+
+]
+
+}

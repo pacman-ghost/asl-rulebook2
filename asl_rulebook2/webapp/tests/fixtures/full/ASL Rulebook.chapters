@@ -1,0 +1,83 @@
+[
+
+{ "title": "Infantry And Basic Game Rules",
+  "chapter_id": "A",
+  "page_no": 42,
+  "sections": [
+    { "caption": "1. Personnel Counters", "ruleid": "A1" },
+    { "caption": "2. The Mapboard", "ruleid": "A2" },
+    { "caption": "3. Basic Sequence Of Play", "ruleid": "A3" }
+] },
+
+{ "title": "Terrain",
+  "chapter_id": "B",
+  "page_no": 109,
+  "sections": [
+    { "caption": "1. Open Ground", "ruleid": "B1" },
+    { "caption": "2. Shellholes", "ruleid": "B2" },
+    { "caption": "3. Roads", "ruleid": "B3" }
+] },
+
+{ "title": "Ordnance & Offboard Artillery (OBA)",
+  "chapter_id": "C",
+  "page_no": 158,
+  "sections": [
+    { "caption": "1. Offboard Artillery (OBA)", "ruleid": "C1" },
+    { "caption": "2. Gun Classifications", "ruleid": "C2" },
+    { "caption": "3. The To Hit Process", "ruleid": "C3" }
+] },
+
+{ "title": "Vehicles",
+  "chapter_id": "D",
+  "page_no": 187,
+  "sections": [
+    { "caption": "1. Vehicle Counters", "ruleid": "D1" },
+    { "caption": "2. Vehicular Movement", "ruleid": "D2" },
+    { "caption": "3. AFV Combat", "ruleid": "D3" }
+] },
+
+{ "title": "Miscellaneous",
+  "chapter_id": "E",
+  "page_no": 216,
+  "sections": [
+    { "caption": "1. Night", "ruleid": "E1" },
+    { "caption": "2. Interrogation", "ruleid": "E2" },
+    { "caption": "3. Weather", "ruleid": "E3" }
+] },
+
+{ "title": "North Africa",
+  "chapter_id": "F",
+  "page_no": 247,
+  "sections": [
+    { "caption": "1. Open Ground", "ruleid": "F1" },
+    { "caption": "2. Scrub", "ruleid": "F2" },
+    { "caption": "3. Hammada", "ruleid": "F3" }
+] },
+
+{ "title": "Pacific Theater",
+  "chapter_id": "G",
+  "page_no": 270,
+  "sections": [
+    { "caption": "1. The Japanese", "ruleid": "G1" },
+    { "caption": "2. Jungle", "ruleid": "G2" },
+    { "caption": "3. Bamboo", "ruleid": "G3" }
+] },
+
+{ "title": "Deluxe ASL",
+  "chapter_id": "J",
+  "page_no": 593,
+  "sections": [
+    { "caption": "1. Miniatures", "ruleid": "J1" },
+    { "caption": "2. Converting ASL Rules To Deluxe ASL", "ruleid": "J2" }
+] },
+
+{ "title": "Korean War",
+  "chapter_id": "W",
+  "page_no": 647,
+  "sections": [
+    { "caption": "1. KW Terrain", "ruleid": "W1" },
+    { "caption": "2. The Americans", "ruleid": "W2" },
+    { "caption": "3. The South Koreans", "ruleid": "W3" }
+] }
+
+]

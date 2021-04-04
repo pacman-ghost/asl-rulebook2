@@ -107,6 +107,20 @@ def get_curr_target():
     ruleid = elem.get_attribute( "data-ruleid" )
     return ( tab_id, ruleid )
 
+def check_sr_filters( expected ):
+    """Check the search result filter checkboxes."""
+    sr_filters = find_child( "#search-box .sr-filters" )
+    if expected:
+        elems = [
+            c.get_attribute("name") for c in find_children( "input[type='checkbox']", sr_filters )
+            if c.is_displayed()
+        ]
+        assert all( e.startswith("show-") and e.endswith("-sr") for e in elems )
+        elems = [ e[5:-3] for e in elems ]
+        assert elems == expected
+    else:
+        assert not sr_filters.is_displayed()
+
 # ---------------------------------------------------------------------
 
 #pylint: disable=multiple-statements,missing-function-docstring

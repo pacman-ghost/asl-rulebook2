@@ -8,6 +8,15 @@ message SetDataDirRequest {
     string fixturesDirName = 1 ;
 }
 
+message SetAppConfigValRequest {
+    string key = 1 ;
+    oneof ac_oneof {
+        string strVal = 2 ;
+        int32 intVal = 3 ;
+        bool boolVal = 4 ;
+    }
+}
+
 // --------------------------------------------------------------------
 
 service ControlTests
@@ -16,4 +25,5 @@ service ControlTests
     rpc endTests( google.protobuf.Empty ) returns ( google.protobuf.Empty ) ;
 
     rpc setDataDir( SetDataDirRequest ) returns ( google.protobuf.Empty ) ;
+    rpc setAppConfigVal( SetAppConfigValRequest ) returns ( google.protobuf.Empty ) ;
 }

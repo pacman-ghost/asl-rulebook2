@@ -1,0 +1,37 @@
+{
+
+"A.2": { "caption": "ERRORS" },
+"A3.8": { "caption": "CLOSE COMBAT PHASE (CCPh)" },
+"A7.7": { "caption": "ENCIRCLEMENT" },
+"A11": { "caption": "CLOSE COMBAT (CC)" },
+"A24.3": { "caption": "WHITE PHOSPHORUS (WP)" },
+"D5.2": { "caption": "BUTTONED UP (BU)" },
+
+"A1": { "caption": "PERSONNEL COUNTERS" },
+"A2": { "caption": "THE MAPBOARD" },
+"A3": { "caption": "BASIC SEQUENCE OF PLAY" },
+"B1": { "caption": "OPEN GROUND" },
+"B2": { "caption": "SHELLHOLES" },
+"B3": { "caption": "ROADS" },
+"C1": { "caption": "OFFBOARD ARTILLERY (OBA)" },
+"C2": { "caption": "GUN CLASSIFICATIONS" },
+"C3": { "caption": "THE TO HIT PROCESS" },
+"D1": { "caption": "VEHICLE COUNTERS" },
+"D2": { "caption": "VEHICULAR MOVEMENT" },
+"D3": { "caption": "AFV COMBAT" },
+"E1": { "caption": "NIGHT" },
+"E2": { "caption": "INTERROGATION" },
+"E3": { "caption": "WEATHER" },
+"F1": { "caption": "OPEN GROUND" },
+"F2": { "caption": "SCRUB" },
+"F3": { "caption": "HAMMADA" },
+"G1": { "caption": "THE JAPANESE" },
+"G2": { "caption": "JUNGLE" },
+"G3": { "caption": "BAMBOO" },
+"J1": { "caption": "MINIATURES" },
+"J2": { "caption": "CONVERTING ASL RULES TO DELUXE ASL" },
+"W1": { "caption": "KW TERRAIN" },
+"W2": { "caption": "THE AMERICANS" },
+"W3": { "caption": "THE SOUTH KOREANS" }
+
+}

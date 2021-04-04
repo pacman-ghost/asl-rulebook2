@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   syntax='proto3',
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n\x13\x63ontrol_tests.proto\x1a\x1bgoogle/protobuf/empty.proto\",\n\x11SetDataDirRequest\x12\x17\n\x0f\x66ixturesDirName\x18\x01 \x01(\t2\xc2\x01\n\x0c\x43ontrolTests\x12<\n\nstartTests\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\x12:\n\x08\x65ndTests\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\x12\x38\n\nsetDataDir\x12\x12.SetDataDirRequest\x1a\x16.google.protobuf.Emptyb\x06proto3'
+  serialized_pb=b'\n\x13\x63ontrol_tests.proto\x1a\x1bgoogle/protobuf/empty.proto\",\n\x11SetDataDirRequest\x12\x17\n\x0f\x66ixturesDirName\x18\x01 \x01(\t\"h\n\x16SetAppConfigValRequest\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x10\n\x06strVal\x18\x02 \x01(\tH\x00\x12\x10\n\x06intVal\x18\x03 \x01(\x05H\x00\x12\x11\n\x07\x62oolVal\x18\x04 \x01(\x08H\x00\x42\n\n\x08\x61\x63_oneof2\x86\x02\n\x0c\x43ontrolTests\x12<\n\nstartTests\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\x12:\n\x08\x65ndTests\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\x12\x38\n\nsetDataDir\x12\x12.SetDataDirRequest\x1a\x16.google.protobuf.Empty\x12\x42\n\x0fsetAppConfigVal\x12\x17.SetAppConfigValRequest\x1a\x16.google.protobuf.Emptyb\x06proto3'
   ,
   dependencies=[google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,])
 
@@ -58,7 +58,75 @@ _SETDATADIRREQUEST = _descriptor.Descriptor(
   serialized_end=96,
 )
 
+
+_SETAPPCONFIGVALREQUEST = _descriptor.Descriptor(
+  name='SetAppConfigValRequest',
+  full_name='SetAppConfigValRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  create_key=_descriptor._internal_create_key,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='key', full_name='SetAppConfigValRequest.key', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='strVal', full_name='SetAppConfigValRequest.strVal', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=b"".decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='intVal', full_name='SetAppConfigValRequest.intVal', index=2,
+      number=3, type=5, cpp_type=1, label=1,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+    _descriptor.FieldDescriptor(
+      name='boolVal', full_name='SetAppConfigValRequest.boolVal', index=3,
+      number=4, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+    _descriptor.OneofDescriptor(
+      name='ac_oneof', full_name='SetAppConfigValRequest.ac_oneof',
+      index=0, containing_type=None,
+      create_key=_descriptor._internal_create_key,
+    fields=[]),
+  ],
+  serialized_start=98,
+  serialized_end=202,
+)
+
+_SETAPPCONFIGVALREQUEST.oneofs_by_name['ac_oneof'].fields.append(
+  _SETAPPCONFIGVALREQUEST.fields_by_name['strVal'])
+_SETAPPCONFIGVALREQUEST.fields_by_name['strVal'].containing_oneof = _SETAPPCONFIGVALREQUEST.oneofs_by_name['ac_oneof']
+_SETAPPCONFIGVALREQUEST.oneofs_by_name['ac_oneof'].fields.append(
+  _SETAPPCONFIGVALREQUEST.fields_by_name['intVal'])
+_SETAPPCONFIGVALREQUEST.fields_by_name['intVal'].containing_oneof = _SETAPPCONFIGVALREQUEST.oneofs_by_name['ac_oneof']
+_SETAPPCONFIGVALREQUEST.oneofs_by_name['ac_oneof'].fields.append(
+  _SETAPPCONFIGVALREQUEST.fields_by_name['boolVal'])
+_SETAPPCONFIGVALREQUEST.fields_by_name['boolVal'].containing_oneof = _SETAPPCONFIGVALREQUEST.oneofs_by_name['ac_oneof']
 DESCRIPTOR.message_types_by_name['SetDataDirRequest'] = _SETDATADIRREQUEST
+DESCRIPTOR.message_types_by_name['SetAppConfigValRequest'] = _SETAPPCONFIGVALREQUEST
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 SetDataDirRequest = _reflection.GeneratedProtocolMessageType('SetDataDirRequest', (_message.Message,), {
@@ -67,6 +135,13 @@ SetDataDirRequest = _reflection.GeneratedProtocolMessageType('SetDataDirRequest'
   # @@protoc_insertion_point(class_scope:SetDataDirRequest)
   })
 _sym_db.RegisterMessage(SetDataDirRequest)
+
+SetAppConfigValRequest = _reflection.GeneratedProtocolMessageType('SetAppConfigValRequest', (_message.Message,), {
+  'DESCRIPTOR' : _SETAPPCONFIGVALREQUEST,
+  '__module__' : 'control_tests_pb2'
+  # @@protoc_insertion_point(class_scope:SetAppConfigValRequest)
+  })
+_sym_db.RegisterMessage(SetAppConfigValRequest)
 
 
 
@@ -77,8 +152,8 @@ _CONTROLTESTS = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   create_key=_descriptor._internal_create_key,
-  serialized_start=99,
-  serialized_end=293,
+  serialized_start=205,
+  serialized_end=467,
   methods=[
   _descriptor.MethodDescriptor(
     name='startTests',
@@ -106,6 +181,16 @@ _CONTROLTESTS = _descriptor.ServiceDescriptor(
     index=2,
     containing_service=None,
     input_type=_SETDATADIRREQUEST,
+    output_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
+    serialized_options=None,
+    create_key=_descriptor._internal_create_key,
+  ),
+  _descriptor.MethodDescriptor(
+    name='setAppConfigVal',
+    full_name='ControlTests.setAppConfigVal',
+    index=3,
+    containing_service=None,
+    input_type=_SETAPPCONFIGVALREQUEST,
     output_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,

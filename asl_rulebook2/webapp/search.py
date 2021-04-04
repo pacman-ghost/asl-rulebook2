@@ -120,7 +120,7 @@ def _do_search( args ):
             row[col_no] = remove_bad_hilites( row[col_no] )
         if row[1] == "index":
             result = _unload_index_sr( row )
-        elif row[1] == "q+a":
+        elif row[1] == "qa":
             result = _unload_qa_sr( row )
         elif row[1] == "errata":
             result = _unload_anno_sr( row, "errata" )
@@ -186,7 +186,7 @@ def _unload_index_sr( row ):
 
 def _unload_qa_sr( row ):
     """Unload a Q+A search result from the database."""
-    qa_entry = _fts_index["q+a"][ row[0] ] # nb: our copy of the Q+A entry (must remain unchanged)
+    qa_entry = _fts_index["qa"][ row[0] ] # nb: our copy of the Q+A entry (must remain unchanged)
     result = copy.deepcopy( qa_entry ) # nb: the Q+A entry we will return to the caller (will be changed)
     # replace the content in the Q+A entry we will return to the caller with the values
     # from the search index (which will have search term highlighting)
@@ -412,7 +412,7 @@ def init_search( content_sets, qa, errata, user_anno, asop, asop_content, startu
 
     # initialize
     global _fts_index
-    _fts_index = { "index": {}, "q+a": {}, "errata": {}, "user-anno": {}, "asop-entry": {} }
+    _fts_index = { "index": {}, "qa": {}, "errata": {}, "user-anno": {}, "asop-entry": {} }
 
     # initialize the database
     global _sqlite_path
@@ -488,7 +488,7 @@ def _init_qa( curs, qa, logger ):
     """Add the Q+A to the search index."""
     logger.info( "- Adding the Q+A." )
     nrows = 0
-    sr_type = "q+a"
+    sr_type = "qa"
     for qa_entries in qa.values():
         for qa_entry in qa_entries:
             buf = []
@@ -615,7 +615,7 @@ def load_search_config( startup_msgs, logger ):
 
     # load the search replacements
     def load_search_replacements( fname, ftype ):
-        if not os.path.isfile( fname ):
+        if fname is None or not os.path.isfile( fname ):
             return
         logger.info( "Loading %s search replacements: %s", ftype, fname )
         try:
@@ -637,7 +637,7 @@ def load_search_config( startup_msgs, logger ):
 
     # load the search aliases
     def load_search_aliases( fname, ftype ):
-        if not os.path.isfile( fname ):
+        if fname is None or not os.path.isfile( fname ):
             return
         logger.info( "Loading %s search aliases: %s", ftype, fname )
         try:
@@ -660,7 +660,7 @@ def load_search_config( startup_msgs, logger ):
 
     # load the search synonyms
     def load_search_synonyms( fname, ftype ):
-        if not os.path.isfile( fname ):
+        if fname is None or not os.path.isfile( fname ):
             return
         logger.info( "Loading %s search synonyms: %s", ftype, fname )
         try:

@@ -77,6 +77,7 @@ gMainApp.component( "main-app", {
             // get the app config
             return getJSON( gGetAppConfigUrl ).then( (resp) => { //eslint-disable-line no-undef
                 gAppConfig = resp ;
+                gEventBus.emit( "app-config-loaded" ) ;
             } ).catch( (errorMsg) => {
                 showErrorMsg( "Couldn't get the app config.", errorMsg ) ;
             } ) ;

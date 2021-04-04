@@ -5,7 +5,8 @@ import json
 
 from asl_rulebook2.webapp.tests.test_search import do_search
 from asl_rulebook2.webapp.tests.utils import init_webapp, select_tabbed_page, \
-    wait_for, wait_for_elem, find_child, find_children, unload_elem, unload_sr_text, get_image_filename, has_class
+    wait_for, wait_for_elem, find_child, find_children, unload_elem, unload_sr_text, \
+    check_sr_filters, get_image_filename, has_class
 
 # ---------------------------------------------------------------------
 
@@ -15,6 +16,7 @@ def test_asop_nav( webdriver, webapp ):
     # initialize
     webapp.control_tests.set_data_dir( "asop" )
     init_webapp( webapp, webdriver )
+    check_sr_filters( [ "index", "asop-entry" ] )
 
     # load the ASOP
     fname = os.path.join( os.path.dirname(__file__), "fixtures/asop/asop/index.json" )

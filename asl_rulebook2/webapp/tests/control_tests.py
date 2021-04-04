@@ -6,7 +6,7 @@ from google.protobuf.empty_pb2 import Empty
 from asl_rulebook2.webapp.tests.proto.generated.control_tests_pb2_grpc import ControlTestsStub
 
 from asl_rulebook2.webapp.tests.proto.generated.control_tests_pb2 import \
-    SetDataDirRequest
+    SetDataDirRequest, SetAppConfigValRequest
 
 # ---------------------------------------------------------------------
 
@@ -34,4 +34,17 @@ class ControlTests:
         self._stub.setDataDir(
             SetDataDirRequest( fixturesDirName = fixtures_dname )
         )
+        return self
+
+    def set_app_config_val( self, key, val ):
+        """Set an app config value."""
+        if isinstance( val, str ):
+            req = SetAppConfigValRequest( key=key, strVal=val )
+        elif isinstance( val, int ):
+            req = SetAppConfigValRequest( key=key, intVal=val )
+        elif isinstance( val, bool ):
+            req = SetAppConfigValRequest( key=key, boolVal=val )
+        else:
+            raise ValueError( "Invalid value type: {}".format( type(val).__name__ ) )
+        self._stub.setAppConfigVal( req )
         return self

@@ -1,0 +1,80 @@
+[
+
+{ "title": "Errors",
+  "ruleids": [ "A.2" ]
+},
+
+{ "title": "CCPh",
+  "subtitle": "Close Combat Phase",
+  "content": "This rule has had an errata attached to it. Click through to see it.",
+  "ruleids": [ "A3.8" ],
+  "rulerefs": [
+    { "caption": "ENEMY Attacks", "ruleids": [ "S11.5" ] },
+    { "caption": "dropping SW before CC", "ruleids": [ "A4.43" ] }
+  ]
+},
+
+{ "title": "CC",
+  "subtitle": "Close Combat",
+  "ruleids": [ "A11" ],
+  "rulerefs": [
+    { "caption": "Armor Leader", "ruleids": [ "D3.44" ] },
+    { "caption": "ATMM", "ruleids": [ "C13.7" ] },
+    { "caption": "Berserk", "ruleids": [ "A15.43" ] },
+    { "caption": "units in Boats", "ruleids": [ "E5.6" ] },
+    { "caption": "Broken Units", "ruleids": [ "A11.16" ] },
+    { "caption": "BU", "ruleids": [ "D5.2" ] }
+  ]
+},
+
+{ "title": "BU",
+  "subtitle": "Buttoned Up",
+  "ruleids": [ "D5.2" ],
+  "rulerefs": [
+    { "caption": "Amphibian", "ruleids": [ "G14.31" ] },
+    { "caption": "can change BU/CE status during MPh or APh", "ruleids": [ "D5.33" ] },
+    { "caption": "ENEMY Vehicles", "ruleids": [ "S9.31" ] },
+    { "caption": "MA Interdiction NA", "ruleids": [ "A10.532" ] },
+    { "caption": "OT AFV", "ruleids": [ "D6.61" ] },
+    { "caption": "Passengers on LC", "ruleids": [ "G12.123" ] },
+    { "caption": "Pinning", "ruleids": [ "A7.82" ] },
+    { "caption": "Secret Record", "ruleids": [ "A12.2" ] },
+    { "caption": "sN", "ruleids": [ "D13.34" ] },
+    { "caption": "Sighting TC", "ruleids": [ "E7.43" ] },
+    { "caption": "sM", "ruleids": [ "D13.3" ] },
+    { "caption": "TH Penalty", "ruleids": [ "C5.9" ] }
+  ]
+},
+
+{ "title": "Encirclement",
+  "ruleids": [ "A7.7" ],
+  "rulerefs": [
+    { "caption": "Cellars NA", "ruleids": [ "O6.7", "R4.7" ] },
+    { "caption": "Japanese do not lower their morale by 1", "ruleids": [ "G1.62" ] },
+    { "caption": "Mission End", "ruleids": [ "S17.43" ] },
+    { "caption": "EXC Pillbox", "ruleids": [ "B30.32" ] },
+    { "caption": "RePh", "ruleids": [ "O11.6041", "P8.6041", "Q9.6041", "R9.6041", "T15.6041", "T15.606" ] },
+    { "caption": "Rout Effects", "ruleids": [ "A20.21" ] },
+    { "caption": "Upper Level", "ruleids": [ "A7.72" ] }
+  ]
+},
+
+{ "title": "White Phosphorus",
+  "ruleids": [ "A24.3" ],
+  "see_also": [ "WP" ]
+},
+
+{ "title": "WP",
+  "subtitle": "White Phosphorus",
+  "ruleids": [ "A24.3" ],
+  "rulerefs": [
+    { "caption": "vs Cave", "ruleids": [ "G11.85" ] },
+    { "caption": "DM", "ruleids": [ "A10.62" ] },
+    { "caption": "FFE", "ruleids": [ "C3.76" ] },
+    { "caption": "Germans in ABtF", "ruleids": [ "SSR18" ] },
+    { "caption": "Straying", "ruleids": [ "E1.53" ] },
+    { "caption": "G.M.D.", "ruleids": [ "G18.21" ] }
+  ]
+}
+
+]

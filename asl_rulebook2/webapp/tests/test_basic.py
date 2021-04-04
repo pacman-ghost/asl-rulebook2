@@ -1,7 +1,7 @@
 """ Test basic functionality. """
 
 from asl_rulebook2.webapp.tests.utils import init_webapp, \
-    get_nav_panels, get_content_docs, select_tabbed_page, find_child
+    get_nav_panels, get_content_docs, check_sr_filters, select_tabbed_page, find_child
 
 # ---------------------------------------------------------------------
 
@@ -11,6 +11,7 @@ def test_hello( webapp, webdriver ):
     # initialize
     webapp.control_tests.set_data_dir( "simple" )
     init_webapp( webapp, webdriver )
+    check_sr_filters( [] )
 
     # check that the nav panel loaded correctly
     nav_panels = get_nav_panels()

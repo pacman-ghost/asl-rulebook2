@@ -1,7 +1,7 @@
 """ Test annotations. """
 
 from asl_rulebook2.webapp.tests.utils import init_webapp, \
-    find_child, find_children, wait_for_elem
+    find_child, find_children, wait_for_elem, check_sr_filters
 from asl_rulebook2.webapp.tests.test_search import do_search, unload_elem
 
 # ---------------------------------------------------------------------
@@ -12,6 +12,7 @@ def test_full_errata( webapp, webdriver ):
     # initialize
     webapp.control_tests.set_data_dir( "annotations" )
     init_webapp( webapp, webdriver )
+    check_sr_filters( [ "index", "errata" ] )
 
     # bring up the errata and check it in the search results
     results = do_search( "test" )

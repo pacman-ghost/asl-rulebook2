@@ -48,6 +48,7 @@
 <script src="{{ url_for( 'static',
     filename = 'tinyemitter/tinyemitter' + WEB_DEBUG_MIN + '.js'
 ) }}"></script>
+<script src="{{ url_for( 'static', filename='js-cookie/js.cookie.js' ) }}"></script>
 <script src="{{ url_for( 'static', filename='growl/jquery.growl.js' ) }}"></script>
 <script src="{{ url_for( 'static', filename='imageZoom/jquery.imageZoom.min.js' ) }}"></script>
 
@@ -75,6 +76,7 @@ gGetFootnotesUrl = "{{ url_for( 'get_footnotes' ) }}" ;
 <script type="module" src="{{ url_for( 'static', filename='ASOP.js' ) }}"></script>
 <script type="module" src="{{ url_for( 'static', filename='TabbedPages.js' ) }}"></script>
 <script type="module" src="{{ url_for( 'static', filename='Accordian.js' ) }}"></script>
+<script type="module" src="{{ url_for( 'static', filename='UserSettings.js' ) }}"></script>
 <script type="module" src="{{ url_for( 'static', filename='utils.js' ) }}"></script>
 
 </html>

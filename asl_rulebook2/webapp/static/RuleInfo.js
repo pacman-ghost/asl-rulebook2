@@ -1,5 +1,5 @@
 import { gMainApp, gUrlParams } from "./MainApp.js" ;
-import { makeImagesZoomable } from "./utils.js" ;
+import { linkifyAutoRuleids, fixupSearchHilites, makeImagesZoomable } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -37,7 +37,26 @@ gMainApp.component( "rule-info", {
 
     beforeUpdate() {
         // hide the close button until the "enter" transition has completed
-        $( this.$refs.closeRuleInfoButton ).hide() ;
+        let $closeButton = $( this.$refs.closeRuleInfoButton ) ;
+        if ( this.ruleInfo.length == 0 )
+            $closeButton.hide() ;
+        else {
+            if ( $closeButton.css( "display" ) == "none" )
+                $closeButton.hide() ;
+            else {
+                // NOTE: If we're already visible, we don't get the transition, so we force
+                // post-transition processing manually.
+                this.$nextTick( () => {
+                    this.onAfterEnterRuleInfoTransition() ;
+                    this.$refs.ruleInfo.scrollTop = 0 ;
+                } ) ;
+            }
+        }
+    },
+
+    updated() {
+        // make the ruleid's clickable
+        linkifyAutoRuleids( $( this.$el ) ) ;
     },
 
     methods: {
@@ -76,7 +95,7 @@ gMainApp.component( "qa-entry", {
 
     template: `
 <div class="qa rule-info">
-    <div class="caption"> {{qaEntry.caption}} </div>
+    <div class="caption" v-html=fixupHilites(qaEntry.caption) />
     <div v-for="content in qaEntry.content" :key=content class="content">
         <div v-if="content.question">
             <!-- this is a normal question + one or more answers -->
@@ -109,10 +128,17 @@ gMainApp.component( "qa-entry", {
     },
 
     methods: {
+
         makeQAImageUrl( fname ) {
             // return the URL to an image associated with a Q+A entry
             return gGetQAImageUrl.replace( "FNAME", fname ) ; //eslint-disable-line no-undef
         },
+
+        fixupHilites( val ) {
+            // convert search term highlights returned to us by the search engine to HTML
+            return fixupSearchHilites( val ) ;
+        },
+
     },
 
 } ) ;
@@ -127,7 +153,10 @@ gMainApp.component( "annotation", {
 
     template: `
 <div class="anno rule-info">
-    <div :class=annoType class="caption" > {{anno.ruleid || '(no rule ID)'}} </div>
+    <div :class=annoType class="caption" >
+        <span v-if=anno.ruleid :data-ruleid=anno.ruleid class="auto-ruleid"> {{anno.ruleid}} </span>
+        <span v-else> (no rule ID) </span>
+    </div>
     <div class="content">
         <img :src=makeIconImageUrl() :title=anno.source class="icon" />
         <div v-html=anno.content />

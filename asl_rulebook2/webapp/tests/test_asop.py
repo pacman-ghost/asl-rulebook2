@@ -261,6 +261,23 @@ def test_asop_entries( webdriver, webapp ):
 
 # ---------------------------------------------------------------------
 
+def open_asop_chapter( chapter_id ):
+    """Open the specified ASOP chapter."""
+    nav = _unload_nav( True )
+    for chapter in nav:
+        if chapter["chapter_id"] == chapter_id:
+            chapter["elem"].click()
+            wait_for( 2, lambda: find_child("#asop").get_attribute("data-chapterid") == chapter_id )
+            return chapter
+    assert False, "Can't find ASOP chapter: "+chapter_id
+    return None # nb: for pylint :-/
+
+def open_asop_section( chapter_id, section_no ):
+    """Open the specified ASOP section."""
+    chapter = open_asop_chapter( chapter_id )
+    chapter["sections"][ section_no ]["elem"].click()
+    wait_for( 2, lambda: find_child( "#asop .sections.single" ) )
+
 def _unload_nav( include_elems ):
     """Unload the ASOP nav."""
 

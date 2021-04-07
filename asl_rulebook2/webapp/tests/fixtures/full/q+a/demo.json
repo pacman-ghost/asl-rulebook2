@@ -40,7 +40,7 @@
 { "caption": "A24.31",
   "ruleids": [ "A24.31" ],
   "content": [
-    { "question": "May a MMC attempt to throw WP grenades into its own location? <p> Into an adjacent location solely occupied by friendly units?",
+    { "question": "May a MMC attempt to throw WP grenades (A24.3) into its own location? <p> Into an adjacent location solely occupied by friendly units?",
       "answers": [
         [ "Yes to both; A24.31", "ps" ]
       ]

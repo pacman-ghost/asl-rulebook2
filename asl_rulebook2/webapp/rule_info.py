@@ -41,11 +41,11 @@ def init_qa( startup_msgs, logger ):
         qa_entries = load_data_file( fname, "Q+A", False, logger, startup_msgs.warning )
         if qa_entries is None:
             return
-        for key, vals in qa_entries.items():
+        for key, entries in qa_entries.items():
             if key in qa:
-                qa[ key ].extend( vals )
+                qa[ key ].extend( entries )
             else:
-                qa[ key ] = vals
+                qa[ key ] = entries
         n = sum( len(v) for v in qa_entries.values() )
         logger.info( "- Loaded %s.", plural(n,"entry","entries") )
 

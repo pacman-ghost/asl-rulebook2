@@ -51,6 +51,10 @@ gMainApp.component( "content-pane", {
             // show the footnote in a notification balloon
             let msg = this.makeFootnoteContent( footnotes ) ;
             let $growl = showNotificationMsg( "footnote", msg ) ;
+            if ( ! $growl ) {
+                // NOTE: We get here when running the test suite (notifications are stored in a message buffer).
+                return ;
+            }
 
             // adjust the width of the balloon (based on the available width)
             // NOTE: The longest footnote is ~7K (A25.8), so we try to hit the max width at ~3K.

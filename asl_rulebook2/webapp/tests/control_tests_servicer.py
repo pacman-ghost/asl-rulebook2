@@ -39,7 +39,7 @@ class ControlTestsServicer( BaseControlTestsServicer ):
         # reset the webapp
         ctx = None
         self.setDataDir( SetDataDirRequest( fixturesDirName=None ), ctx )
-        # NOTE: The webapp has now been reset, but the client must reloaed the home page
+        # NOTE: The webapp has now been reset, but the client must reload the home page
         # with "?reload=1", to force it to reload with the new settings.
         return Empty()
 

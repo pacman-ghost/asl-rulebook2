@@ -1,5 +1,5 @@
 import { gMainApp, gASOPChapterIndex, gASOPSectionIndex, gEventBus } from "./MainApp.js" ;
-import { getURL, getASOPChapterIdFromSectionId, wrapMatches, isChildOf } from "./utils.js" ;
+import { getURL, getASOPChapterIdFromSectionId, linkifyAutoRuleids, wrapMatches, isChildOf } from "./utils.js" ;
 
 let gSectionContentOverrides = {} ;
 
@@ -33,6 +33,9 @@ gMainApp.component( "asop", {
                 return ;
             this.isActive = (tabId == "asop") ;
         } ) ;
+        gEventBus.on( "show-target", (cdocId, ruleid) => { //eslint-disable-line no-unused-vars
+            this.isActive = false ;
+        } ) ;
 
         // handle events in the nav pane
         gEventBus.on( "asop-chapter-expanded", this.showASOPChapter ) ;
@@ -43,6 +46,7 @@ gMainApp.component( "asop", {
         gEventBus.on( "search", () =>  {
             gSectionContentOverrides = {} ;
         } ) ;
+
     },
 
     mounted() {
@@ -51,6 +55,8 @@ gMainApp.component( "asop", {
     },
 
     updated() {
+        // make the ruleid's clickable
+        linkifyAutoRuleids( $( this.$el ) ) ;
         // scroll to the top of the sections each time
         if ( this.$refs.sections )
             this.$refs.sections.scrollTop = 0 ;
@@ -77,6 +83,7 @@ gMainApp.component( "asop", {
             if ( ! isClick )
                 return ;
             // prepare to show the ASOP chapter (with all sections combined)
+            this.isActive = true ;
             this.title = this.makeTitle( chapter, chapter.caption ) ;
             this.preamble = this.fixupContent( chapter.preamble ) ;
             this.sections = chapter.sections ? Array( chapter.sections.length ) : [] ;
@@ -146,6 +153,7 @@ gMainApp.component( "asop", {
 
         doShowASOPSection( chapter, section, content ) {
             // show the specified ASOP section
+            this.isActive = true ;
             this.title = this.makeTitle( chapter, section.caption ) ;
             this.preamble = this.fixupContent( chapter.preamble ) ;
             let contentOverride = gSectionContentOverrides[ section.section_id ] ;

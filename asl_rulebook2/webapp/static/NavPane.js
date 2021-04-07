@@ -1,5 +1,5 @@
 import { gMainApp, gAppConfig, gContentDocs, gEventBus } from "./MainApp.js" ;
-import { getJSON, getURL, getASOPChapterIdFromSectionId, showWarningMsg } from "./utils.js" ;
+import { getJSON, getURL, linkifyAutoRuleids, getASOPChapterIdFromSectionId, showWarningMsg } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -172,7 +172,7 @@ gMainApp.component( "nav-pane-asop", {
       @pane-expanded=onPaneExpanded @entry-clicked=onEntryClicked
     />
 </accordian>
-<div v-show=footer v-html=footer id="asop-footer" />
+<div v-show=footer v-html=footer id="asop-footer" ref="footer" />
 `,
 
     created() {
@@ -180,6 +180,9 @@ gMainApp.component( "nav-pane-asop", {
         // get the ASOP footer
         getURL( gGetASOPFooterUrl ).then( (resp) => { //eslint-disable-line no-undef
             this.footer = resp ;
+            this.$nextTick( () => {
+                linkifyAutoRuleids( $( this.$refs.footer ) ) ;
+            } ) ;
         } ).catch( (errorMsg) => {
             console.log( "Couldn't get the ASOP footer: " + errorMsg ) ;
         } ) ;

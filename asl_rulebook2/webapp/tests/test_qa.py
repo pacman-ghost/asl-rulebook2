@@ -95,7 +95,7 @@ def test_missing_content( webapp, webdriver ):
     # NOTE: Q+A captions are ignored by the search engine (since they usually just contain just ruleid's),
     # so search terms are *not* highlighted.
     expected = {
-        "caption": "Missing content",
+        "caption": "((Missing)) content",
     }
     assert len(results) == 1
     result = results[0]

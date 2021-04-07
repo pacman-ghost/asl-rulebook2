@@ -1,6 +1,10 @@
 """ Manage the startup process. """
 
+import time
+import datetime
+import threading
 import logging
+import traceback
 from collections import defaultdict
 
 from flask import jsonify
@@ -12,10 +16,13 @@ from asl_rulebook2.webapp.rule_info import init_qa, init_errata, init_annotation
 from asl_rulebook2.webapp.asop import init_asop
 from asl_rulebook2.webapp.utils import parse_int
 
+_capabilities = None
+
+fixup_content_lock = threading.Lock()
+_fixup_content_tasks = None
+
 _logger = logging.getLogger( "startup" )
 _startup_msgs = None
-
-_capabilities = None
 
 # ---------------------------------------------------------------------
 
@@ -27,9 +34,10 @@ def init_webapp():
     """
 
     # initialize
-    global _startup_msgs, _capabilities
+    global _startup_msgs, _capabilities, _fixup_content_tasks
     _startup_msgs = StartupMsgs()
     _capabilities = {}
+    _fixup_content_tasks = []
 
     # initialize the webapp
     content_sets = load_content_sets( _startup_msgs, _logger )
@@ -51,6 +59,47 @@ def init_webapp():
         content_sets, qa, errata, user_anno, asop, asop_content,
         _startup_msgs, _logger
     )
+
+    # everything has been initialized - now we can go back and fixup content
+    # NOTE: This is quite a slow process (~1 minute for a full data load), which is why we don't do it inline,
+    # during the normal startup process. So, we start up using the original content, and if the user does
+    # a search, that's what they will see, but we fix it up in the background, and the new content will
+    # eventually start to be returned as search results. We could do this process once, and save the results
+    # in a file, then reload everything at startup, which will obviously be much faster, but we then have to
+    # figure out when that file needs to be rebuolt :-/
+    if app.config.get( "BLOCKING_FIXUP_CONTENT" ):
+        # NOTE: It's useful to do this synchronously when running the test suite, since if the tests
+        # need the linkified ruleid's, they can't start until the fixup has finished (and if they don't
+        # it won't really matter, since there will be so little data, this process will be fast).
+        _do_fixup_content()
+    else:
+        threading.Thread( target = _do_fixup_content ).start()
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def add_fixup_content_task( ctype, func ):
+    """Register a function to fixup content after startup has finished."""
+    if app.config.get( "DISABLE_FIXUP_CONTENT" ):
+        return
+    _fixup_content_tasks.append( ( ctype, func ) )
+
+def _do_fixup_content():
+    """Run each task to fixup content."""
+    if not _fixup_content_tasks:
+        return
+    start_time = time.time()
+    for task_no, (ctype, func) in enumerate( _fixup_content_tasks ):
+        _logger.debug( "Fixing up %s (%d/%d)...", ctype, 1+task_no, len(_fixup_content_tasks) )
+        start_time2 = time.time()
+        try:
+            msg = func()
+        except Exception as ex: #pylint: disable=broad-except
+            _logger.error( "Couldn't fixup %s: %s\n%s", ctype, ex, traceback.format_exc() )
+            continue
+        elapsed_time = datetime.timedelta( seconds = int( time.time() - start_time2 ) )
+        _logger.debug( "- Finished fixing up %s (%s): %s", ctype, elapsed_time, msg )
+    elapsed_time = datetime.timedelta( seconds = int( time.time() - start_time ) )
+    _logger.info( "All fixup tasks completed (%s).", elapsed_time )
 
 # ---------------------------------------------------------------------
 

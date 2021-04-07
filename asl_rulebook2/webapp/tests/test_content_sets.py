@@ -101,6 +101,7 @@ def test_chapters( webapp, webdriver ):
 
     def do_test( chapter_no, entry_no, expected ):
         """Click on a chapter entry."""
+        select_tabbed_page( "nav", "chapters" )
         elems = find_children( "#accordian-chapters .accordian-pane" )
         chapter_elem = elems[ chapter_no ]
         _select_chapter( chapter_elem )

@@ -1,6 +1,7 @@
 """ Manage the content documents. """
 
 import os
+import re
 import io
 import glob
 
@@ -10,8 +11,11 @@ from asl_rulebook2.webapp import app
 from asl_rulebook2.webapp.utils import load_data_file, slugify
 
 _content_sets = None
+_target_index = None
 _footnote_index = None
 _chapter_resources = None
+
+_tag_ruleid_regexes = None
 
 # ---------------------------------------------------------------------
 
@@ -28,8 +32,8 @@ def load_content_sets( startup_msgs, logger ):
     #   in the MMP eASLRB index, and have their own index.
 
     # initialize
-    global _content_sets, _footnote_index, _chapter_resources
-    _content_sets, _footnote_index = {}, {}
+    global _content_sets, _target_index, _footnote_index, _chapter_resources
+    _content_sets, _target_index, _footnote_index = {}, {}, {}
     _chapter_resources = { "background": {}, "icon": {} }
 
     # get the data directory
@@ -51,7 +55,11 @@ def load_content_sets( startup_msgs, logger ):
     def load_content_doc( fname_stem, title, cdoc_id ):
         # load the content doc files
         content_doc = { "cdoc_id": cdoc_id, "title": title }
-        load_file( fname_stem+".targets", content_doc, "targets", startup_msgs.warning )
+        if load_file( fname_stem+".targets", content_doc, "targets", startup_msgs.warning ):
+            # update the target index
+            _target_index[ cdoc_id ] = {}
+            for ruleid, target in content_doc.get( "targets", {} ).items():
+                _target_index[ cdoc_id ][ ruleid ] = target
         load_file( fname_stem+".chapters", content_doc, "chapters", startup_msgs.warning )
         if load_file( fname_stem+".footnotes", content_doc, "footnotes", startup_msgs.warning ):
             # update the footnote index
@@ -142,6 +150,17 @@ def load_content_sets( startup_msgs, logger ):
         # save the new content set
         _content_sets[ content_set["cset_id"] ] = content_set
 
+    # generate a list of regex's that identify each ruleid
+    global _tag_ruleid_regexes
+    _tag_ruleid_regexes = {}
+    for cset_id, cset in _content_sets.items():
+        for cdoc_id, cdoc in cset["content_docs"].items():
+            for ruleid in cdoc.get( "targets", {} ):
+                # nb: we also want to detect things like A1.23-.45
+                _tag_ruleid_regexes[ ruleid ] = re.compile(
+                    r"\b{}(-\.\d+)?\b".format( ruleid.replace( ".", "\\." ) )
+                )
+
     return _content_sets
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -155,6 +174,78 @@ def _dump_content_sets():
             for key in [ "targets", "footnotes", "content" ]:
                 if key in cdoc:
                     print( "- {}: {}".format( key, len(cdoc[key]) ))
+
+# ---------------------------------------------------------------------
+
+
+def tag_ruleids( content, cset_id ):
+    """Identify ruleid's in a piece of content and tag them.
+
+    There are a lot of free-form ruleid's in the content (e.g. Q+A or ASOP,) which we would
+    like to make clickable. We could do it in the front-end using regex's, but it gets
+    quite tricky to do this reliably (e.g. "AbtF SSR CG.1a"), so we do things a different way.
+    We already have a list of known ruleid's (i.e. the content set targets), so we look
+    specifically for those in the content, and mark them with a special <span>, which the front-end
+    can look for and convert into clickable links. It would be nice to detect ruleid's that
+    we don't know about, and mark them accordingly in the UI, but then we're back in regex hell,
+    so we can live without it.
+    """
+
+    # NOTE: This function is quite expensive, so it's worth doing a quick check to see if there's
+    # any point looping through all the regex's e.g. it's pointless doing this for all those
+    # numerous Q+A answers that just say "Yes." or "No." :-/
+    if not content:
+        return content
+    if all( not c.isdigit() for c in content ):
+        return content
+
+    # NOTE: To avoid excessive string operations, we identify all ruleid matches first,
+    # then fixup the string content in one pass.
+
+    # look for ruleid matches in the content
+    matches = []
+    for ruleid, regex in _tag_ruleid_regexes.items():
+        matches.extend(
+            ( mo, ruleid )
+            for mo in regex.finditer( content )
+        )
+
+    # sort the matches by start position, longer matches first
+    matches.sort( key = lambda m: (
+        m[0].start(), -len( m[0].group() )
+    ) )
+
+    # remove "duplicate" matches (e.g "A1.2" when we've already matched "A1.23")
+    prev_match = [] # nb: we use [] instead of None to stop unsubscriptable-object warnings :-/
+    for match_no, match in enumerate( matches ):
+        if prev_match:
+            if match[0].start() == prev_match[0].start():
+                if match[0].group() == prev_match[0].group()[ : len(match[0].group()) ]:
+                    # this is a "duplicate" match - delete it
+                    matches[ match_no ] = None
+                    continue
+            assert match[0].start() > prev_match[0].end()
+        prev_match = match
+    matches = [ m for m in matches if m ]
+
+    # tag the matches
+    for match in reversed( matches ):
+        mo = match[0]
+        buf = [
+            content[ : mo.start() ],
+            "<span data-ruleid='{}' class='auto-ruleid'".format( match[1] )
+        ]
+        if cset_id:
+            buf.append( " data-csetid='{}'".format( cset_id ) )
+        buf.append( ">" )
+        buf.extend( [
+            mo.group(),
+            "</span>",
+            content[ mo.end() : ]
+        ] )
+        content = "".join( buf )
+
+    return content
 
 # ---------------------------------------------------------------------
 

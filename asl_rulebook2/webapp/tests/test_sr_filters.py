@@ -1,7 +1,7 @@
 """ Test search result filtering. """
 
 from asl_rulebook2.webapp.tests.test_search import do_search, unload_search_results
-from asl_rulebook2.webapp.tests.utils import init_webapp, \
+from asl_rulebook2.webapp.tests.utils import init_webapp, refresh_webapp, \
     check_sr_filters, find_child
 
 # ---------------------------------------------------------------------
@@ -43,7 +43,7 @@ def test_sr_filtering( webdriver, webapp ):
         check_sr_count( len(expected2) if isinstance(expected2,list) else 0, len(expected) )
 
         # refresh the page
-        webdriver.refresh()
+        refresh_webapp( webdriver )
         elem = find_child( sel )
         assert not elem.is_selected()
 

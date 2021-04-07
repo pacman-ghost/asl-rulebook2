@@ -1,4 +1,4 @@
-import { gTargetIndex, gChapterResources, gUrlParams } from "./MainApp.js" ;
+import { gContentDocs, gTargetIndex, gChapterResources, gEventBus, gUrlParams } from "./MainApp.js" ;
 
 // --------------------------------------------------------------------
 
@@ -78,6 +78,37 @@ export function fixupSearchHilites( val )
         return val ;
     return val.replace( _HILITE_REGEXES[0], "<span class='hilite'>" )
               .replace( _HILITE_REGEXES[1], "</span>" ) ;
+}
+
+export function linkifyAutoRuleids( $root )
+{
+    if ( ! gTargetIndex )
+        return ; // nb: don't bother during this during startup
+
+    // process each auto-detected ruleid
+    $root.find( "span.auto-ruleid" ).each( function() {
+
+        let ruleid = $(this).attr( "data-ruleid" ) ;
+        let csetId = $(this).attr( "data-csetid" ) ;
+        let targets = findTargets( ruleid, csetId ) ;
+        if ( ! targets || targets.length == 0 ) {
+            // nb: this would normally suggest an error, but there are things like e.g "Chapter B Terrain Chart" :-/
+            return ;
+        } else if ( targets.length != 1 )
+            console.log( "WARNING: Found multiple targets for auto-ruleid: " + csetId + "/" + ruleid ) ;
+        let target = targets[0] ;
+
+        // add a label
+        // NOTE: We don't add labels to ruleref's in index search results because their destination
+        // is more-or-less indicated by the ruleref caption.
+        let caption = gContentDocs[ target.cdoc_id ].targets[ target.ruleid ].caption ;
+        $(this).attr( "title", caption ) ;
+
+        // make the ruleid clickable
+        $(this).on( "click", function() {
+            gEventBus.emit( "show-target", target.cdoc_id, target.ruleid ) ;
+        } ) ;
+    } ) ;
 }
 
 // --------------------------------------------------------------------

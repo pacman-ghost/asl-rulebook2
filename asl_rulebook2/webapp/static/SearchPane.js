@@ -1,6 +1,6 @@
 import { gMainApp, gAppConfig, gEventBus } from "./MainApp.js" ;
-import { postURL, findTargets, getPrimaryTarget, fixupSearchHilites, hideFootnotes } from "./utils.js" ;
 import { gUserSettings, saveUserSettings } from "./UserSettings.js" ;
+import { postURL, findTargets, getPrimaryTarget, linkifyAutoRuleids, fixupSearchHilites, hideFootnotes } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -195,6 +195,11 @@ gMainApp.component( "search-results", {
                 this.noResultsMsg = null ;
         } ) ;
 
+    },
+
+    updated() {
+        // make the ruleid's clickable
+        linkifyAutoRuleids( $( this.$el ) ) ;
     },
 
     methods: {

@@ -5,11 +5,13 @@ import os
 from flask import jsonify, render_template_string, send_from_directory, safe_join, url_for, abort
 
 from asl_rulebook2.webapp import app
+from asl_rulebook2.webapp.content import tag_ruleids
 from asl_rulebook2.webapp.utils import load_data_file
 
 _asop = None
 _asop_dir = None
 _asop_section_content = None
+_footer = None
 user_css_url = None
 
 # ---------------------------------------------------------------------
@@ -18,8 +20,8 @@ def init_asop( startup_msgs, logger ):
     """Initialize the ASOP."""
 
     # initiailize
-    global _asop, _asop_dir, _asop_section_content, user_css_url
-    _asop, _asop_section_content = {}, {}
+    global _asop, _asop_dir, _asop_section_content, _footer, user_css_url
+    _asop, _asop_section_content, _footer = {}, {}, ""
 
     # get the data directory
     data_dir = app.config.get( "DATA_DIR" )
@@ -35,7 +37,7 @@ def init_asop( startup_msgs, logger ):
 
     # load the ASOP index
     fname = os.path.join( base_dir, "index.json" )
-    _asop = load_data_file( fname, "ASCOP index", False, logger, startup_msgs.error )
+    _asop = load_data_file( fname, "ASOP index", False, logger, startup_msgs.error )
     if not _asop:
         return None, None
 
@@ -51,6 +53,10 @@ def init_asop( startup_msgs, logger ):
             section[ "section_id" ] = section_id
             content = _render_template( section_id + ".html" )
             _asop_section_content[ section_id ] = content
+
+    # load the ASOP footer
+    footer = _render_template( "footer.html" )
+    _footer = tag_ruleids( footer, None )
 
     return _asop, _asop_section_content
 
@@ -72,10 +78,9 @@ def get_asop_intro():
 @app.route( "/asop/footer" )
 def get_asop_footer():
     """Return the ASOP footer."""
-    resp = _render_template( "footer.html" )
-    if not resp:
+    if not _footer:
         abort( 404 )
-    return resp
+    return _footer
 
 @app.route( "/asop/section/<section_id>" )
 def get_asop_section( section_id ):

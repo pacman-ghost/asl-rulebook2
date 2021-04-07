@@ -24,7 +24,6 @@
 #asop[data-chapterid="pre-game"]>.title { background: #fff6e2 ; }
 
 .asop .pre { margin-left: 30px ; font-family: monospace ; }
-.asop .exc { font-style: italic ; color: #666 ; }
 .asop .hilite { padding: 0 2px ; background: #ffa ; }
 
 .asop .title { border: 1px solid #666 ; border-radius: 2px ; background: #eee ; font-size: 125% ; font-weight: bold ; padding: 2px 5px ; }

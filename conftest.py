@@ -114,6 +114,12 @@ def _make_webapp():
     # check if we need to start a local webapp server
     if not webapp_url:
         # yup - make it so
+        # FUDGE! If the dev environment is configured to fixup content in a background thread, that thread will start
+        # when we start the webapp server. When we configure things before running a test, and reload the webapp,
+        # that thread will still be running, loading the old data into the search index and in-memory structures :-/
+        # We work-around this by forcing an empty environment before starting the webapp server.
+        app.config.pop( "DATA_DIR", None )
+        app.config.pop( "INITIAL_QUERY_STRING", None ) # nb: this can also cause problems
         # NOTE: We run the server thread as a daemon so that it won't prevent the tests from finishing
         # when they're done. However, this makes it difficult to know when to shut the server down,
         # and, in particular, clean up the gRPC service. We send an EndTests message at the end of each test,

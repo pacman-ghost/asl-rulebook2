@@ -7,6 +7,7 @@ import re
 import itertools
 import string
 import copy
+import time
 import tempfile
 import logging
 import traceback
@@ -16,10 +17,12 @@ import lxml.html
 
 from asl_rulebook2.utils import plural
 from asl_rulebook2.webapp import app
+import asl_rulebook2.webapp.startup as webapp_startup
+from asl_rulebook2.webapp.content import tag_ruleids
 from asl_rulebook2.webapp.utils import make_config_path, make_data_path, split_strip
 
 _sqlite_path = None
-_fts_index= None
+_fts_index = None
 
 _logger = logging.getLogger( "search" )
 
@@ -72,14 +75,19 @@ def search() :
         _logger.info( "- %s: %s", key, val )
 
     # run the search
-    try:
-        return _do_search( args )
-    except Exception as exc: #pylint: disable=broad-except
-        msg = str( exc )
-        if msg.startswith( "fts5: " ):
-            msg = msg[5:] # nb: this is a sqlite3.OperationalError
-        _logger.warning( "SEARCH ERROR: %s\n%s", args, traceback.format_exc() )
-        return jsonify( { "error": msg } )
+    # NOTE: We can't use the search index nor in-memory data structures if the "fix content" thread
+    # is still running (and possible updating them). However, the tasks running in that thread
+    # relinquish the lock regularly, to give the user a chance to jump in and grab it here, if they
+    # want to do a search while that thread is still running.
+    with webapp_startup.fixup_content_lock:
+        try:
+            return _do_search( args )
+        except Exception as exc: #pylint: disable=broad-except
+            msg = str( exc )
+            if msg.startswith( "fts5: " ):
+                msg = msg[5:] # nb: this is a sqlite3.OperationalError
+            _logger.warning( "SEARCH ERROR: %s\n%s", args, traceback.format_exc() )
+            return jsonify( { "error": msg } )
 
 def _do_search( args ):
 
@@ -160,14 +168,11 @@ def _do_search( args ):
 def _unload_index_sr( row ):
     """Unload an index search result from the database."""
     index_entry = _fts_index["index"][ row[0] ] # nb: our copy of the index entry (must remain unchanged)
-    result = { "cset_id": row[2] } # nb: the index entry we will return to the caller
+    result = copy.deepcopy( index_entry ) # nb: the index entry we will return to the caller
+    result[ "cset_id" ] = row[2]
     _get_result_col( result, "title", row[4] )
     _get_result_col( result, "subtitle", row[5] )
     _get_result_col( result, "content", row[6] )
-    if index_entry.get( "ruleids" ):
-        result["ruleids"] = index_entry["ruleids"]
-    if index_entry.get( "see_also" ):
-        result["see_also"] = index_entry["see_also"]
     rulerefs = split_strip( row[7], _RULEREF_SEPARATOR ) if row[7] else []
     assert len(rulerefs) == len(index_entry.get("rulerefs",[]))
     if rulerefs:
@@ -190,6 +195,8 @@ def _unload_qa_sr( row ):
     result = copy.deepcopy( qa_entry ) # nb: the Q+A entry we will return to the caller (will be changed)
     # replace the content in the Q+A entry we will return to the caller with the values
     # from the search index (which will have search term highlighting)
+    if row[4]:
+        result["caption"] = row[4]
     sr_content = split_strip( row[6], _QA_CONTENT_SEPERATOR ) if row[6] else []
     qa_entry_content = qa_entry.get( "content", [] )
     if len(sr_content) != len(qa_entry_content):
@@ -216,7 +223,7 @@ def _unload_anno_sr( row, atype ):
 
 def _unload_asop_entry_sr( row ):
     """Unload an ASOP entry search result from the database."""
-    section = _fts_index["asop-entry"][ row[0] ] # nb: our copy of the ASOP section (must remain unchanged)
+    section = _fts_index["asop-entry"][ row[0] ][0] # nb: our copy of the ASOP section (must remain unchanged)
     result = copy.deepcopy( section ) # nb: the ASOP section we will return to the caller (will be changed)
     _get_result_col( result, "content", row[6] )
     return result
@@ -458,6 +465,14 @@ def init_search( content_sets, qa, errata, user_anno, asop, asop_content, startu
 
 def _init_content_sets( conn, curs, content_sets, logger ):
     """Add the content sets to the search index."""
+
+    def make_fields( index_entry ):
+        return {
+            "subtitle": index_entry.get( "subtitle" ),
+            "content": index_entry.get( "content" ),
+        }
+
+    # add the index entries to the search index
     sr_type = "index"
     for cset in content_sets.values():
         logger.info( "- Adding index file: %s", cset["index_fname"] )
@@ -469,12 +484,13 @@ def _init_content_sets( conn, curs, content_sets, logger ):
             # will be this stripped content. We could go back to the original data to get the original HTML content,
             # but that means we would lose the highlighting of search terms that SQLite gives us. We opt to insert
             # the original content, since none of it should contain HTML, anyway.
+            fields = make_fields( index_entry )
             curs.execute(
                 "INSERT INTO searchable"
                 " ( sr_type, cset_id, title, subtitle, content, rulerefs )"
                 " VALUES ( ?, ?, ?, ?, ?, ? )", (
                     sr_type, cset["cset_id"],
-                    index_entry.get("title"), index_entry.get("subtitle"), index_entry.get("content"), rulerefs
+                    index_entry.get("title"), fields["subtitle"], fields["content"], rulerefs
             ) )
             _fts_index[sr_type][ curs.lastrowid ] = index_entry
             index_entry["_fts_rowid"] = curs.lastrowid
@@ -482,35 +498,65 @@ def _init_content_sets( conn, curs, content_sets, logger ):
         logger.info( "  - Added %s.", plural(nrows,"index entry","index entries"),  )
     assert len(_fts_index[sr_type]) == _get_row_count( conn, "searchable" )
 
+    # register a task to fixup the content
+    def fixup_index_entry( rowid, cset_id ):
+        index_entry = _fts_index[ sr_type ][ rowid ]
+        _tag_ruleids_in_field( index_entry, "subtitle", cset_id )
+        _tag_ruleids_in_field( index_entry, "content", cset_id )
+        return index_entry
+    from asl_rulebook2.webapp.startup import add_fixup_content_task
+    add_fixup_content_task( "index searchable content",
+        lambda: _fixup_searchable_content( sr_type, fixup_index_entry, make_fields )
+    )
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def _init_qa( curs, qa, logger ):
     """Add the Q+A to the search index."""
+
+    def make_fields( qa_entry ):
+        buf = []
+        for content in qa_entry.get( "content", [] ):
+            buf2 = []
+            buf2.append( content.get( "question", _NO_QA_QUESTION ) )
+            # NOTE: We don't really want to index answers, since they are mostly not very useful (e.g. "Yes."),
+            # but we do so in order to get highlighting for those cases where they contain a search term.
+            for answer in content.get( "answers", [] ):
+                buf2.append( answer[0] )
+            buf.append( _QA_FIELD_SEPARATOR.join( buf2 ) )
+        return {
+            "title": qa_entry.get( "caption" ),
+            "content":_QA_CONTENT_SEPERATOR.join( buf ),
+        }
+
     logger.info( "- Adding the Q+A." )
     nrows = 0
     sr_type = "qa"
     for qa_entries in qa.values():
         for qa_entry in qa_entries:
-            buf = []
-            for content in qa_entry.get( "content", [] ):
-                buf2 = []
-                buf2.append( content.get( "question", _NO_QA_QUESTION ) )
-                # NOTE: We don't really want to index answers, since they are mostly not very useful (e.g. "Yes."),
-                # but we do so in order to get highlighting for those cases where they contain a search term.
-                for answer in content.get( "answers", [] ):
-                    buf2.append( answer[0] )
-                buf.append( _QA_FIELD_SEPARATOR.join( buf2 ) )
-            # NOTE: We munge all the questions and answers into one big searchable string, but we need to
-            # be able to separate that string back out into its component parts, so that we can return
-            # the Q+A entry to the front-end as a search result, but with highlighted search terms.
+            fields = make_fields( qa_entry )
             curs.execute(
                 "INSERT INTO searchable ( sr_type, title, content ) VALUES ( ?, ?, ? )", (
-                    sr_type, qa_entry.get("caption"), _QA_CONTENT_SEPERATOR.join(buf)
+                    sr_type, fields["title"], fields["content"]
             ) )
             _fts_index[sr_type][ curs.lastrowid ] = qa_entry
             qa_entry["_fts_rowid"] = curs.lastrowid
             nrows += 1
     logger.info( "  - Added %s.", plural(nrows,"Q+A entry","Q+A entries"),  )
+
+    # register a task to fixup the content
+    def fixup_qa( rowid, cset_id ):
+        qa_entry = _fts_index[ sr_type ][ rowid ]
+        _tag_ruleids_in_field( qa_entry, "caption", cset_id )
+        for content in qa_entry.get( "content", [] ):
+            _tag_ruleids_in_field( content, "question", cset_id )
+            for answer in content.get( "answers", [] ):
+                _tag_ruleids_in_field( answer, 0, cset_id )
+        return qa_entry
+    from asl_rulebook2.webapp.startup import add_fixup_content_task
+    add_fixup_content_task( "Q+A searchable content",
+        lambda: _fixup_searchable_content( sr_type, fixup_qa, make_fields )
+    )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -527,32 +573,55 @@ def _init_user_anno( curs, user_anno, logger ):
     logger.info( "  - Added %s.", plural(nrows,"annotation","annotations"),  )
 
 def _do_init_anno( curs, anno, atype ):
-    """Add the annotations to the search index."""
+    """Add annotations to the search index."""
+
+    def make_fields( anno ):
+        return {
+            "content": anno.get( "content" ),
+        }
+
+    # add the annotations to the search index
     nrows = 0
     sr_type = atype
     for ruleid in anno:
         for a in anno[ruleid]:
+            fields = make_fields( a )
             curs.execute(
                 "INSERT INTO searchable ( sr_type, content ) VALUES ( ?, ? )", (
-                sr_type, a.get("content")
+                sr_type, fields["content"]
             ) )
             _fts_index[sr_type][ curs.lastrowid ] = a
             a["_fts_rowid"] = curs.lastrowid
             nrows += 1
+
+    # register a task to fixup the content
+    def fixup_anno( rowid, cset_id ):
+        anno = _fts_index[ sr_type ][ rowid ]
+        _tag_ruleids_in_field( anno, "content", cset_id )
+        return anno
+    from asl_rulebook2.webapp.startup import add_fixup_content_task
+    add_fixup_content_task( atype+" searchable content",
+        lambda: _fixup_searchable_content( sr_type, fixup_anno, make_fields )
+    )
+
     return nrows
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def _init_asop( curs, asop, asop_content, logger ):
     """Add the ASOP to the search index."""
+
     logger.info( "- Adding the ASOP." )
     sr_type = "asop-entry"
+    fixup_chapters, fixup_sections = [], []
     nentries = 0
     for chapter in asop.get( "chapters", [] ):
+        fixup_chapters.append( chapter )
         for section in chapter.get( "sections", [] ):
-            content =  asop_content.get( section["section_id"] )
+            content = asop_content.get( section["section_id"] )
             if not content:
                 continue
+            fixup_sections.append( section )
             entries = _extract_section_entries( content )
             # NOTE: The way we manage the FTS index for ASOP entries is a little different to normal,
             # since they don't exist as individual entities (this is the only place where they do,
@@ -564,10 +633,28 @@ def _init_asop( curs, asop, asop_content, logger ):
                     "INSERT INTO searchable ( sr_type, content ) VALUES ( ?, ? )", (
                     sr_type, entry
                 ) )
-                _fts_index[sr_type][ curs.lastrowid ] = section
+                _fts_index[sr_type][ curs.lastrowid ] = [ section, entry ]
                 section[ "_fts_rowids" ].append( curs.lastrowid )
             nentries += 1
     logger.info( "  - Added %s.", plural(nentries,"entry","entries") )
+
+    # register a task to fixup the content
+    def fixup_content():
+        _fixup_searchable_content( sr_type, fixup_entry, make_fields )
+        # we also need to fixup the in-memory data structures
+        cset_id = None
+        for chapter in fixup_chapters:
+            _tag_ruleids_in_field( chapter, "preamble", cset_id )
+        for section in fixup_sections:
+            _tag_ruleids_in_field( asop_content, section["section_id"], cset_id )
+    def fixup_entry( rowid, cset_id ):
+        entry = _fts_index[ sr_type ][ rowid ].pop()
+        entry = tag_ruleids( entry, cset_id )
+        return entry
+    def make_fields( entry ):
+        return { "content": entry }
+    from asl_rulebook2.webapp.startup import add_fixup_content_task
+    add_fixup_content_task( "ASOP searchable content", fixup_content )
 
 def _extract_section_entries( content ):
     """Separate out each entry from the section's content."""
@@ -578,7 +665,8 @@ def _extract_section_entries( content ):
     for elem in fragment.xpath( ".//div[contains(@class,'entry')]" ):
         if "entry" not in elem.attrib["class"].split():
             continue
-        entries.append( lxml.html.tostring( elem ) )
+        entry = lxml.html.tostring( elem )
+        entries.append( entry.decode( "utf-8" ) )
     return entries
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -683,6 +771,65 @@ def load_search_config( startup_msgs, logger ):
     load_search_synonyms( make_data_path( "search-synonyms.json" ), "user" )
 
 # ---------------------------------------------------------------------
+
+def _fixup_searchable_content( sr_type, fixup_row, make_fields ):
+    """Fixup the searchable content for the specified search result type."""
+
+    # locate the rows we're going to fixup
+    # NOTE: Then searchable table never changes after it has been built, so we don't need the lock.
+    conn = sqlite3.connect( _sqlite_path )
+    curs = conn.cursor()
+    query = curs.execute( "SELECT rowid, cset_id, title, subtitle, content FROM searchable WHERE sr_type=?",
+        ( sr_type, )
+    )
+    content_rows = list( query.fetchall() )
+
+    # update the searchable content in each row
+    nrows = 0
+    last_commit_time = time.time()
+    for row in content_rows:
+
+        # NOTE: The fixup_row() callback will usually be using _tag_ruleids_in_field(), which manages
+        # the lock; otherwise the callback needs to do it itself. We don't want to invoke this callback
+        # inside the lock since it can be quite slow; _tag_ruleids_in_field() holds the lock for the
+        # minimum amount of time.
+        new_row = fixup_row( row[0], row[1] )
+
+        with webapp_startup.fixup_content_lock:
+            # NOTE: The make_fields() callback will usually be accessing the fields we want to fixup,
+            # so we need to protect them with the lock.
+            fields = make_fields( new_row )
+            # NOTE: We update the row inside the lock to prevent "database is locked" errors, if the user
+            # tries to do a search while this is happening.
+            query = "UPDATE searchable SET {} WHERE rowid={}".format(
+                ", ".join( "{}=?".format( f ) for f in fields ),
+                row[0]
+            )
+            curs.execute( query, tuple(fields.values()) )
+            nrows += 1
+
+        # commit the changes regularly (so that they are available to the front-end)
+        if time.time() - last_commit_time >= 1:
+            conn.commit()
+            last_commit_time = time.time()
+
+    # commit the last block of updates
+    conn.commit()
+
+    return plural( nrows, "row", "rows" )
+
+def _tag_ruleids_in_field( obj, key, cset_id ):
+    """Tag ruleid's in an optional field."""
+    if isinstance( key, int ) or key in obj:
+        # NOTE: The data structures we use to manage all the in-memory objects never change after
+        # they have been loaded, so the only thread-safety we need to worry about is when we read
+        # the original value from an object, and when we update it with a new value. The actual process
+        # of tagging ruleid's in a piece of content is done outside the lock, since it's quite slow.
+        with webapp_startup.fixup_content_lock:
+            val = obj[key]
+        new_val = tag_ruleids( val, cset_id )
+        with webapp_startup.fixup_content_lock:
+            obj[key] = new_val
 
 def _get_row_count( conn, table_name ):
     """Get the number of rows in a table."""

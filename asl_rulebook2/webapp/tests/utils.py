@@ -35,6 +35,7 @@ def init_webapp( webapp, webdriver, **options ):
     }
 
     # load the webapp
+    webapp.control_tests.set_app_config_val( "BLOCKING_FIXUP_CONTENT", True )
     if get_pytest_option("webdriver") == "chrome" and get_pytest_option("headless"):
         # FUDGE! Headless Chrome doesn't want to show the PDF in the browser,
         # it downloads the file and saves it in the current directory :wtf:
@@ -60,7 +61,10 @@ def init_webapp( webapp, webdriver, **options ):
     # reset the user settings
     webdriver.delete_all_cookies()
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+def refresh_webapp( webdriver ):
+    """Refresh the webapp."""
+    webdriver.refresh()
+    _wait_for_webapp()
 
 def _wait_for_webapp():
     """Wait for the webapp to finish initialization."""

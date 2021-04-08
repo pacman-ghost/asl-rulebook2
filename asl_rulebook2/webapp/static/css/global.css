@@ -12,7 +12,7 @@ ul, ol { margin-left: 15px ; }
 /* content */
 .hilite { padding: 0 2px ; background: #ffa ; }
 .exc { font-style: italic ; color: #666 ; }
-.auto-ruleid { color:red; border-bottom:1px dotted red; cursor: pointer ; }
+.auto-ruleid { color: red ; cursor: pointer ; }
 
  /* notification balloons */
 .growl { cursor: pointer ; }

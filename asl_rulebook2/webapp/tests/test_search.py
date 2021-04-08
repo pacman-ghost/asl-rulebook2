@@ -324,8 +324,11 @@ def unload_search_results():
         ruleids = []
         for elem in find_children( ".ruleid", parent ):
             ruleid = unload_sr_text( elem )
-            assert ruleid.startswith( "[" ) and ruleid.endswith( "]" )
-            ruleids.append( ruleid[1:-1] )
+            if ruleid.startswith( "[" ) and ruleid.endswith( "]" ):
+                ruleid = ruleid[1:-1]
+            if ruleid.endswith( "," ):
+                ruleid = ruleid[:-1]
+            ruleids.append( ruleid )
         if ruleids:
             result[key] = ruleids
 

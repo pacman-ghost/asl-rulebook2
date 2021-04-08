@@ -31,12 +31,18 @@ gMainApp.component( "index-sr", {
             </span>
         </div>
         <div v-if=sr.ruleids class="ruleids" >
-            <ruleid v-for="rid in sr.ruleids" :csetId=sr.cset_id :ruleId=rid :key=rid />
+            <ruleid v-for="(rid,rno) in sr.ruleids" :key=rid
+              :csetId=sr.cset_id :ruleId=rid
+              :delim="''" :sep="rno < sr.ruleids.length-1 ? ',' : ''"
+            />
         </div>
         <ul v-if=sr.rulerefs class="rulerefs" >
             <li v-for="rref in sr.rulerefs" v-show=showRuleref(rref) :key=rref >
                 <span v-if=rref.caption class="caption" v-html=fixupHilites(rref.caption) />
-                <ruleid v-for="rid in rref.ruleids" :csetId=sr.cset_id :ruleId=rid :key=rid />
+                <ruleid v-for="rid in rref.ruleids" :key=rid
+                  :csetId=sr.cset_id :ruleId=rid
+                  :delim="'[]'"
+                />
             </li>
         </ul>
     </div>
@@ -174,14 +180,15 @@ gMainApp.component( "asop-entry-sr", {
 
 gMainApp.component( "ruleid", {
 
-    props: [ "csetId", "ruleId" ],
+    // FUDGE! Can't get Vue to do the spacing right, so we pass in the delimiters and separator :-/
+    props: [ "csetId", "ruleId", "delim", "sep" ],
     data() { return {
         cdocId: null, ruleid: null,
         title: null,
     } ; },
 
     // NOTE: This bit of HTML is sensitive to spaces :-/
-    template: `<span class="ruleid" :class="{unknown:!ruleid}">[<a v-if=ruleid @click=onClick :title=title>{{ruleId}}</a><span v-else>{{ruleId}}</span>]</span>`,
+    template: `<span class="ruleid" :class="{unknown:!ruleid}">{{delim[0]}}<a v-if=ruleid @click=onClick :title=title>{{ruleId}}</a><span v-else>{{ruleId}}</span>{{delim[1]}}{{sep}}</span>`,
 
     created() {
         // check if the rule is one we know about

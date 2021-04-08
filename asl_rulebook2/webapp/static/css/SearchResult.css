@@ -7,13 +7,12 @@
 #search-results .index-sr .body { padding: 2px 5px 0 5px ; }
 #search-results .index-sr .content { color: #444 ; }
 #search-results .index-sr .see-also { color: #444 ; font-style: italic ; cursor: pointer ; }
-#search-results .index-sr .see-also a { border-bottom: 1px dotted #888 ; }
 #search-results .index-sr img.toggle-rulerefs { float: right ; margin: 0 0 0.25em 0.25em ; height: 1.25em ; cursor: pointer ; }
 #search-results .index-sr ul.rulerefs .caption { padding-right: 0.5em ; }
 #search-results .index-sr ul.rulerefs .ruleid { font-size: 80% ; }
-#search-results .index-sr .ruleid { margin-right: 0.25em ; font-style: italic ; color: #444 ; }
+#search-results .index-sr .ruleid { margin-right: 0.25em ; font-style: italic ; color: #888 ; }
 #search-results .index-sr .ruleid.unknown {  color: #888 ; }
-#search-results .index-sr .ruleid a { cursor: pointer ; }
+#search-results .index-sr .ruleid a { color: red ; cursor: pointer ; }
 
 /* nb: the real ASOP background color is #b72754, but it's quite dark */
 #search-results .asop-entry-sr .caption { padding: 3px 6px ; font-weight: bold ; border-radius: 3px ; background: #f6edda ; }

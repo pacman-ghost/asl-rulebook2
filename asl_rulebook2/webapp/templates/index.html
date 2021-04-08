@@ -20,6 +20,7 @@
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/ASOP.css' ) }}" />
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/TabbedPages.css' ) }}" />
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/Accordian.css' ) }}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/Collapsible.css' ) }}" />
 {%if ASOP_CSS_URL%}
     <link rel="stylesheet" type="text/css" href="{{ASOP_CSS_URL}}" />
 {%endif%}
@@ -76,6 +77,7 @@ gGetFootnotesUrl = "{{ url_for( 'get_footnotes' ) }}" ;
 <script type="module" src="{{ url_for( 'static', filename='ASOP.js' ) }}"></script>
 <script type="module" src="{{ url_for( 'static', filename='TabbedPages.js' ) }}"></script>
 <script type="module" src="{{ url_for( 'static', filename='Accordian.js' ) }}"></script>
+<script type="module" src="{{ url_for( 'static', filename='Collapsible.js' ) }}"></script>
 <script type="module" src="{{ url_for( 'static', filename='UserSettings.js' ) }}"></script>
 <script type="module" src="{{ url_for( 'static', filename='utils.js' ) }}"></script>
 

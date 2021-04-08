@@ -106,13 +106,24 @@ def _do_fixup_content():
 @app.route( "/app-config" )
 def get_app_config():
     """Return the app config."""
-    result = {
-        "capabilities": _capabilities,
-    }
-    for key in [ "INITIAL_QUERY_STRING", "DISABLE_AUTO_SHOW_RULE_INFO" ]:
+
+    # initialize
+    _logger.debug( "Sending app config:" )
+    result = {}
+
+    # send the available capabilities
+    _logger.debug( "- capabilities: %s", _capabilities )
+    result["capabilities"] = _capabilities
+
+    # send any user-defined debug settings
+    for key in app.config:
+        if not key.startswith( "WEBAPP_" ):
+            continue
         val = app.config.get( key )
         if val is not None:
+            _logger.debug( "- %s = %s", key, val )
             result[ key ] = parse_int( val, val )
+
     return jsonify( result )
 
 # ---------------------------------------------------------------------

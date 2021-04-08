@@ -1,0 +1,44 @@
+[
+
+{ "title": "Backblast",
+  "ruleids": [ "C13.8" ],
+  "rulerefs": [
+    { "caption": "HEAT", "ruleids": [ "C13.8" ] },
+    { "caption": "RCL", "ruleids": [ "C12.3-.4" ] }
+  ]
+},
+
+{ "title": "CCPh",
+  "subtitle": "Close Combat Phase",
+  "ruleids": [ "A3.8" ],
+  "rulerefs": [
+    { "caption": "ENEMY Attacks", "ruleids": [ "S11.5" ] },
+    { "caption": "dropping SW before CC", "ruleids": [ "A4.43" ] }
+  ]
+},
+
+{ "title": "Double Time",
+  "ruleids": [ "A4.5-.51", "S6.222" ],
+  "see_also": [ "CX" ],
+  "content": "Also known as \"running <em>really</em> fast.\"",
+  "rulerefs": [
+    { "caption": "ENEMY Guard Automatic Action", "ruleids": [ "S6.303" ] },
+    { "ruleids": [ "C10.3" ] },
+    { "caption": "NA in Advance Phase", "ruleids": [ "A4.7" ] },
+    { "caption": "'S?' is \"&lt;NA&gt;\"" }
+  ]
+},
+
+{ "title": "Firepower",
+  "content": "The U.S. has lots of this.",
+  "ruleids": [ "A1.21" ],
+  "see_also": [ "FP" ]
+},
+
+{ "title": "H#",
+  "subtitle": "HEAT Depletion Number; the number is the Depletion Number, and the superscript following it indicates the first year it applies and a letter indicates the month of that year [EX: A superscript of \"4\" means the vehicle/ordnance has that ammo starting in 1944]",
+  "ruleids": [ "C8.3" ],
+  "see_also": [ "HEAT" ]
+}
+
+]

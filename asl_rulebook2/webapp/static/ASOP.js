@@ -17,8 +17,13 @@ gMainApp.component( "asop", {
 
     template: `
 <div v-if=isActive :data-chapterid=chapterId id="asop" class="asop" >
-    <div v-html=title class="title" />
-    <div v-html=preamble class="preamble" />
+    <div class="title">
+        <span v-html=title />
+        <collapser collapserId="asop-preamble" ref="collapser" />
+    </div>
+    <collapsible collapsedHeight=5 ref="collapsible">
+        <div v-html=preamble class="preamble" />
+    </collapsible>
     <div v-if="sections.length > 0" class="sections" :class="{single: isSingleSection}" ref="sections" >
         <div v-for="s in sections" :key=s class="section" v-html=s />
     </div>
@@ -50,6 +55,9 @@ gMainApp.component( "asop", {
     },
 
     mounted() {
+        // set up the collapser
+        if ( this.$refs.collapser )
+            this.$refs.collapser.initCollapser( this.$refs.collapsible, null ) ;
         // start off with the intro
         this.showIntro() ;
     },
@@ -57,6 +65,9 @@ gMainApp.component( "asop", {
     updated() {
         // make the ruleid's clickable
         linkifyAutoRuleids( $( this.$el ) ) ;
+        // update the preamble collapser/collapsible
+        if ( this.$refs.collapser )
+            this.$refs.collapser.initCollapser( this.$refs.collapsible, null ) ;
         // scroll to the top of the sections each time
         if ( this.$refs.sections )
             this.$refs.sections.scrollTop = 0 ;

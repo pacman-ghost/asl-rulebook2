@@ -25,7 +25,7 @@ def test_asop_nav( webdriver, webapp ):
 
     # check the nav
     select_tabbed_page( "nav", "asop" )
-    nav = _unload_nav( False )
+    nav = unload_asop_nav( False )
     chapters = asop_index["chapters"]
     for chapter_no, chapter in enumerate( chapters ):
         chapters[ chapter_no ] = {
@@ -57,7 +57,7 @@ def test_asop_content( webdriver, webapp ):
     webapp.control_tests.set_data_dir( "asop" )
     init_webapp( webapp, webdriver )
     select_tabbed_page( "nav", "asop" )
-    nav = _unload_nav( True )
+    nav = unload_asop_nav( True )
 
     def load_asop_file( fname, as_json ):
         """Load an ASOP data file."""
@@ -261,9 +261,10 @@ def test_asop_entries( webdriver, webapp ):
 
 # ---------------------------------------------------------------------
 
-def open_asop_chapter( chapter_id ):
+def open_asop_chapter( chapter_id, nav=None ):
     """Open the specified ASOP chapter."""
-    nav = _unload_nav( True )
+    if not nav:
+        nav = unload_asop_nav( True )
     for chapter in nav:
         if chapter["chapter_id"] == chapter_id:
             chapter["elem"].click()
@@ -272,13 +273,13 @@ def open_asop_chapter( chapter_id ):
     assert False, "Can't find ASOP chapter: "+chapter_id
     return None # nb: for pylint :-/
 
-def open_asop_section( chapter_id, section_no ):
+def open_asop_section( chapter_id, section_no, nav=None ):
     """Open the specified ASOP section."""
-    chapter = open_asop_chapter( chapter_id )
+    chapter = open_asop_chapter( chapter_id, nav )
     chapter["sections"][ section_no ]["elem"].click()
     wait_for( 2, lambda: find_child( "#asop .sections.single" ) )
 
-def _unload_nav( include_elems ):
+def unload_asop_nav( include_elems ):
     """Unload the ASOP nav."""
 
     chapters = []

@@ -1,0 +1,19 @@
+{
+
+"chapters": [
+
+    { "caption": "No content", "chapter_id": "no-content" },
+    { "caption": "Short content", "chapter_id": "short-content",
+      "sections": [
+        { "caption": "Short content" }
+      ]
+    },
+    { "caption": "Long content", "chapter_id": "long-content",
+      "sections": [
+        { "caption": "Long content" }
+      ]
+    }
+
+]
+
+}

@@ -667,6 +667,11 @@ def _extract_section_entries( content ):
             continue
         entry = lxml.html.tostring( elem )
         entries.append( entry.decode( "utf-8" ) )
+    if not entries:
+        # NOTE: If the content hasn't been divided into entries, we return the whole thing as
+        # one big entry, which will kinda suck as a search result if it's big, but it's better
+        # than not seeing anything at all.
+        return [ content ]
     return entries
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

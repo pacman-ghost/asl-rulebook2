@@ -31,7 +31,7 @@ gMainApp.component( "nav-pane", {
     created() {
 
         gEventBus.on( "show-target", (cdocId, ruleid) => {
-            if ( gAppConfig.DISABLE_AUTO_SHOW_RULE_INFO )
+            if ( gAppConfig.WEBAPP_DISABLE_AUTO_SHOW_RULE_INFO )
                 return ;
             // get the Q+A and annotations for the target being opened
             // NOTE: Targets are associated with a content set, but the Q+A is global, which is not quite

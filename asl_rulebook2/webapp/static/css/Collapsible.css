@@ -1,0 +1,4 @@
+.collapser { cursor: pointer ; opacity: 0.3 ; }
+
+.collapsible { overflow-y: hidden ; }
+.collapsible.collapsed { mask-image: linear-gradient( to bottom, black 25%, transparent 100% ) ; }

@@ -28,6 +28,7 @@
 .qa img.icon { float: left ; margin: 0 6px 0 0 ; height: 18px ; }
 .qa .content { clear: left ; margin-top: 5px ; }
 .qa .caption { margin-bottom: 2px ; background: #60b0ff ; border-radius: 3px ; padding: 2px 5px ; font-weight: bold ; color: #002850 ; }
+.qa .collapser { height: 16px ; float: right ; margin: 1px 2px 1px 0 ; }
 .qa .question { margin-bottom: 5px ; color: #002850 ; }
 .qa .question img { float: right ; margin: 0 0 5px 5px ; height: 100px ; }
 .qa .answer { clear: left ; padding-bottom: 2px ; font-style: italic ; color: #0c6905 ; }
@@ -43,4 +44,5 @@
 .anno .caption { margin-bottom: 2px ; border-radius: 3px ; padding: 2px 5px ; font-weight: bold ; }
 .anno .caption.errata { background: #ffc020 ; }
 .anno .caption.user-anno { background: #20ff20 ; }
+.anno .collapser { height: 16px ; float: right ; margin: 1px 2px 1px 0 ; }
 .anno .content { clear: left ; margin-top: 5px ; }

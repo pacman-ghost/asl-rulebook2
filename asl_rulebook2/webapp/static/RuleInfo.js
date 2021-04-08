@@ -1,4 +1,4 @@
-import { gMainApp, gUrlParams } from "./MainApp.js" ;
+import { gMainApp, gEventBus, gUrlParams } from "./MainApp.js" ;
 import { linkifyAutoRuleids, fixupSearchHilites, makeImagesZoomable } from "./utils.js" ;
 
 // --------------------------------------------------------------------
@@ -21,7 +21,7 @@ gMainApp.component( "rule-info", {
       @click="$emit('close')" ref="closeRuleInfoButton"
       title="Close the rule info" class="close-rule-info"
     />
-    <transition :name=ruleInfoTransitionName @after-enter=onAfterEnterRuleInfoTransition >
+    <transition :name=ruleInfoTransitionName @after-enter=updateCloseButton >
         <div v-show="ruleInfo.length > 0" id="rule-info" ref="ruleInfo" >
             <div class="content" ref="content">
                 <div v-for="ri in ruleInfo" :key=ri >
@@ -35,6 +35,14 @@ gMainApp.component( "rule-info", {
     </transition>
 </div>`,
 
+    created() {
+        // NOTE: Toggling collapsible's can cause the v-scrollbar to appear/hide.
+        gEventBus.on( "collapsible-toggled", () => {
+            if ( this.ruleInfo.length > 0 )
+                this.updateCloseButton() ;
+        } ) ;
+    },
+
     beforeUpdate() {
         // hide the close button until the "enter" transition has completed
         let $closeButton = $( this.$refs.closeRuleInfoButton ) ;
@@ -47,7 +55,7 @@ gMainApp.component( "rule-info", {
                 // NOTE: If we're already visible, we don't get the transition, so we force
                 // post-transition processing manually.
                 this.$nextTick( () => {
-                    this.onAfterEnterRuleInfoTransition() ;
+                    this.updateCloseButton() ;
                     this.$refs.ruleInfo.scrollTop = 0 ;
                 } ) ;
             }
@@ -61,7 +69,7 @@ gMainApp.component( "rule-info", {
 
     methods: {
 
-        onAfterEnterRuleInfoTransition() {
+        updateCloseButton() {
             // FUDGE! We have to wait until the rule info popup is open before we can check
             // if it has a v-scrollbar or not, and hence where we should put the close button.
             this.$nextTick( () => {
@@ -95,34 +103,41 @@ gMainApp.component( "qa-entry", {
 
     template: `
 <div class="qa rule-info">
-    <div class="caption" v-html=fixupHilites(qaEntry.caption) />
-    <div v-for="content in qaEntry.content" :key=content class="content">
-        <div v-if="content.question">
-            <!-- this is a normal question + one or more answers -->
-            <img :src=questionImageUrl class="icon" />
-            <div class="question">
-                <img v-if=content.image :src=makeQAImageUrl(content.image) class="imageZoom" />
-                <div v-html=content.question />
-            </div>
-            <div v-for="answer in content.answers" class="answer" >
-                <img :src=answerImageUrl :title=answer[1] class="icon" />
-                <div v-html=answer[0] />
-            </div>
-        </div>
-        <div v-else>
-            <!-- this is an informational entry that contains only answers -->
-            <img :src=infoImageUrl :title="content.answers.length > 0 ? content.answers[0][1] : ''" class="icon" />
-            <div v-for="answer in content.answers" class="info" >
-                <div v-html=answer[0] />
-            </div>
-        </div>
-        <div v-if=content.see_other class="see-other" >
-            See other errata: <span v-html=content.see_other />
-        </div>
+    <div class="caption">
+        <collapser ref="collapser" />
+        <span v-html=fixupHilites(qaEntry.caption) />
     </div>
+    <collapsible ref="collapsible" >
+        <div v-for="content in qaEntry.content" :key=content class="content">
+            <div v-if="content.question">
+                <!-- this is a normal question + one or more answers -->
+                <img :src=questionImageUrl class="icon" />
+                <div class="question">
+                    <img v-if=content.image :src=makeQAImageUrl(content.image) class="imageZoom" />
+                    <div v-html=content.question />
+                </div>
+                <div v-for="answer in content.answers" class="answer" >
+                    <img :src=answerImageUrl :title=answer[1] class="icon" />
+                    <div v-html=answer[0] />
+                </div>
+            </div>
+            <div v-else>
+                <!-- this is an informational entry that contains only answers -->
+                <img :src=infoImageUrl :title="content.answers.length > 0 ? content.answers[0][1] : ''" class="icon" />
+                <div v-for="answer in content.answers" class="info" >
+                    <div v-html=answer[0] />
+                </div>
+            </div>
+            <div v-if=content.see_other class="see-other" >
+                See other errata: <span v-html=content.see_other />
+            </div>
+        </div>
+    </collapsible>
 </div>`,
 
     mounted() {
+        // set up the collapser
+        this.$refs.collapser.initCollapser( this.$refs.collapsible, null ) ;
         // make any images that are part of the Q+A entry zoomable
         makeImagesZoomable( $(this.$el) ) ;
     },
@@ -154,14 +169,22 @@ gMainApp.component( "annotation", {
     template: `
 <div class="anno rule-info">
     <div :class=annoType class="caption" >
+        <collapser ref="collapser" />
         <span v-if=anno.ruleid :data-ruleid=anno.ruleid class="auto-ruleid"> {{anno.ruleid}} </span>
         <span v-else> (no rule ID) </span>
     </div>
-    <div class="content">
-        <img :src=makeIconImageUrl() :title=anno.source class="icon" />
-        <div v-html=anno.content />
-    </div>
+    <collapsible ref="collapsible" >
+        <div class="content">
+            <img :src=makeIconImageUrl() :title=anno.source class="icon" />
+            <div v-html=anno.content />
+        </div>
+    </collapsible>
 </div>`,
+
+    mounted() {
+        // set up the collapser
+        this.$refs.collapser.initCollapser( this.$refs.collapsible, null ) ;
+    },
 
     methods: {
         makeIconImageUrl() {

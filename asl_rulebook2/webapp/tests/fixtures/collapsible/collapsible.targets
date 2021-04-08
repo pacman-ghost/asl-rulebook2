@@ -1,0 +1,12 @@
+{
+
+"A.1": { "caption": "A short Q+A" },
+"A.2": { "caption": "A long Q+A" },
+
+"B.1": { "caption": "A short errata." },
+"B.2": { "caption": "A long errata." },
+
+"C.1": { "caption": "A short user annotation." },
+"C.2": { "caption": "A long user annotation." }
+
+}

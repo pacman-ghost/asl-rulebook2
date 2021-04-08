@@ -11,7 +11,7 @@ def test_sr_filtering( webdriver, webapp ):
 
     # initialize
     webapp.control_tests.set_data_dir( "full" )
-    webapp.control_tests.set_app_config_val( "DISABLE_AUTO_SHOW_RULE_INFO", True )
+    webapp.control_tests.set_app_config_val( "WEBAPP_DISABLE_AUTO_SHOW_RULE_INFO", True )
     init_webapp( webapp, webdriver )
     check_sr_filters( [ "index", "qa", "errata", "asop-entry" ] )
 

@@ -2,6 +2,7 @@
 
 #search-results .index-sr .title { padding: 3px 6px ; font-weight: bold ; border-radius: 3px ; }
 #search-results .index-sr .title img.icon { height: 15px ; float: left ; margin-top: 2px ; }
+#search-results .index-sr .collapser { height: 16px ; float: right ; margin: 1px 2px 1px 0 ; }
 #search-results .index-sr .subtitle { padding: 2px 5px ; font-weight: normal ; font-size: 80% ; font-style: italic ; }
 #search-results .index-sr .body { padding: 2px 5px 0 5px ; }
 #search-results .index-sr .content { color: #444 ; }
@@ -15,5 +16,7 @@
 #search-results .index-sr .ruleid a { cursor: pointer ; }
 
 /* nb: the real ASOP background color is #b72754, but it's quite dark */
-#search-results .asop-entry-sr .caption { padding: 3px 6px ; font-weight: bold ; border-radius: 3px ; background: #f6edda ; cursor: pointer ; }
+#search-results .asop-entry-sr .caption { padding: 3px 6px ; font-weight: bold ; border-radius: 3px ; background: #f6edda ; }
+#search-results .asop-entry-sr .caption span { cursor: pointer ; }
+#search-results .asop-entry-sr .collapser { height: 16px ; float: right ; margin: 1px 2px 1px 0 ; }
 #search-results .asop-entry-sr .content { padding: 5px ; }

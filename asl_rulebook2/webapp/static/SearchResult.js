@@ -1,4 +1,4 @@
-import { gMainApp, gEventBus, gUrlParams } from "./MainApp.js" ;
+import { gMainApp, gEventBus, gAppConfig } from "./MainApp.js" ;
 import { findTargets, getPrimaryTarget, isRuleid, getChapterResource, fixupSearchHilites, hasHilite, hideFootnotes } from "./utils.js" ;
 
 // --------------------------------------------------------------------
@@ -15,6 +15,7 @@ gMainApp.component( "index-sr", {
     template: `
 <div class="index-sr" >
     <div v-if="sr.title || sr.subtitle" :style="{background: cssBackground}" class="title" >
+        <collapser @click=onToggleRulerefs ref="collapser" />
         <a v-if=iconUrl href="#" @click=onClickIcon >
             <img :src=iconUrl class="icon" />
         </a>
@@ -22,9 +23,6 @@ gMainApp.component( "index-sr", {
         <span v-if=sr.subtitle class="subtitle" v-html=sr.subtitle />
     </div>
     <div class="body">
-        <img v-if="expandRulerefs !== null" :src=getToggleRulerefsImageUrl @click=onToggleRulerefs class="toggle-rulerefs"
-          :title="expandRulerefs ? 'Hide non-matching rule references. ': 'Show all rule references.'"
-        />
         <div v-if=sr.content class="content" v-html=sr.content />
         <div v-if=sr.see_also class="see-also" > See also:
             <span v-for="(sa, sa_no) in sr.see_also" >
@@ -46,8 +44,10 @@ gMainApp.component( "index-sr", {
 
     created() {
         // figure out whether ruleref's should start expanded or collapsed
-        if ( this.sr.rulerefs === undefined || this.sr.rulerefs.length == 0 || gUrlParams.get( "no-toggle-rulerefs" ) ) {
-            // there are no ruleref's - don't show the toggle button
+        if ( gAppConfig.WEBAPP_DISABLE_COLLAPSIBLE_INDEX_SR ) {
+            // the user has disabled this feature - don't show the collapser
+        } else if ( this.sr.rulerefs === undefined || this.sr.rulerefs.length == 0 ) {
+            // there are no ruleref's - don't show the collapser
         } else {
             // count how many ruleref's have a matching search term
             let nHiliteRulerefs = 0 ;
@@ -56,7 +56,7 @@ gMainApp.component( "index-sr", {
                     ++ nHiliteRulerefs;
             } ) ;
             if ( nHiliteRulerefs == this.sr.rulerefs.length ) {
-                // every ruleref is a match - don't show the toggle button
+                // every ruleref is a match - don't show the collapser
             } else {
                 // NOTE: We start the ruleref's expanded if one of the important fields has a matching search term.
                 // The idea is that the index entry is probably one that the user will be interested in (since there is
@@ -69,11 +69,10 @@ gMainApp.component( "index-sr", {
         }
     },
 
-    computed: {
-        getToggleRulerefsImageUrl() {
-            // return the image URL for the "toggle ruleref's" button
-            return gImagesBaseUrl + (this.expandRulerefs ? "collapse" : "expand") + "-rulerefs.png" ; //eslint-disable-line no-undef
-        },
+    mounted() {
+        // set up the collapser
+        let isCollapsed = (this.expandRulerefs == null) ? null : ! this.expandRulerefs ;
+        this.$refs.collapser.initCollapser( null, isCollapsed ) ;
     },
 
     methods: {
@@ -100,7 +99,7 @@ gMainApp.component( "index-sr", {
 
         showRuleref( ruleref ) {
             // flag whether the ruleref should be shown or hidden
-            if ( gUrlParams.get( "no-toggle-rulerefs" ) )
+            if ( gAppConfig.WEBAPP_DISABLE_COLLAPSIBLE_INDEX_SR )
                 return true ;
             return this.expandRulerefs || hasHilite( ruleref.caption ) ;
         },
@@ -148,9 +147,19 @@ gMainApp.component( "asop-entry-sr", {
 
     template: `
 <div class="asop-entry-sr asop" >
-    <div v-html="sr.caption+' (ASOP)'" @click=onClickCaption class="caption" title="Go to the ASOP" />
-    <div class="content" v-html=sr.content />
+    <div class="caption" title="Go to the ASOP" >
+        <span v-html="sr.caption+' (ASOP)'" @click=onClickCaption />
+        <collapser ref="collapser" />
+    </div>
+    <collapsible ref="collapsible" >
+        <div class="content" v-html=sr.content />
+    </collapsible>
 </div>`,
+
+    mounted() {
+        // set up the collapser
+        this.$refs.collapser.initCollapser( this.$refs.collapsible, null ) ;
+    },
 
     methods: {
         onClickCaption() {

@@ -69,8 +69,8 @@ gMainApp.component( "search-box", {
 
         gEventBus.on( "app-loaded", () => {
             // check if we should start off with a query (for debugging porpoises)
-            if ( gAppConfig.INITIAL_QUERY_STRING )
-                gEventBus.emit( "search-for", gAppConfig.INITIAL_QUERY_STRING ) ;
+            if ( gAppConfig.WEBAPP_INITIAL_QUERY_STRING )
+                gEventBus.emit( "search-for", gAppConfig.WEBAPP_INITIAL_QUERY_STRING ) ;
         } ) ;
 
         gEventBus.on( "search-done", (showSrCount) => {

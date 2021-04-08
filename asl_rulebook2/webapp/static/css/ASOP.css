@@ -27,8 +27,10 @@
 .asop .hilite { padding: 0 2px ; background: #ffa ; }
 
 .asop .title { border: 1px solid #666 ; border-radius: 2px ; background: #eee ; font-size: 125% ; font-weight: bold ; padding: 2px 5px ; }
+.asop .title .collapser { height: 16px ; float: right ; margin: 2px 0 0 5px ; }
 
 .asop .preamble { margin-bottom: 5px ;  padding: 2px 5px ; font-size: 90% ; font-style: italic ; }
+.asop .collapsible { overflow-y: visible ; }
 .asop .preamble i, #asop .preamble em { font-style: normal ; }
 
 .asop .sections { flex-grow: 1 ; overflow-y: auto ; }

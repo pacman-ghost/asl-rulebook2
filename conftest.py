@@ -119,7 +119,8 @@ def _make_webapp():
         # that thread will still be running, loading the old data into the search index and in-memory structures :-/
         # We work-around this by forcing an empty environment before starting the webapp server.
         app.config.pop( "DATA_DIR", None )
-        app.config.pop( "INITIAL_QUERY_STRING", None ) # nb: this can also cause problems
+        app.config.pop( "WEBAPP_INITIAL_QUERY_STRING", None )
+        app.config.pop( "DISABLE_FIXUP_CONTENT", None )
         # NOTE: We run the server thread as a daemon so that it won't prevent the tests from finishing
         # when they're done. However, this makes it difficult to know when to shut the server down,
         # and, in particular, clean up the gRPC service. We send an EndTests message at the end of each test,

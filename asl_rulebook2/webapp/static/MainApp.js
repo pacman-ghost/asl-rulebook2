@@ -1,4 +1,4 @@
-import { getJSON, showErrorMsg, showNotificationMsg } from "./utils.js" ;
+import { getJSON, showErrorMsg, showNotificationMsg, hideFootnotes } from "./utils.js" ;
 
 // parse any URL parameters
 export let gUrlParams = new URLSearchParams( window.location.search.substring(1) ) ;
@@ -37,6 +37,12 @@ gMainApp.component( "main-app", {
 <content-pane id="content" :contentDocs=contentDocs />
 <div v-if=isLoaded id="_mainapp-loaded_" />
 `,
+
+    created() {
+        gEventBus.on( "show-target", () => {
+            hideFootnotes() ;
+        } ) ;
+    },
 
     mounted() {
 

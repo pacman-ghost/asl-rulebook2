@@ -1,5 +1,5 @@
 import { gMainApp, gContentDocs, gEventBus, gAppConfig } from "./MainApp.js" ;
-import { findTargets, getPrimaryTarget, isRuleid, getChapterResource, fixupSearchHilites, hasHilite, hideFootnotes } from "./utils.js" ;
+import { findTargets, getPrimaryTarget, isRuleid, getChapterResource, fixupSearchHilites, hasHilite } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -200,7 +200,6 @@ gMainApp.component( "ruleid", {
     methods: {
         onClick() {
             // show the target
-            hideFootnotes() ;
             gEventBus.emit( "show-target", this.cdocId, this.ruleid ) ;
         },
     },

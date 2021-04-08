@@ -73,6 +73,12 @@ gMainApp.component( "search-box", {
                 gEventBus.emit( "search-for", gAppConfig.WEBAPP_INITIAL_QUERY_STRING ) ;
         } ) ;
 
+        gEventBus.on( "tab-activated", (tabbedPages, tabId) => {
+            // set focus to the query string input box
+            if ( tabbedPages.tabbedPagesId == "nav" && tabId == "search" )
+                this.$refs.queryString.focus() ;
+        } ) ;
+
         gEventBus.on( "search-done", (showSrCount) => {
             // a search has been completed - update the search result count
             this.showSrCount = showSrCount ;

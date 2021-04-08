@@ -1,4 +1,4 @@
-import { gMainApp, gEventBus, gAppConfig } from "./MainApp.js" ;
+import { gMainApp, gContentDocs, gEventBus, gAppConfig } from "./MainApp.js" ;
 import { findTargets, getPrimaryTarget, isRuleid, getChapterResource, fixupSearchHilites, hasHilite, hideFootnotes } from "./utils.js" ;
 
 // --------------------------------------------------------------------
@@ -177,10 +177,11 @@ gMainApp.component( "ruleid", {
     props: [ "csetId", "ruleId" ],
     data() { return {
         cdocId: null, ruleid: null,
+        title: null,
     } ; },
 
     // NOTE: This bit of HTML is sensitive to spaces :-/
-    template: `<span class="ruleid" :class="{unknown:!ruleid}">[<a v-if=ruleid @click=onClick>{{ruleId}}</a><span v-else>{{ruleId}}</span>]</span>`,
+    template: `<span class="ruleid" :class="{unknown:!ruleid}">[<a v-if=ruleid @click=onClick :title=title>{{ruleId}}</a><span v-else>{{ruleId}}</span>]</span>`,
 
     created() {
         // check if the rule is one we know about
@@ -189,8 +190,10 @@ gMainApp.component( "ruleid", {
             // NOTE: We assume that targets are unique within a content set. This might not be true if MMP
             // ever adds Chapter Z stuff to the main index, but we'll cross that bridge if and when we come to it.
             // TBH, that stuff would probably be better off as a separate content set, anyway.
-            this.cdocId = targets[0].cdoc_id ;
-            this.ruleid = targets[0].ruleid ;
+            let target = targets[0]
+            this.cdocId = target.cdoc_id ;
+            this.ruleid = target.ruleid ;
+            this.title = gContentDocs[ target.cdoc_id ].targets[ target.ruleid ].caption ;
         }
     },
 

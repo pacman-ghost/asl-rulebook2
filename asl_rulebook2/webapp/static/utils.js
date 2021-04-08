@@ -99,8 +99,6 @@ export function linkifyAutoRuleids( $root )
         let target = targets[0] ;
 
         // add a label
-        // NOTE: We don't add labels to ruleref's in index search results because their destination
-        // is more-or-less indicated by the ruleref caption.
         let caption = gContentDocs[ target.cdoc_id ].targets[ target.ruleid ].caption ;
         $(this).attr( "title", caption ) ;
 

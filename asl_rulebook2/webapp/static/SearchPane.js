@@ -40,12 +40,11 @@ gMainApp.component( "search-box", {
         gEventBus.on( "app-config-loaded", () => {
             // initialize the search result filter checkboxes
             let nVisible = 0 ;
+            let getSrType = this.getSrType ;
             $( this.$el ).find( ".sr-filters input[type='checkbox']" ).each( function() {
                 // check if the next checkbox will have any effect (e.g. if no Q+A have been configured,
                 // then there's no point in showing the checkbox to filter Q+A search results)
-                let name = $(this).attr( "name" ) ;
-                let match = name.match( /^show-(.+)-sr$/ ) ;
-                let key = match[1] ;
+                let key = getSrType( $(this) ) ;
                 let caps_key = { "index": "content-sets", "asop-entry": "asop" }[ key ] || key ;
                 if ( gAppConfig.capabilities[ caps_key ] ) {
                     // yup - load the last-saved state
@@ -55,6 +54,7 @@ gMainApp.component( "search-box", {
                 } else {
                     // nope - just hide it
                     $(this).hide() ;
+                    let name = $(this).attr( "name" ) ;
                     $(this).siblings( "label[for='" + name + "']" ).hide() ;
                 }
             } ) ;
@@ -98,14 +98,36 @@ gMainApp.component( "search-box", {
 
         onClickSrFilter( evt ) {
             // a search result filter checkbox was clicked - update the user settings
-            let match = evt.target.getAttribute( "name" ).match( /^show-(.+)-sr$/ ) ;
-            let srType = match[1] ;
-            let state = evt.target.checked ;
-            gUserSettings[ "HIDE_" + srType.toUpperCase().replace("-","_") + "_SR" ] = ! state ;
+            let isChecked = evt.target.checked ;
+            let srType = this.getSrType( $( evt.target ) ) ;
+            let srTypes = {} ;
+            let getSrType = this.getSrType ;
+            // figure out what to do
+            if ( evt.ctrlKey && evt.shiftKey ) {
+                // Ctrl-Shift-Click = select/clear all checkboxes
+                $( this.$el ).find( ".sr-filters input[type='checkbox']" ).each( function() {
+                    srTypes[ getSrType( $(this) ) ] = isChecked ;
+                } ) ;
+            } else if ( evt.ctrlKey ) {
+                // Ctrl-Click = only select this checkbox
+                $( this.$el ).find( ".sr-filters input[type='checkbox']" ).each( function() {
+                    let srType2 = getSrType( $(this) ) ;
+                    srTypes[ srType2 ] = (srType2 == srType) ;
+                } ) ;
+            } else {
+                // otheriwse, just toggle the checkbox that was clicked
+                srTypes[ getSrType( $( evt.target ) ) ] = isChecked ;
+            }
+            for ( srType in srTypes ) {
+                isChecked = srTypes[ srType ] ;
+                let $elem = $( this.$el ).find( ".sr-filters input[type='checkbox'][name='show-" + srType + "-sr']" )
+                $elem.prop( "checked", isChecked ) ;
+                gUserSettings[ "HIDE_" + srType.toUpperCase().replace("-","_") + "_SR" ] = ! isChecked ;
+                // hide/show the corresponding search results
+                $elem = $( "#search-results .sr[data-srtype='" + srType + "']" ) ;
+                $elem.css( "display", isChecked ? "block" : "none" ) ;
+            }
             saveUserSettings() ;
-            // hide/show the corresponding search results
-            let $elem = $( "#search-results .sr[data-srtype='" + srType + "']" ) ;
-            $elem.css( "display", state ? "block" : "none" ) ;
             this.updateSrCount() ;
         },
 
@@ -137,6 +159,12 @@ gMainApp.component( "search-box", {
         onKeyUp( evt ) {
             if ( evt.keyCode == 13 )
                 this.$refs.submit.click() ;
+        },
+
+        getSrType( $elem ) {
+            // get the search result type of a filter checkbox
+            let match = $elem.attr( "name" ).match( /^show-(.+)-sr$/ ) ;
+            return match[1] ;
         },
 
     },

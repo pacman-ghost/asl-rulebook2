@@ -48,13 +48,6 @@ gMainApp.component( "nav-pane", {
             } ) ;
         } ) ;
 
-        // close the rule info popup if Escape is pressed
-        gEventBus.on( "escape-pressed", () => {
-            if ( $( ".growl-footnote" ).length > 0 )
-                return ; // nb: unless a footnote on-screen (let the Escape close that instead)
-            this.closeRuleInfo() ;
-        } ) ;
-
     },
 
     methods: {

@@ -185,19 +185,17 @@ gMainApp.component( "main-app", {
         },
 
         onEscapePressed() {
-            // check if an image is currently zoomed
-            if ( $(".jquery-image-zoom").length > 0 ) {
-                // yup - no need to do anything (the image will un-zoom itself)
+            // check if there are any notification balloons open
+            if ( $( ".growl" ).length > 0 ) {
+                // yup - close them all
+                $( ".growl-close" ).each( function() {
+                    $(this).trigger( "click" ) ;
+                } ) ;
                 return ;
             }
-            // close any notification balloons
-            let isFootnoteOpen = $( ".growl-footnote" ).length > 0 ;
-            $( ".growl-close" ).each( function() {
-                $(this).trigger( "click" ) ;
-            } ) ;
-            // check if a footnotes balloon is open
-            if ( isFootnoteOpen ) {
-                // yup - let it "consume" the Escape key
+            // check if an image is currently zoomed
+            if ( $(".jquery-image-zoom").length > 0 ) {
+                // yup - no need to do anything here, the image will un-zoom itself
                 return ;
             }
             // check if the rule info popup is open

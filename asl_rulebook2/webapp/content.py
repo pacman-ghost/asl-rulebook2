@@ -55,11 +55,17 @@ def load_content_sets( startup_msgs, logger ):
     def load_content_doc( fname_stem, title, cdoc_id ):
         # load the content doc files
         content_doc = { "cdoc_id": cdoc_id, "title": title }
-        if load_file( fname_stem+".targets", content_doc, "targets", startup_msgs.warning ):
+        fname = fname_stem + ".targets"
+        if load_file( fname, content_doc, "targets", startup_msgs.warning ):
             # update the target index
             _target_index[ cdoc_id ] = {}
             for ruleid, target in content_doc.get( "targets", {} ).items():
                 _target_index[ cdoc_id ][ ruleid ] = target
+        else:
+            # NOTE: Things will work without this file, but from the user's point of view,
+            # they've probably set something up incorrectly, so we give them a hint.
+            if not app.config.get( "IGNORE_MISSING_DATA_FILES" ):
+                logger.warn( "Didn't find targets file: %s", fname )
         load_file( fname_stem+".chapters", content_doc, "chapters", startup_msgs.warning )
         if load_file( fname_stem+".footnotes", content_doc, "footnotes", startup_msgs.warning ):
             # update the footnote index
@@ -75,7 +81,12 @@ def load_content_sets( startup_msgs, logger ):
                         if ruleid not in _footnote_index[ cdoc_id ]:
                             _footnote_index[ cdoc_id ][ ruleid ] = []
                         _footnote_index[ cdoc_id ][ ruleid ].append( footnote )
-        load_file( fname_stem+".pdf", content_doc, "content", startup_msgs.warning, binary=True )
+        fname = fname_stem + ".pdf"
+        if not load_file( fname, content_doc, "content", startup_msgs.warning, binary=True ):
+            # NOTE: Things will work without this file, but from the user's point of view,
+            # they've probably set something up incorrectly, so we give them a hint.
+            if not app.config.get( "IGNORE_MISSING_DATA_FILES" ):
+                logger.warn( "Didn't find content file: %s", fname )
         # locate any chapter backgrounds and icons
         resource_dirs = [
             data_dir, os.path.join( os.path.dirname(__file__), "data/chapters/" )
@@ -120,7 +131,7 @@ def load_content_sets( startup_msgs, logger ):
     fspec = os.path.join( data_dir, "*.index" )
     for fname in sorted( glob.glob( fspec ) ):
         fname2 = os.path.basename( fname )
-        logger.info( "- %s", fname2 )
+        logger.info( "- Found index file: %s", fname2 )
         # load the index file
         title = os.path.splitext( fname2 )[0]
         cset_id = slugify( title )

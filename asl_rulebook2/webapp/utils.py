@@ -25,14 +25,13 @@ def load_data_file( fname, ftype, binary, logger, on_error ):
     """Load a data file."""
     try:
         # load the file
+        logger.debug("- Loading %s: %s", ftype, fname )
         if binary:
             with open( fname, mode="rb" ) as fp:
                 data = fp.read()
-            logger.debug( "- Loaded \"%s\" file: #bytes=%d", ftype, len(data) )
         else:
             with open( fname, "r", encoding="utf-8" ) as fp:
                 data = json.load( fp )
-            logger.debug( "- Loaded \"%s\" file.", ftype )
     except Exception as ex: #pylint: disable=broad-except
         msg = "Couldn't load \"{}\".".format( os.path.basename(fname) )
         on_error( msg, str(ex) )

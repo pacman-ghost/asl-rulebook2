@@ -153,10 +153,13 @@ export function showNotificationMsg( msgType, msg, info )
     return $growl ;
 }
 
-export function hideFootnotes()
+export function hideFootnotes( fast )
 {
     // hide the footnotes balloon
-    $( ".growl-footnote" ).find( ".growl-close" ).click() ;
+    if ( fast )
+        $( ".growl-footnote" ).hide() ;
+    else
+        $( ".growl-footnote" ).find( ".growl-close" ).click() ;
 }
 
 // --------------------------------------------------------------------

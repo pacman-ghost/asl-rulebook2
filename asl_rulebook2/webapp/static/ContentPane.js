@@ -1,5 +1,5 @@
 import { gMainApp, gFootnoteIndex, gEventBus, gUrlParams } from "./MainApp.js" ;
-import { findTargets, showErrorMsg, showNotificationMsg } from "./utils.js" ;
+import { findTargets, showErrorMsg, showNotificationMsg, hideFootnotes } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -47,6 +47,12 @@ gMainApp.component( "content-pane", {
     methods: {
 
         showFootnotes( footnotes ) {
+
+            // quickly hide the footnote balloon if it's already showing
+            // NOTE: It would be nice to leave it where it is if it's the same footnote, but we would
+            // also need to stop the show-target handler from closing it, and it becomes more effort
+            // than it's worth for something that will happen rarely.
+            hideFootnotes( true ) ;
 
             // show the footnote in a notification balloon
             let msg = this.makeFootnoteContent( footnotes ) ;

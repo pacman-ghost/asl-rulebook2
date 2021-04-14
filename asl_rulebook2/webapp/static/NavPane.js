@@ -31,8 +31,8 @@ gMainApp.component( "nav-pane", {
 
     created() {
 
-        gEventBus.on( "show-target", (cdocId, ruleid) => {
-            if ( gAppConfig.WEBAPP_DISABLE_AUTO_SHOW_RULE_INFO )
+        gEventBus.on( "show-target", (cdocId, ruleid, noRuleInfo) => {
+            if ( noRuleInfo || gAppConfig.WEBAPP_DISABLE_AUTO_SHOW_RULE_INFO )
                 return ;
             // get the Q+A and annotations for the target being opened
             // NOTE: Targets are associated with a content set, but the Q+A is global, which is not quite
@@ -150,7 +150,7 @@ gMainApp.component( "nav-pane-chapters", {
 
         onChapterEntryClicked( paneKey, entry ) {
             // show the chapter entry's target
-            gEventBus.emit( "show-target", paneKey[0], entry.ruleid ) ;
+            gEventBus.emit( "show-target", paneKey[0], entry.ruleid, true ) ;
 
         },
 

@@ -98,8 +98,6 @@ gMainApp.component( "nav-pane-search", {
 
         onSearch( queryString ) {
             // run the search (handled elsewhere)
-            if ( $("#rule-info").css( "display" ) != "none" )
-                return ; // nb: dont respond to key-presses if the rule info popup is open
             gEventBus.emit( "search", queryString ) ;
         },
 

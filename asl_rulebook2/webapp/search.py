@@ -95,6 +95,8 @@ def _do_search( args ):
     query_string = args[ "queryString" ].strip()
     if query_string == "!:simulated-error:!":
         raise RuntimeError( "Simulated error." ) # nb: for the test suite
+    if not query_string:
+        raise RuntimeError( "Missing query string." )
     fts_query_string, search_terms = _make_fts_query_string( query_string )
     _logger.debug( "FTS query string: %s", fts_query_string )
     conn = sqlite3.connect( _sqlite_path )
@@ -246,7 +248,7 @@ def _get_result_col( sr, key, val ):
 PASSTHROUGH_REGEXES = set([
     re.compile( r"\bAND\b" ),
     re.compile( r"\bOR\b" ),
-    re.compile( r"\bNOT\b" ),
+    re.compile( r"\bNOT\b" ), # nb: this is a binary operator i.e. x NOT y = x && !x
     re.compile( r"\((?![Rr]\))" ),
 ])
 

@@ -7,18 +7,21 @@
  * */
 
 #asop {
-    position: absolute ; top: 5px ; left: 5px ; bottom: 5px ; right: 5px ; z-index: 20 ;
+    position: absolute ; top: 2px ; left: 2px ; bottom: 2px ; right: 2px ; z-index: 20 ;
     display: flex ; flex-direction: column ;
-    border: 1px solid #444 ; border-radius: 5px ; background: white ;
+    border: 1px solid #888 ; border-radius: 5px ; background: white ;
     padding: 10px ;
 }
+#asop-overlay {
+    position: absolute ; top: 0 ; left: 0 ; bottom: 0 ; right: 0 ; z-index: 15 ; background: white ;
+}
 
-#nav .tabbed-page[data-tabid="asop"] .wrapper { display: flex ; flex-direction: column ; }
+#nav .tabbed-page[data-tabid="asop"] .wrapper { height: 100% ; display: flex ; flex-direction: column ; overflow-y: auto ; }
 #nav .tabbed-page[data-tabid="asop"] .accordian { flex-grow: 1 ; overflow-y: auto ; }
 #nav .tabbed-page[data-tabid="asop"] .accordian-pane .title { background: #f6edda ; border: 1px solid #e5cea0 ; font-size: 110% ; }
 #nav .tabbed-page[data-tabid="asop"] .accordian-pane[data-chapterid="pre-game"] .title { background: #fff6e2 ; }
 #nav .tabbed-page[data-tabid="asop"] .accordian .entry { margin: 6px 0 ; }
-#asop-footer { border-top: 1px solid #ccc ;  margin-top: 5px ; padding: 5px ; }
+#asop-footer { border-top: 1px solid #ccc ;  margin-top: 5px ; padding: 5px 5px 0 5px ; }
 
 #asop>.title { background: #f6edda ; border: 1px solid #e5cea0 }
 #asop[data-chapterid="pre-game"]>.title { background: #fff6e2 ; }
@@ -33,8 +36,8 @@
 .asop .collapsible { overflow-y: visible ; }
 .asop .preamble i, #asop .preamble em { font-style: normal ; }
 
-.asop .sections { flex-grow: 1 ; overflow-y: auto ; }
-.asop .section { margin-top: 10px ; border: 1px solid #444 ; border-radius: 5px; padding: 10px ; }
+.asop .sections { flex-grow: 1 ; overflow-y: auto ; padding: 0 5px ; }
+.asop .section { margin-top: 10px ; border: 1px solid #ccc ; border-radius: 5px; padding: 10px ; }
 .asop .section:first-of-type { margin-top: 0 ; }
-.asop .sections.single .section { border: none ; padding: 0 5px ; }
+.asop .sections.single .section { border: none ; padding: 0 ; }
 .asop .section .caption { font-weight: bold ; }

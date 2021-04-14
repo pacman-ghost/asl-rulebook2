@@ -1,0 +1,8 @@
+http://dabuttonfactory.com
+
+Calibri ; bold ; size=24 ; padding=16/4
+rounded rectangle ; radius=5
+bgd=simple gradient ; 4f88e6/2566d2
+border=1 ; 1d4edf
+
+inactive: unicolored ; #75a0e7

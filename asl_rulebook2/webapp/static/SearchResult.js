@@ -8,18 +8,26 @@ gMainApp.component( "index-sr", {
     props: [ "sr" ],
     data() { return {
         expandRulerefs: null,
+        primaryTarget: getPrimaryTarget( this.sr ),
         iconUrl: getChapterResource( "icon", this.getChapterId() ),
         cssBackground: this.makeCssBackground(),
+        borderCol: this.makeBorderColor(),
     } ; },
 
     template: `
 <div class="index-sr" >
-    <div v-if="sr.title || sr.subtitle" :style="{background: cssBackground}" class="title" >
+    <div v-if="sr.title || sr.subtitle" :style="{background: cssBackground}"
+      :class=makeBorderColor() class="caption"
+    >
         <collapser @click=onToggleRulerefs ref="collapser" />
-        <a v-if=iconUrl href="#" @click=onClickIcon >
-            <img :src=iconUrl class="icon" />
-        </a>
-        <span v-if=sr.title class="title" v-html=sr.title />
+        <img v-if=iconUrl :src=iconUrl :style="{cursor: this.primaryTarget ? 'pointer' : null}"
+          @click=onClickIcon
+          class="icon"
+        />
+        <span v-if=sr.title v-html=sr.title :style="{cursor: this.primaryTarget ? 'pointer' : null}"
+          @click=onClickIcon
+          class="title"
+        />
         <span v-if=sr.subtitle class="subtitle" v-html=sr.subtitle />
     </div>
     <div class="body">
@@ -92,9 +100,8 @@ gMainApp.component( "index-sr", {
 
         onClickIcon() {
             // open the search result's primary target
-            let target = getPrimaryTarget( this.sr ) ;
-            if ( target )
-                gEventBus.emit( "show-target", target.cdoc_id, target.ruleid ) ;
+            if ( this.primaryTarget )
+                gEventBus.emit( "show-target", this.primaryTarget.cdoc_id, this.primaryTarget.ruleid ) ;
         },
 
         onToggleRulerefs() {
@@ -119,6 +126,12 @@ gMainApp.component( "index-sr", {
             // generate the CSS background URL for the search result's title
             let url = getChapterResource( "background", this.getChapterId() ) ;
             return url ? "url(" + url + ")" : "#ddd" ;
+        },
+
+        makeBorderColor() {
+            // generate the caption border color
+            let chapterId = this.getChapterId() ;
+            return chapterId ? "chapter-" + chapterId.toLowerCase() : null ;
         },
 
         getChapterId() {

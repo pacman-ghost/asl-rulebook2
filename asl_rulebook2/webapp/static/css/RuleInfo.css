@@ -1,12 +1,17 @@
 #rule-info {
-    position: absolute ; top: 0 ; left: 0 ; bottom: 0 ; right: 0 ;
+    position: absolute ; top: 5px ; left: 5px ; bottom: 5px ; right: 5px ;
     overflow-y: auto ;
     z-index: 10 ;
     border: 1px solid #444 ; border-radius: 5px ; background: white ;
 }
+#rule-info-overlay {
+    position: absolute ; top: 0 ; left: 0 ; bottom: 0 ; right: 0 ;
+    background: white ;
+    z-index: 5 ;
+}
 #nav img.close-rule-info {
-    position: absolute ; top: 6px ; z-index: 15 ;
-    height: 15px ; cursor: pointer ;
+    position: absolute ; top: 1px ; right: 1px ; z-index: 15 ;
+    height: 18px ; cursor: pointer ;
 }
 
 /* This transition was originally a slide, but it proved to be quite distracting, since the user will be looking at
@@ -20,14 +25,16 @@
 
 /* NOTE: Rule info entries can appear in the rule info popup *and* search results, so the following rules need to be global. */
 
+.rule-info { padding: 5px ; }
 .rule-info p { margin-top: 5px ; }
 .rule-info br { margin-top: 3px ; }
 .rule-info .quote { font-style: italic ; color: #406040 ; }
+.rule-info .caption .auto-ruleid { color: inherit ; }
+.rule-info .caption .auto-ruleid:hover { background: inherit ; }
 
-.qa { margin: 2px ; background: white ; padding: 5px ; }
 .qa img.icon { float: left ; margin: 0 6px 0 0 ; height: 18px ; }
 .qa .content { clear: left ; margin-top: 5px ; }
-.qa .caption { margin-bottom: 2px ; background: #60b0ff ; border-radius: 3px ; padding: 2px 5px ; font-weight: bold ; color: #002850 ; }
+.qa .caption { margin-bottom: 2px ; background: #60b0ff ; border: 1px solid #50a0f0 ; border-radius: 3px ; padding: 2px 5px ; font-weight: bold ; color: #002850 ; }
 .qa .collapser { height: 16px ; float: right ; margin: 1px 2px 1px 0 ; }
 .qa .question { margin-bottom: 5px ; color: #002850 ; }
 .qa .question img { float: right ; margin: 0 0 5px 5px ; height: 100px ; }
@@ -39,10 +46,9 @@
 .qa .info .note a { color: #666 ; }
 .qa .see-other { font-size: 80% ; font-style: italic ; color: #0c6905 ; }
 
-.anno { margin: 2px ; background: white ; padding: 5px ; color: #002850 ; }
 .anno img.icon { float: left ; margin: 0 6px 0 0 ; height: 18px ; }
 .anno .caption { margin-bottom: 2px ; border-radius: 3px ; padding: 2px 5px ; font-weight: bold ; }
-.anno .caption.errata { background: #ffc020 ; }
-.anno .caption.user-anno { background: #20ff20 ; }
+.anno .caption.errata { background: #ffc020 ; border: 1px solid #f0b010 ; }
+.anno .caption.user-anno { background: #20ff20 ; border: 1px solid #10f010 ; }
 .anno .collapser { height: 16px ; float: right ; margin: 1px 2px 1px 0 ; }
 .anno .content { clear: left ; margin-top: 5px ; }

@@ -53,6 +53,22 @@ gMainApp.component( "main-app", {
             gutterSize: 2,
         } ) ;
 
+        // initialize hotkeys
+        jQuery.hotkeys.options.filterInputAcceptingElements = false ;
+        jQuery.hotkeys.options.filterContentEditable = false ;
+        jQuery.hotkeys.options.filterTextInputs = false ;
+        function selectNav( tabId ) {
+            $( "#nav .tab-strip .tab[data-tabid='" + tabId + "']" ).click() ;
+        }
+        $( "body" ).bind( "keydown", "alt+r", function( evt ) {
+            selectNav( "search" ) ;
+            $( "#query-string" ).select() ;
+            $( "#query-string" ).focus() ;
+            evt.preventDefault() ;
+        } ) ;
+        $( "body" ).bind( "keydown", "alt+c", function( evt ) { selectNav( "chapters" ) ; evt.preventDefault() ; } ) ;
+        $( "body" ).bind( "keydown", "alt+a", function( evt ) { selectNav( "asop" ) ; evt.preventDefault() ; } ) ;
+
         // initialze the webapp
         Promise.all( [
             this.getAppConfig(),
@@ -62,6 +78,7 @@ gMainApp.component( "main-app", {
         ] ).then( () => {
             this.isLoaded = true ;
             gEventBus.emit( "app-loaded" ) ;
+            $( "#watermark" ).css( "opacity", 0.15 ) ;
             this.showStartupMsgs() ;
             $( "#query-string" ).focus() ; // nb: because autofocus on the <input> doesn't work :-/
         } ).catch( () => {
@@ -194,8 +211,12 @@ gMainApp.component( "main-app", {
             // check if there are any notification balloons open
             if ( $( ".growl" ).length > 0 ) {
                 // yup - close them all
-                $( ".growl-close" ).each( function() {
-                    $(this).trigger( "click" ) ;
+                // FUDGE! We used to trigger a click on the close button, so that the balloons would fade out,
+                // but there seems to be a bug where they would just build up, hidden. Just removing them
+                // from the DOM is a bit abrupt visually, but it's arguable that it's more in line with what
+                // the user wants (i.e. get rid of them!)
+                $( ".growl" ).each( function() {
+                    $(this).remove() ;
                 } ) ;
                 return ;
             }

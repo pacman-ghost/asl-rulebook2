@@ -4,17 +4,23 @@ html { height: 100% ; }
 body { height: 100% ; overflow: hidden ; }
 
 /* general styling */
-body { font-family: Arial, Helvetica, sans-serif ; font-size: 16px ; }
+body { font-family: Arial, Helvetica, sans-serif ; font-size: 16px ; color: #002850 ; }
 input[type="text"] { height: 22px ; padding: 0 5px ; }
 button { height: 24px ; padding: 0 5px !important ; }
-ul, ol { margin-left: 15px ; }
+ul { margin-left: 15px ; }
+ol { margin-left: 20px ; }
+ul { list-style-image: url(../images/bullet.png) ; }
+ul ul { list-style-image: url(../images/bullet2.png) ; }
+ul ul ul { list-style-image: url(../images/bullet3.png) ; }
 
 /* content */
 .hilite { padding: 0 2px ; background: #ffa ; }
 .exc { font-style: italic ; color: #666 ; }
-.auto-ruleid { color: red ; cursor: pointer ; }
+.auto-ruleid { color: red ; }
+.auto-ruleid:hover { background: #ffffcc ; }
 
  /* notification balloons */
+#growls-br { bottom: 22px ; right: 0 ; max-height: 40% ; }
 .growl { cursor: pointer ; }
 .growl .growl-close { position: absolute ; top: 0 ; right: 6px ; }
 .growl .growl-title { display: none ; }

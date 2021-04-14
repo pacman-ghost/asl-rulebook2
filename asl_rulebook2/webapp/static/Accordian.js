@@ -39,7 +39,7 @@ gMainApp.component( "accordian", {
 
 gMainApp.component( "accordian-pane", {
 
-    props: [ "paneKey", "title", "entries", "getEntryKey", "iconUrl", "backgroundUrl" ],
+    props: [ "paneKey", "title", "entries", "getEntryKey", "iconUrl", "backgroundUrl", "borderClass" ],
     data() { return {
         isExpanded: false,
         cssBackground: this.backgroundUrl ? "url(" + this.backgroundUrl + ")": null,
@@ -47,7 +47,7 @@ gMainApp.component( "accordian-pane", {
 
     template: `
 <div class="accordian-pane">
-    <div class="title" :style="{background: cssBackground}" @click=onToggleExpand >
+    <div class="title" :style="{background: cssBackground}" :class=borderClass @click=onToggleExpand >
         <img v-if=iconUrl :src=iconUrl class="icon" />
         {{title}}
     </div>

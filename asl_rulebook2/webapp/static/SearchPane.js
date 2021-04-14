@@ -21,18 +21,21 @@ gMainApp.component( "search-box", {
 
     template: `
 <div>
-    <div class="row">
-        <input type="text" id="query-string" @keyup=onKeyUp v-model.trim="queryString" ref="queryString" autofocus >
-        <button @click="$emit('search',this.queryString)" ref="submit"> Go </button>
+    <div class="content">
+        <div class="row">
+            <span class="label"> Sea<u>r</u>ch: </span>
+            <input type="text" id="query-string" @keyup=onKeyUp v-model.trim="queryString" ref="queryString" autofocus >
+            <button @click="$emit('search',this.queryString)" class="submit" ref="submit" />
+        </div>
+        <div class="row sr-filters" style="display:none;" ref="srFilters" >
+            <span class="label"> Show: </span>
+            <input type="checkbox" name="show-index-sr" @click=onClickSrFilter > <label for="show-index-sr"> Index </label>
+            <input type="checkbox" name="show-qa-sr" @click=onClickSrFilter > <label for="show-qa-sr"> Q+A </label>
+            <input type="checkbox" name="show-errata-sr" @click=onClickSrFilter > <label for="show-errata-sr"> Errata </label>
+            <input type="checkbox" name="show-asop-entry-sr" @click=onClickSrFilter > <label for="show-asop-entry-sr"> ASOP </label>
+        </div>
     </div>
-    <div class="row sr-filters" style="display:none;" ref="srFilters" >
-        <b> Show: </b>
-        <input type="checkbox" name="show-index-sr" @click=onClickSrFilter > <label for="show-index-sr"> Index </label>
-        <input type="checkbox" name="show-qa-sr" @click=onClickSrFilter > <label for="show-qa-sr"> Q+A </label>
-        <input type="checkbox" name="show-errata-sr" @click=onClickSrFilter > <label for="show-errata-sr"> Errata </label>
-        <input type="checkbox" name="show-asop-entry-sr" @click=onClickSrFilter > <label for="show-asop-entry-sr"> ASOP </label>
-        <span v-if=showSrCount :title=srCountInfo class="sr-count"> {{srCount}} </span>
-    </div>
+    <div v-if=showSrCount :title=srCountInfo class="sr-count"> {{srCount}} </div>
 </div>`,
 
     created() {
@@ -61,6 +64,7 @@ gMainApp.component( "search-box", {
             if ( nVisible <= 1 ) {
                 // there's only 1 checkbox - turn it on and leave everything hidden
                 $( this.$el ).find( "input[type='checkbox']" ).prop( "checked", true ) ;
+                $( this.$el ).find( ".content" ).css( { "margin-top": "6px", right: "15px" } ) ;
             } else {
                 // there are multiple checkboxes - show them to the user
                 $( this.$refs.srFilters ).show() ;
@@ -147,7 +151,8 @@ gMainApp.component( "search-box", {
                 if ( $(this).css( "display" ) != "none" )
                     nVisible += 1 ;
             } ) ;
-            if ( nVisible == 0 && nTotal == 0 ) {
+            let $srFilters = $( this.$refs.srFilters ) ;
+            if ( (nVisible == 0 && nTotal == 0) || $srFilters.css("display") == "none" ) {
                 this.srCount = null ;
                 this.srCountInfo = null ;
             } else {

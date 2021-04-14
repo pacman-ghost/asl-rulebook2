@@ -1,4 +1,4 @@
-#nav { margin: 0 5px ; position: relative ; }
+#nav { position: relative ; }
 #nav .no-chapters { font-style: italic ; color: #888 ; }
 
-#nav .tab-strip { border-top: 1px solid #aaa ; padding: 5px 5px ; }
+#nav .tabbed-page[data-tabid="chapters"] .wrapper { overflow-y: auto ; }

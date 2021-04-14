@@ -1,4 +1,4 @@
-import { gMainApp, gAppConfig, gContentDocs, gEventBus } from "./MainApp.js" ;
+import { gMainApp, gAppConfig, gContentDocs, gEventBus, gUrlParams } from "./MainApp.js" ;
 import { getJSON, getURL, linkifyAutoRuleids, getASOPChapterIdFromSectionId, showWarningMsg } from "./utils.js" ;
 
 // --------------------------------------------------------------------
@@ -13,18 +13,19 @@ gMainApp.component( "nav-pane", {
     template: `
 <div>
     <tabbed-pages tabbedPagesId="nav" >
-        <tabbed-page tabId="search" caption="Search" >
+        <tabbed-page tabId="search" image="search" >
             <nav-pane-search />
         </tabbed-page>
-        <tabbed-page tabId="chapters" caption="Chapters" >
+        <tabbed-page tabId="chapters" image="chapters" >
             <nav-pane-chapters />
         </tabbed-page>
         <tabbed-page v-if="asop.chapters && asop.chapters.length > 0"
-          tabId="asop" caption="ASOP" ref="asop"
+          tabId="asop" image="asop" ref="asop"
         >
             <nav-pane-asop :asop=asop />
         </tabbed-page>
     </tabbed-pages>
+    <div id="watermark" />
     <rule-info :ruleInfo=ruleInfo @close=closeRuleInfo />
 </div>`,
 
@@ -67,14 +68,26 @@ gMainApp.component( "nav-pane-search", {
 
     data() { return {
         seqNo: 0, // nb: for the test suite
+        show: gUrlParams.get( "no-animations" ),
     } ; },
 
     template: `
-<search-box id="search-box" @search=onSearch />
+<search-box :style="{display: show ? 'block' : 'none'}" @search=onSearch
+    id="search-box" ref="searchBox"
+/>
 <search-results :data-seqno=seqNo id="search-results" />
 `,
 
     created() {
+        // NOTE: We can sometimes see the search box being built during startup (as the background images
+        // are loaded), so we start it off hidden, and fade it in after the webapp has initialized.
+        gEventBus.on( "app-loaded", () => {
+            if ( ! this.show ) {
+                $( this.$refs.searchBox.$el ).fadeIn( 500, () => {
+                    this.show = true ;
+                } ) ;
+            }
+        } ) ;
         // notify the test suite that the search results are now available
         gEventBus.on( "search-done", () => {
             this.seqNo += 1 ;
@@ -107,7 +120,7 @@ gMainApp.component( "nav-pane-chapters", {
     <accordian-pane v-if="chapters.length > 0" v-for="c in chapters"
       :key=c :paneKey=c
       :entries=c[1].sections :getEntryKey=getEntryKey
-      :title=c[1].title :iconUrl=c[1].icon :backgroundUrl=c[1].background
+      :title=c[1].title :iconUrl=c[1].icon :backgroundUrl=c[1].background :borderClass=makeBorderClass(c)
       @pane-expanded=onChapterPaneExpanded
       @entry-clicked=onChapterEntryClicked
     />
@@ -142,6 +155,7 @@ gMainApp.component( "nav-pane-chapters", {
         },
 
         getEntryKey( entry ) { return entry.ruleid ; },
+        makeBorderClass( chapter ) { return chapter[1].chapter_id ? "chapter-" + chapter[1].chapter_id.toLowerCase() : null ; },
 
     },
 

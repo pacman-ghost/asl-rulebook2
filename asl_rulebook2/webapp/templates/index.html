@@ -21,6 +21,7 @@
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/TabbedPages.css' ) }}" />
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/Accordian.css' ) }}" />
 <link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/Collapsible.css' ) }}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/chapters.css' ) }}" />
 {%if ASOP_CSS_URL%}
     <link rel="stylesheet" type="text/css" href="{{ASOP_CSS_URL}}" />
 {%endif%}
@@ -52,6 +53,7 @@
 <script src="{{ url_for( 'static', filename='js-cookie/js.cookie.js' ) }}"></script>
 <script src="{{ url_for( 'static', filename='growl/jquery.growl.js' ) }}"></script>
 <script src="{{ url_for( 'static', filename='imageZoom/jquery.imageZoom.min.js' ) }}"></script>
+<script src="{{ url_for( 'static', filename='hotkey/jquery.hotkey.js' ) }}"></script>
 
 <script>
 gImagesBaseUrl = "{{ url_for( 'static', filename='images/' ) }}" ;

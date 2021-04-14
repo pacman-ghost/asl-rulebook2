@@ -1,4 +1,5 @@
 import { gMainApp, gAppConfig, gEventBus } from "./MainApp.js" ;
+import { makeImageUrl } from "./utils.js" ;
 
 let gCollapsibleStates = {} ; // nb: we only save the states for the current session
 
@@ -59,8 +60,7 @@ gMainApp.component( "collapser", {
         },
 
         getImageUrl() {
-            return gImagesBaseUrl //eslint-disable-line no-undef
-                + "collapser-" + (this.isCollapsed ? "down" : "up") + ".png" ;
+            return makeImageUrl( "collapser-" + (this.isCollapsed ? "down" : "up") + ".png" ) ;
         },
 
         updateCollapsible() {

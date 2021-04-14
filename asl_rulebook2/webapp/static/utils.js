@@ -106,6 +106,7 @@ export function linkifyAutoRuleids( $root )
         $(this).on( "click", function() {
             gEventBus.emit( "show-target", target.cdoc_id, target.ruleid ) ;
         } ) ;
+        $(this).css( "cursor", "pointer" ) ;
     } ) ;
 }
 
@@ -176,6 +177,17 @@ export function makeImagesZoomable( $elem )
         } ) ) ;
     } ) ;
     $elem.find( "img.imageZoom" ).imageZoom( $ ) ;
+}
+
+export function makeImageUrl( fname )
+{
+    // generate an image URL
+    let baseUrl = gImagesBaseUrl ; //eslint-disable-line no-undef
+    if ( baseUrl[ baseUrl.length-1 ] != "/" )
+        baseUrl += "/" ;
+    if ( fname[0] == "/" )
+        fname = fname.substring( 1 ) ;
+    return baseUrl + fname ;
 }
 
 // --------------------------------------------------------------------

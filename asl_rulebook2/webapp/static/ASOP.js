@@ -16,19 +16,21 @@ gMainApp.component( "asop", {
     } ; },
 
     template: `
-<div v-if=isActive :data-chapterid=chapterId id="asop" class="asop" >
-    <div class="title">
-        <span v-html=title />
-        <collapser collapserId="asop-preamble" ref="collapser" />
+<div>
+    <div v-if=isActive id="asop-overlay" />
+    <div v-if=isActive :data-chapterid=chapterId id="asop" class="asop" >
+        <div class="title">
+            <span v-html=title />
+            <collapser collapserId="asop-preamble" ref="collapser" />
+        </div>
+        <collapsible collapsedHeight=5 ref="collapsible">
+            <div v-html=preamble class="preamble" />
+        </collapsible>
+        <div v-if="sections.length > 0" class="sections" :class="{single: isSingleSection}" ref="sections" >
+            <div v-for="s in sections" :key=s class="section" v-html=s />
+        </div>
     </div>
-    <collapsible collapsedHeight=5 ref="collapsible">
-        <div v-html=preamble class="preamble" />
-    </collapsible>
-    <div v-if="sections.length > 0" class="sections" :class="{single: isSingleSection}" ref="sections" >
-        <div v-for="s in sections" :key=s class="section" v-html=s />
-    </div>
-</div>
-`,
+</div>`,
 
     created() {
 

@@ -1,5 +1,5 @@
-import { gMainApp, gEventBus, gUrlParams } from "./MainApp.js" ;
-import { linkifyAutoRuleids, fixupSearchHilites, makeImagesZoomable } from "./utils.js" ;
+import { gMainApp, gUrlParams } from "./MainApp.js" ;
+import { linkifyAutoRuleids, fixupSearchHilites, makeImagesZoomable, makeImageUrl } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -7,22 +7,18 @@ gMainApp.component( "rule-info", {
 
     props: [ "ruleInfo" ],
     data() { return {
-        closeRuleInfoImageUrl: gImagesBaseUrl + "cross.png", //eslint-disable-line no-undef
+        closeRuleInfoImageUrl: makeImageUrl( "close-popup.png" ),
         ruleInfoTransitionName: gUrlParams.get("no-animations") ? "" : "ruleinfo-slide",
     } ; },
 
-    // FUDGE! We want the "close" button to stay in the top-right corner of the rule info popup as the user
-    // scrolls around. If we put it in together with the content itself, with an absolute position, it scrolls
-    // with the content, so we place it outside the content, with an absolute position, and a larger z-index.
-    // It doesn't look so good when the v-scrollbar appears, but we can live with that.
+    // NOTE: We have 3 separate transitions to try get the animation timing to look right :-/
     template: `
 <div>
-    <img :src=closeRuleInfoImageUrl style="display:none;"
-      @click="$emit('close')" ref="closeRuleInfoButton"
-      title="Close the rule info" class="close-rule-info"
-    />
-    <transition :name=ruleInfoTransitionName @after-enter=updateCloseButton >
-        <div v-show="ruleInfo.length > 0" id="rule-info" ref="ruleInfo" >
+    <transition :name=ruleInfoTransitionName >
+        <div v-show=showPopup() id="rule-info-overlay" />
+    </transition>
+    <transition :name=ruleInfoTransitionName >
+        <div v-show=showPopup() id="rule-info" ref="ruleInfo" >
             <div class="content" ref="content">
                 <div v-for="ri in ruleInfo" :key=ri >
                     <annotation v-if="ri.ri_type == 'errata'" :anno=ri />
@@ -33,33 +29,18 @@ gMainApp.component( "rule-info", {
             </div>
         </div>
     </transition>
+    <transition :name=ruleInfoTransitionName >
+        <img v-if=showPopup() :src=closeRuleInfoImageUrl
+          @click="$emit('close')" ref="closeRuleInfoButton"
+          class="close-rule-info"
+        />
+    </transition>
 </div>`,
 
-    created() {
-        // NOTE: Toggling collapsible's can cause the v-scrollbar to appear/hide.
-        gEventBus.on( "collapsible-toggled", () => {
-            if ( this.ruleInfo.length > 0 )
-                this.updateCloseButton() ;
-        } ) ;
-    },
-
     beforeUpdate() {
-        // hide the close button until the "enter" transition has completed
-        let $closeButton = $( this.$refs.closeRuleInfoButton ) ;
-        if ( this.ruleInfo.length == 0 )
-            $closeButton.hide() ;
-        else {
-            if ( $closeButton.css( "display" ) == "none" )
-                $closeButton.hide() ;
-            else {
-                // NOTE: If we're already visible, we don't get the transition, so we force
-                // post-transition processing manually.
-                this.$nextTick( () => {
-                    this.updateCloseButton() ;
-                    this.$refs.ruleInfo.scrollTop = 0 ;
-                } ) ;
-            }
-        }
+        this.$nextTick( () => {
+            this.$refs.ruleInfo.scrollTop = 0 ;
+        } ) ;
     },
 
     updated() {
@@ -69,21 +50,9 @@ gMainApp.component( "rule-info", {
 
     methods: {
 
-        updateCloseButton() {
-            // FUDGE! We have to wait until the rule info popup is open before we can check
-            // if it has a v-scrollbar or not, and hence where we should put the close button.
-            this.$nextTick( () => {
-                let ruleInfo = this.$refs.ruleInfo ;
-                let closeButton = this.$refs.closeRuleInfoButton ;
-                if ( ruleInfo.clientHeight >= ruleInfo.scrollHeight )
-                    $(closeButton).css( "right", "6px" ) ;
-                else {
-                    // FUDGE! The v-scrollbar is visible, so we move the "close" button left a bit.
-                    // This adjustment won't update if the pane is resized, but we can live with that.
-                    $(closeButton).css( "right", "18px" ) ;
-                }
-                $(closeButton).fadeIn( 200 ) ;
-            } ) ;
+        showPopup() {
+            // figure out if the popup should be shown
+            return this.ruleInfo.length > 0 ;
         },
 
     },
@@ -96,9 +65,9 @@ gMainApp.component( "qa-entry", {
 
     props: [ "qaEntry" ],
     data() { return {
-        questionImageUrl: gImagesBaseUrl + "question.png", //eslint-disable-line no-undef
-        infoImageUrl: gImagesBaseUrl + "info.png", //eslint-disable-line no-undef
-        answerImageUrl: gImagesBaseUrl + "answer.png", //eslint-disable-line no-undef
+        questionImageUrl: makeImageUrl( "question.png" ),
+        infoImageUrl: makeImageUrl( "info.png" ),
+        answerImageUrl: makeImageUrl( "answer.png" ),
     } ; },
 
     template: `
@@ -189,7 +158,7 @@ gMainApp.component( "annotation", {
     methods: {
         makeIconImageUrl() {
             if ( this.annoType )
-                return gImagesBaseUrl + this.annoType+".png" ; //eslint-disable-line no-undef
+                return makeImageUrl( this.annoType + ".png" ) ;
             else
                 return null ;
         },

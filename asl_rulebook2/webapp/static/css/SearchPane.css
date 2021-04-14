@@ -1,17 +1,33 @@
 #nav .tabbed-page[data-tabid='search'] .wrapper {
     display: flex ; flex-direction: column ;
-    overflow-y: none ;
+    overflow-y: hidden ;
 }
+#nav .tab-strip { margin-top: 5px ; padding: 2px 5px 5px 5px ; }
+#nav .tab-strip .tab img { border: 1px solid transparent ; }
+#nav .tab-strip .tab img:active { border: 1px solid #888 ; border-radius: 5px ; }
 
 /* search box */
-#search-box { display: flex ; flex-direction: column ; padding: 1px ; margin-bottom: 8px ; }
+#search-box {
+    height: 71px ; flex-shrink: 0 ; position: relative ;
+    background-image: url(../images/header-bgd.png), url(../images/header-bgd-edge.png) ;
+    background-repeat: no-repeat, repeat-x;
+    padding: 1px ;
+}
+#search-box .content {
+    position: absolute ; top: 10px ; left: 90px ; right: 5px ;
+    display: flex ; flex-direction: column ;
+    font-size: 90% ;
+}
 #search-box .row { display: flex ; }
-#search-box input#query-string { margin-right: 5px ; flex-grow: 1 ; }
+#search-box span.label { display: inline-block ; width: 70px ; margin-right: 3px ; font-weight: bold ; text-align: right ; }
+#search-box input#query-string { margin-right: 5px ; flex-grow: 1 ; height: 16px ; }
+#search-box button.submit { width: 18px ; height: 18px ; background: #fff no-repeat center/80% url(../images/search.png) ; }
 #search-box .sr-filters { margin-top: 4px ; font-size: 80% ; }
-#search-box .sr-filters input[type="checkbox"] { margin: 0 2px 0 6px ; }
-#search-box .sr-count { flex-grow: 1 ; text-align: right ; font-style: italic ; color: #888 ; }
+#search-box .sr-filters input[type="checkbox"] { margin-right: 2px ; }
+#search-box .sr-filters label { margin-right: 6px ; }
+#search-box .sr-count { position: absolute ; bottom: 18px ; right: 2px ; font-size: 60% ; font-style: italic ; color: #444 ; }
 
 /* search results */
-#search-results { height: 100% ; overflow-y: auto ;  }
-#search-results .no-results { font-style: italic ; color: #666 ; }
+#search-results { flex-grow: 1 ; overflow-y: auto ;  }
+#search-results .no-results { padding: 10px ; font-style: italic ; color: #666 ; }
 #search-results .error .pre { font-family: monospace ; margin: 0.25em 0 0 0.5em ; }

@@ -1,5 +1,6 @@
 .tabbed-pages { display: flex ; flex-direction: column ; height: 100% ; }
-.tabbed-pages .tabbed-page { height: calc(100% - 35px) ; display: flex ; flex-direction: column ; }
-.tabbed-pages .tabbed-page .wrapper { flex-grow: 1 ; margin: 5px 0 2px 0 ; height: calc(100% - 10px) ; overflow-y: auto ; }
+.tabbed-pages .tabbed-page { flex-grow: 1 ; overflow-y: hidden ; display: flex ; flex-direction: column ; }
 .tabbed-pages .tab-strip { height: 24px ; display: flex ; font-size: 10pt ; font-style: italic ; }
-.tabbed-pages .tab-strip .tab { border: 1px solid #aaa ; padding: 2px 5px ; margin-right: 5px ; }
+.tabbed-pages .tab-strip .tab { border: 1px solid #aaa ; padding: 2px 5px ; margin-right: 5px ; cursor: pointer ; }
+.tabbed-pages .tab-strip.images .tab { border: none ; padding: 0 ; }
+.tabbed-pages .tab-strip.images .tab img { height: 22px ; }

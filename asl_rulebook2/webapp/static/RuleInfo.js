@@ -31,7 +31,7 @@ gMainApp.component( "rule-info", {
     </transition>
     <transition :name=ruleInfoTransitionName >
         <img v-if=showPopup() :src=closeRuleInfoImageUrl
-          @click="$emit('close')" ref="closeRuleInfoButton"
+          @click="$emit('close')"
           class="close-rule-info"
         />
     </transition>

@@ -58,6 +58,7 @@ gMainApp.component( "main-app", {
         jQuery.hotkeys.options.filterContentEditable = false ;
         jQuery.hotkeys.options.filterTextInputs = false ;
         function selectNav( tabId ) {
+            $( "#nav .close-rule-info" ).click() ;
             $( "#nav .tab-strip .tab[data-tabid='" + tabId + "']" ).click() ;
         }
         $( "body" ).bind( "keydown", "alt+r", function( evt ) {

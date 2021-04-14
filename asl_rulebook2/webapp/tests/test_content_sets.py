@@ -53,8 +53,8 @@ def test_targets( webapp, webdriver ):
 
     # test clicking on ruleid's
     do_test( "4b", "content-set-1!linked" )
-    do_test( "1a", "content-set-1" )
-    do_test( "cs2d", "content-set-2" )
+    do_test( "1a", "content-set-1!" )
+    do_test( "cs2d", "content-set-2!" )
     select_tabbed_page( "content", "empty" )
     do_test( "1b", "content-set-1!linked" )
 
@@ -116,8 +116,8 @@ def test_chapters( webapp, webdriver ):
             assert expected in get_last_error_msg()
 
     # click on some chapter entries
-    do_test( 1, 2, ( "content-set-1", "6a" ) )
-    do_test( 4, 0, ( "content-set-2", "cs2a" ) )
+    do_test( 1, 2, ( "content-set-1!", "6a" ) )
+    do_test( 4, 0, ( "content-set-2!", "cs2a" ) )
     do_test( 2, 1, ( "content-set-1!linked", "2b" ) )
 
     # try to show an unknown target

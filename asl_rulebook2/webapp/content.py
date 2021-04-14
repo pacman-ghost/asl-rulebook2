@@ -126,6 +126,9 @@ def load_content_sets( startup_msgs, logger ):
                 matches.add( fname[1:-1] )
         return matches
 
+    def make_cdoc_id( cset_id, key ):
+        return "{}!{}".format( cset_id, key )
+
     # load each content set
     logger.info( "Loading content sets: %s", data_dir )
     fspec = os.path.join( data_dir, "*.index" )
@@ -145,13 +148,13 @@ def load_content_sets( startup_msgs, logger ):
             continue # nb: we can't do anything without an index file
         # load the main content doc
         fname_stem = os.path.splitext( fname2 )[0]
-        cdoc_id = cset_id # nb: because this the main content document
+        cdoc_id = make_cdoc_id( cset_id, "" )
         content_doc = load_content_doc( fname_stem, fname_stem, cdoc_id )
         content_set[ "content_docs" ][ cdoc_id ] = content_doc
         # load any associated content docs
         for fname_stem2 in find_assoc_cdocs( fname_stem ):
             # nb: we assume there's only one space between the two filename stems :-/
-            cdoc_id2 = "{}!{}".format( cdoc_id, slugify(fname_stem2) )
+            cdoc_id2 = make_cdoc_id( cset_id, slugify(fname_stem2) )
             content_doc = load_content_doc(
                 "{} ({})".format( fname_stem, fname_stem2 ),
                 fname_stem2,

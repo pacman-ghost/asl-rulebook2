@@ -104,7 +104,7 @@ def test_targets( webapp, webdriver ):
         # click on a target
         elem = find_child( "#search-results {}".format( sel ) )
         elem.click()
-        wait_for( 2, lambda: get_curr_target() == ( "simple", expected ) )
+        wait_for( 2, lambda: get_curr_target() == ( "simple!", expected ) )
 
     # do the tests
     do_test( "CC", ".sr .ruleids .ruleid a", "A3.8" )
@@ -124,21 +124,21 @@ def test_target_search( webapp, webdriver ):
     assert len(results) > 0
     results = do_search( "D1.4" )
     assert len(results) == 0 # nb: previous search results should be removed
-    wait_for( 2, lambda: get_curr_target() == ( "simple", "D1.4" ) )
+    wait_for( 2, lambda: get_curr_target() == ( "simple!", "D1.4" ) )
 
     # search for a target
     results = do_search( "astral plane" )
     assert results is None # nb: this is the "no results" message
     results = do_search( "E11.21" )
     assert len(results) == 0 # nb: the "no results"  message should be cleared
-    wait_for( 2, lambda: get_curr_target() == ( "simple", "E11.21" ) )
+    wait_for( 2, lambda: get_curr_target() == ( "simple!", "E11.21" ) )
 
     # search for a target
     results = do_search( "*" )
     assert isinstance( results, str ) # nb: this is an error message
     results = do_search( "a4.7" )
     assert len(results) == 0 # nb: the error message should be cleared
-    wait_for( 2, lambda: get_curr_target() == ( "simple", "A4.7" ) )
+    wait_for( 2, lambda: get_curr_target() == ( "simple!", "A4.7" ) )
 
 # ---------------------------------------------------------------------
 

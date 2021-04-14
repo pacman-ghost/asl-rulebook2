@@ -23,4 +23,4 @@ def test_hello( webapp, webdriver ):
 
     # check that the content docs loaded correctly
     content_docs = get_content_docs()
-    assert content_docs == [ "simple" ]
+    assert content_docs == [ "simple!" ]

@@ -183,13 +183,15 @@ gMainApp.component( "nav-pane-asop", {
     created() {
 
         // get the ASOP footer
-        getURL( gGetASOPFooterUrl ).then( (resp) => { //eslint-disable-line no-undef
-            this.footer = resp ;
-            this.$nextTick( () => {
-                linkifyAutoRuleids( $( this.$refs.footer ) ) ;
+        gEventBus.on( "app-loaded", () => {
+            getURL( gGetASOPFooterUrl ).then( (resp) => { //eslint-disable-line no-undef
+                this.footer = resp ;
+                this.$nextTick( () => {
+                    linkifyAutoRuleids( $( this.$refs.footer ) ) ;
+                } ) ;
+            } ).catch( (errorMsg) => {
+                console.log( "Couldn't get the ASOP footer: " + errorMsg ) ;
             } ) ;
-        } ).catch( (errorMsg) => {
-            console.log( "Couldn't get the ASOP footer: " + errorMsg ) ;
         } ) ;
 
         // open the appropriate chapter pane when the user clicks on an ASOP section search result

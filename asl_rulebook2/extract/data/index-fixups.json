@@ -66,10 +66,7 @@
 
 "End of Scenario": {
     "replace": [
-        [ "[in ABtF: R9.4 CG4]", "[in ABtF: R9.4, CG4]" ],
-        [ "[in KGP: P8.4 CG23]", "[in KGP: P8.4, CG23]" ],
-        [ "[in PB: Q9.4 CG19 (-1 drm for any Night Scenario and +1 drm for Day II scenario: Turn Record Track)]", "[in PB (-1 drm for any Night Scenario and +1 drm for Day II scenario: Turn Record Track): Q9.4, CG19]" ],
-        [ "[in RB: O11.4 CG4]", "[in RB: O11.4, CG4]" ]
+        [ "[in PB: Q9.4 CG19 (-1 drm for any Night Scenario and +1 drm for Day II scenario: Turn Record Track)]", "[in PB (-1 drm for any Night Scenario and +1 drm for Day II scenario: Turn Record Track): Q9.4 CG19]" ]
     ]
 },
 
@@ -196,13 +193,6 @@
     ]
 },
 
-"Radio": {
-    "replace": [
-        [ "[in KGP: P8.4 CG15]", "[in KGP: P8.4, CG15]" ],
-        [ "[in RB: O11.4 CG6]", "[in RB: O11.4, CG6]" ]
-    ]
-},
-
 "Range": {
     "replace": [
         [ "see Firing Within Hex", "A7.21" ]
@@ -212,6 +202,12 @@
 "Roadblock": {
     "replace": [
         [ "[TEM NA for Ground Support: E7.4; for PRC: B9.3]", "[TEM NA for Ground Support: E7.4] [TEM NA for PRC: B9.3]" ]
+    ]
+},
+
+"Reinforcements": {
+    "replace": [
+        [ "P8.4, CG7", "P8.4 CG7" ]
     ]
 },
 

@@ -198,6 +198,22 @@ class ExtractIndex( ExtractBase ):
     def _process_content( self ):
         """Extract information out of the index entries into a structured form."""
 
+        def fixup_ruleid( ruleid ):
+            # FUDGE! The index often refers to the same rule as e.g. "O11.4 CG3" and "OCG3" :-/
+            # We translate the former into the latter.
+            if ruleid.startswith( "O11.4 CG" ):
+                return "O" + ruleid[6:] # nb: Red Barricades
+            elif ruleid.startswith( "P8.4 CG" ):
+                return "P" + ruleid[5:] # nb: Kampfgruppe Peiper
+            elif ruleid.startswith( "Q9.4 CG" ):
+                return "Q" + ruleid[5:] # nb: Pegasus Bridge
+            elif ruleid.startswith( "R9.4 CG" ):
+                return "R" + ruleid[5:] # nb: A Bridge Too Far
+            elif ruleid.startswith( "T15.4 CG" ):
+                return "T" + ruleid[6:] # nb: Blood Reef Tarawa
+            else:
+                return ruleid
+
         for index_entry in self.index_entries:
 
             # initialize
@@ -244,7 +260,7 @@ class ExtractIndex( ExtractBase ):
                 else:
                     break
             if ruleids:
-                index_entry[ "ruleids" ] = ruleids
+                index_entry[ "ruleids" ] = [ fixup_ruleid( r ) for r in ruleids ]
 
             # extract any ruleref's
             rulerefs = []
@@ -256,7 +272,7 @@ class ExtractIndex( ExtractBase ):
                     pos = val.rfind( ":" )
                     if pos > 0:
                         vals = re.split( "[;,]", val[pos+1:] )
-                        ruleids = [ v.strip() for v in vals ]
+                        ruleids = [ fixup_ruleid( v.strip() ) for v in vals ]
                         val = val[:pos].strip()
                     else:
                         ruleids = None

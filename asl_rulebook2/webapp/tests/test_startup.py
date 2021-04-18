@@ -19,16 +19,6 @@ def test_load_content_docs( webapp, webdriver ):
     # for it), and we degrade gracefully.
     assert len( find_children( "#content .tabbed-page" ) ) == 0
 
-    # test handling of an invalid targets file
-    webapp.control_tests.set_data_dir( "invalid-targets" )
-    init_webapp( webapp, webdriver, warnings=["Couldn't load \"test.targets\"."] )
-    assert len( find_children( "#content .tabbed-page" ) ) == 1
-
-    # test handling of an invalid footnotes file
-    webapp.control_tests.set_data_dir( "invalid-footnotes" )
-    init_webapp( webapp, webdriver, warnings=["Couldn't load \"test.footnotes\"."] )
-    assert len( find_children( "#content .tabbed-page" ) ) == 1
-
 # ---------------------------------------------------------------------
 
 def test_init_search( webapp, webdriver ):

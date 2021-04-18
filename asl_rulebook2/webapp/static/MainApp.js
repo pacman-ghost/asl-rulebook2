@@ -115,11 +115,19 @@ gMainApp.component( "main-app", {
                     resp["empty"] = { "cdoc_id": "empty", "title": "Empty document" } ; // nb: for testing porpoises
                 self.contentDocs = resp ;
                 self.installContentDocs( resp ) ;
-                // start off showing the first content doc
-                let cdocIds = Object.keys( resp ) ;
-                if ( cdocIds.length > 0 ) {
+                // start off showing the main ASL rulebook
+                // NOTE: To avoid forcing the user to configure which document this is, we assume that
+                // it's the one with the most targets.
+                let targetCdocId = null ;
+                for ( let cdocId in self.contentDocs ) {
+                    if ( self.contentDocs[cdocId].targets == undefined )
+                        continue
+                    if ( targetCdocId == null || Object.keys(self.contentDocs[cdocId].targets).length > Object.keys(self.contentDocs[targetCdocId].targets).length )
+                        targetCdocId = cdocId ;
+                }
+                if ( targetCdocId != null ) {
                     Vue.nextTick( () => {
-                        gEventBus.emit( "show-page", cdocIds[0], 1 ) ; // FIXME! which cdoc do we choose?
+                        gEventBus.emit( "show-page", targetCdocId, 1 ) ;
                     } ) ;
                 }
             } ).catch( (errorMsg) => {

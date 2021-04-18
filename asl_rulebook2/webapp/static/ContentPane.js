@@ -6,11 +6,14 @@ import { findTargets, showErrorMsg, showNotificationMsg, hideFootnotes } from ".
 gMainApp.component( "content-pane", {
 
     props: [ "contentDocs" ],
+    data() { return {
+        loadedContentDocs: {},
+    } ; },
 
     template: `
 <div>
     <tabbed-pages tabbedPagesId="content" ref="tabbedPages">
-        <tabbed-page v-for="cdoc in contentDocs" :tabId=cdoc.cdoc_id :caption=cdoc.title :key=cdoc.cdoc_id >
+        <tabbed-page v-for="cdoc in loadedContentDocs" :tabId=cdoc.cdoc_id :caption=cdoc.title :key=cdoc.cdoc_id >
             <content-doc :cdoc=cdoc />
         </tabbed-page>
     </tabbed-pages>
@@ -34,14 +37,45 @@ gMainApp.component( "content-pane", {
 
     mounted() {
         const showContentDoc = (cdocId) => {
-            this.$refs.tabbedPages.activateTab( cdocId ) ; // nb: tabId == cdocId
+            // check if the content doc has already been loaded
+            let cdoc = this.loadedContentDocs[ cdocId ] ;
+            if ( cdoc == undefined ) {
+                // nope - load it
+                this.loadedContentDocs[ cdocId ] = this.contentDocs[ cdocId ] ;
+            }
+            this.$nextTick( () => {
+                this.$refs.tabbedPages.activateTab( cdocId ) ; // nb: tabId == cdocId
+            } ) ;
+            return (cdoc == undefined) ;
         }
         gEventBus.on( "show-target", (cdocId, ruleid) => { //eslint-disable-line no-unused-vars
-            showContentDoc( cdocId ) ;
+            let wasLoaded = showContentDoc( cdocId ) ;
+            if ( wasLoaded ) {
+                // FUDGE! If we just loaded a new content doc, it won't have been around to receive
+                // the "show-target" event, so we re-issue it here. This might cause some minor
+                // problems (e.g. footnotes showing twice), but we seem to be OK.
+                this.$nextTick( () => {
+                    gEventBus.emit( "show-target", cdocId, ruleid ) ;
+                } ) ;
+            }
         } ) ;
         gEventBus.on( "show-page", (cdocId, pageNo) => { //eslint-disable-line no-unused-vars
-            showContentDoc( cdocId ) ;
+            let wasLoaded = showContentDoc( cdocId ) ;
+            if ( wasLoaded ) {
+                // FUDGE! If we just loaded a new content doc, it won't have been around to receive
+                // the "show-page" event, so we re-issue it here.
+                this.$nextTick( () => {
+                    gEventBus.emit( "show-page", cdocId, pageNo ) ;
+                } ) ;
+            }
         } ) ;
+    },
+
+    beforeUpdate() {
+        // make sure the test empty document is loaded
+        let cdoc = this.contentDocs[ "empty" ] ;
+        if ( cdoc != undefined )
+            this.loadedContentDocs[ "empty" ] = cdoc ;
     },
 
     methods: {

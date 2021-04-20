@@ -3,7 +3,6 @@
 import os
 import re
 import io
-import glob
 
 from flask import jsonify, send_file, url_for, abort
 
@@ -40,6 +39,7 @@ def load_content_sets( startup_msgs, logger ):
     data_dir = app.config.get( "DATA_DIR" )
     if not data_dir:
         return None
+    data_dir = os.path.abspath( data_dir )
     if not os.path.isdir( data_dir ):
         startup_msgs.error( "Invalid data directory.", data_dir )
         return None
@@ -89,7 +89,8 @@ def load_content_sets( startup_msgs, logger ):
                 logger.warn( "Didn't find content file: %s", fname )
         # locate any chapter backgrounds and icons
         resource_dirs = [
-            data_dir, os.path.join( os.path.dirname(__file__), "data/chapters/" )
+            os.path.join( data_dir, os.path.dirname(fname_stem) ),
+            os.path.join( os.path.dirname(__file__), "data/chapters/" )
         ]
         for chapter in content_doc.get( "chapters", [] ):
             chapter_id = chapter.get( "chapter_id" )
@@ -102,8 +103,8 @@ def load_content_sets( startup_msgs, logger ):
                     chapter[ rtype ] = url_for( "get_chapter_resource", chapter_id=chapter_id, rtype=rtype )
         return content_doc
 
-    def load_file( fname, save_loc, key, on_error, binary=False ):
-        fname = os.path.join( data_dir, fname )
+    def load_file( rel_fname, save_loc, key, on_error, binary=False ):
+        fname = os.path.join( data_dir, rel_fname )
         if not os.path.isfile( fname ):
             return False
         # load the specified file
@@ -114,10 +115,12 @@ def load_content_sets( startup_msgs, logger ):
         save_loc[ key ] = data
         return True
 
-    def find_assoc_cdocs( fname_stem ):
-        # find other content docs associated with the content set (names have the form "Foo (...)")
+    def find_assoc_cdocs( rel_fname_stem ):
+        """Find other content docs associated with the content set (names have the form "Foo (...)")."""
+        dname = os.path.join( data_dir, os.path.dirname(rel_fname_stem) )
         matches = set()
-        for fname in os.listdir( data_dir ):
+        fname_stem = os.path.basename( rel_fname_stem )
+        for fname in os.listdir( dname ):
             if not fname.startswith( fname_stem ):
                 continue
             fname = os.path.splitext( fname )[0]
@@ -129,38 +132,55 @@ def load_content_sets( startup_msgs, logger ):
     def make_cdoc_id( cset_id, key ):
         return "{}!{}".format( cset_id, key )
 
+    # locate all the index files
+    index_files = []
+    for root, _, fnames in os.walk( data_dir ):
+        for fname in fnames:
+            if os.path.splitext( fname )[1] != ".index":
+                continue
+            index_files.append( os.path.join( root, fname ) )
+    # NOTE: We sort the index files so that the tests will run deterministicly.
+    index_files.sort()
+
     # load each content set
     logger.info( "Loading content sets: %s", data_dir )
-    fspec = os.path.join( data_dir, "*.index" )
-    for fname in sorted( glob.glob( fspec ) ):
-        fname2 = os.path.basename( fname )
-        logger.info( "- Found index file: %s", fname2 )
+    for index_fname in index_files:
+
+        common_path = os.path.commonpath( [ data_dir, index_fname ] )
+        rel_index_fname = index_fname[len(common_path):]
+        if rel_index_fname[0] == os.sep:
+            rel_index_fname = rel_index_fname[1:]
+        logger.info( "- Found index file: %s", rel_index_fname )
+
         # load the index file
-        title = os.path.splitext( fname2 )[0]
-        cset_id = slugify( title )
+        cset_id = slugify( os.path.splitext( rel_index_fname )[0] )
+        title = os.path.splitext( os.path.basename( rel_index_fname ) )[0]
         content_set = {
             "cset_id": cset_id,
             "title": title,
             "content_docs": {},
-            "index_fname": fname,
+            "index_fname": index_fname,
         }
-        if not load_file( fname2, content_set, "index", startup_msgs.error ):
+        if not load_file( rel_index_fname, content_set, "index", startup_msgs.error ):
             continue # nb: we can't do anything without an index file
+
         # load the main content doc
-        fname_stem = os.path.splitext( fname2 )[0]
+        rel_fname_stem = os.path.splitext( rel_index_fname )[0]
         cdoc_id = make_cdoc_id( cset_id, "" )
-        content_doc = load_content_doc( fname_stem, fname_stem, cdoc_id )
+        content_doc = load_content_doc( rel_fname_stem, os.path.basename(rel_fname_stem), cdoc_id )
         content_set[ "content_docs" ][ cdoc_id ] = content_doc
+
         # load any associated content docs
-        for fname_stem2 in find_assoc_cdocs( fname_stem ):
-            # nb: we assume there's only one space between the two filename stems :-/
-            cdoc_id2 = make_cdoc_id( cset_id, slugify(fname_stem2) )
+        for assoc_name in find_assoc_cdocs( rel_fname_stem ):
+            cdoc_id2 = make_cdoc_id( cset_id, slugify(assoc_name) )
             content_doc = load_content_doc(
-                "{} ({})".format( fname_stem, fname_stem2 ),
-                fname_stem2,
+                # nb: we assume there's only one space before the opening parenthesis :-/
+                "{} ({})".format( rel_fname_stem, assoc_name ),
+                assoc_name,
                 cdoc_id2
             )
             content_set[ "content_docs" ][ cdoc_id2 ] = content_doc
+
         # save the new content set
         _content_sets[ content_set["cset_id"] ] = content_set
 

@@ -51,11 +51,14 @@ def main( bind_addr, data_dir, force_init_delay, flask_debug ):
     extra_files = []
     fspecs = [ "static/", "templates/", "config/" ]
     if app.config.get( "DATA_DIR" ):
-        fspecs.append( app.config["DATA_DIR"] )
-        fspecs.append( os.path.join( app.config["DATA_DIR"], "q+a/" ) )
-        fspecs.append( os.path.join( app.config["DATA_DIR"], "errata/" ) )
-        fspecs.append( os.path.join( app.config["DATA_DIR"], "annotations.json" ) )
-        fspecs.append( os.path.join( app.config["DATA_DIR"], "asop/" ) )
+        data_dir = app.config["DATA_DIR"]
+        fspecs.append( data_dir )
+        fspecs.append( os.path.join( data_dir, "annotations.json" ) )
+        paths = [
+            os.path.join( data_dir, p )
+            for p in os.listdir( data_dir )
+        ]
+        fspecs.extend( p for p in paths if os.path.isdir(p) )
     for fspec in fspecs:
         fspec = os.path.abspath( os.path.join( os.path.dirname(__file__), fspec ) )
         if os.path.isdir( fspec ):

@@ -3,7 +3,7 @@
 "This file defines search synonyms.",
 "If a word appears in a query string, it will match any of the words in its set.",
 "  e.g. searching for 'finn gun' will actually search for '(finn OR finnish) AND gun'",
-"These differ from search aliases in that any word from a set will trigger the replacement.",
+"These differ from search aliases in that *any* word from a set will trigger the replacement.",
 "A user-defined version of this file in the data directory will also be loaded.",
 
 [ "u.s.", "america", "american" ],
@@ -19,8 +19,8 @@
 [ "ft", "flamethrower", "flame-thrower" ],
 [ "baz", "bazooka" ],
 [ "pf", "panzerfaust" ],
-[ "psk", "panzershreck" ],
-[ "wp", "white phosphorous" ],
+[ "psk", "panzerschreck" ],
+[ "wp", "white phosphorus" ],
 [ "mol", "molotov cocktail" ],
 [ "ovr", "overrun" ],
 [ "cc", "close combat" ],
@@ -31,9 +31,17 @@
 [ "firelane", "fire-lane", "fire lane" ],
 [ "firegroup", "fire-group", "fire group" ],
 [ "lc", "landing craft" ],
+[ "dp", "damage points" ],
 [ "ht", "halftrack", "half-track" ],
 [ "wa", "wall advantage" ],
 [ "hob", "heat of battle" ],
+[ "ch", "critical hit" ],
+[ "ti", "temporarily immobilized" ],
+[ "ammo", "ammunition" ],
+[ "malf", "malfunction" ],
+[ "resid", "residual", "rfp" ],
+[ "voluntary", "voluntarily" ],
+[ "hth", "hand-to-hand" ],
 [ "cg", "campaign game" ],
 [ "pbm", "pbem" ],
 
@@ -44,7 +52,6 @@
 [ "brt", "br:t", "blood reef tarawa" ],
 [ "pb", "pegasus bridge" ],
 
-[ "ammo", "ammunition" ],
 [ "armor", "armour" ],
 [ "color", "colour" ]
 

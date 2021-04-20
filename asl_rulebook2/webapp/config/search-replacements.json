@@ -1,7 +1,7 @@
 {
 
 "_comment_": "This file defines search replacements.",
-"_comment_": "Keys that appear in a query string will be replaced by the value.",
+"_comment_": "Keys that appear in a query string will be *replaced* by the value.",
 "_comment_": "  e.g. searching for '1/2 MF' will actually search for '&frac12; MF'",
 "_comment_": "A user-defined version of this file in the data directory will also be loaded.",
 

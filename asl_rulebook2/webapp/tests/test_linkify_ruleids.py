@@ -53,8 +53,8 @@ def test_qa( webdriver, webapp ):
 
     # test ruleid's in a Q+A entry's search result
     results = _do_search( "wp", True )
-    assert len(results) == 3
-    sr_elem = find_children( "#search-results .sr" )[ 1 ]
+    assert len(results) == 5
+    sr_elem = find_children( "#search-results .sr" )[ 3 ]
     _check_ruleid( find_child(".caption",sr_elem), ("asl-rulebook!","A24.31") )
     _dismiss_rule_info_popup()
     _check_ruleid( find_child(".question",sr_elem), ("asl-rulebook!","A24.3") )

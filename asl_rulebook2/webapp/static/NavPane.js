@@ -148,11 +148,16 @@ gMainApp.component( "nav-pane-chapters", {
 
         onChapterEntryClicked( paneKey, entry ) {
             // show the chapter entry's target
-            gEventBus.emit( "show-target", paneKey[0], entry.ruleid, true ) ;
+            if ( entry.ruleid )
+                gEventBus.emit( "show-target", paneKey[0], entry.ruleid, true ) ;
+            else if ( entry.page_no )
+                gEventBus.emit( "show-page", paneKey[0], entry.page_no, true ) ;
+            else
+                console.log( "ERROR: Don't know how to show chapter section:", entry ) ;
 
         },
 
-        getEntryKey( entry ) { return entry.ruleid ; },
+        getEntryKey( entry ) { return entry.ruleid || entry.page_no ; },
         makeBorderClass( chapter ) { return chapter[1].chapter_id ? "chapter-" + chapter[1].chapter_id.toLowerCase() : null ; },
 
     },

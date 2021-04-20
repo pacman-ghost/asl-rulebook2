@@ -171,7 +171,7 @@ gMainApp.component( "content-doc", {
     } ; },
 
     template: `
-<div class="content-doc" :data-ruleid=ruleid >
+<div class="content-doc" :data-ruleid=ruleid :data-pageno=pageNo >
     <div v-if=noContent class="disabled">
         <div style='margin-bottom:0.25em;'>&mdash;&mdash;&mdash; Content disabled &mdash;&mdash;&mdash; </div>
         {{cdoc.title}}

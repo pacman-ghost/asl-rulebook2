@@ -113,7 +113,12 @@ def get_curr_target():
     # check the current ruleid
     elem = find_child( "#content .tabbed-page[data-tabid='{}'] .content-doc".format( tab_id ) )
     ruleid = elem.get_attribute( "data-ruleid" )
-    return ( tab_id, ruleid )
+    if ruleid:
+        return ( tab_id, ruleid )
+    page_no = elem.get_attribute( "data-pageno" )
+    if page_no:
+        return ( tab_id, int(page_no) )
+    return tab_id
 
 def check_sr_filters( expected ):
     """Check the search result filter checkboxes."""

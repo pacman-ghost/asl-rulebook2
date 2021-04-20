@@ -75,7 +75,7 @@ def test_chapters( webapp, webdriver ):
           "entries": [ "Top of the page", "Middle of the page", "Bottom of the page" ]
         },
         { "title": "Page 2",
-          "entries": [ "Top of the page", "Middle of the page", "Bottom of the page", "No ruleid" ]
+          "entries": [ "Top of the page", "Middle of the page", "Bottom of the page", "Link to page 2", "No ruleid" ]
         },
         { "title": "Linked document - Page 1",
           "entries": [ "Top of the page", "Middle of the page", "Bottom of the page" ]
@@ -95,8 +95,8 @@ def test_chapters( webapp, webdriver ):
     elems = find_children( "#accordian-chapters .accordian-pane" )
     assert len(elems) == 6
     elems = find_children( ".entry", elems[1] )
-    assert len(elems) == 4
-    elem = elems[3]
+    assert len(elems) == 5
+    elem = elems[4]
     assert find_child( "a", elem ) is None
 
     def do_test( chapter_no, entry_no, expected ):
@@ -119,6 +119,7 @@ def test_chapters( webapp, webdriver ):
     do_test( 1, 2, ( "content-set-1!", "6a" ) )
     do_test( 4, 0, ( "content-set-2!", "cs2a" ) )
     do_test( 2, 1, ( "content-set-1!linked", "2b" ) )
+    do_test( 1, 3, ( "content-set-1!", 2 ) )
 
     # try to show an unknown target
     do_test( 3, 3, "Unknown ruleid:" )

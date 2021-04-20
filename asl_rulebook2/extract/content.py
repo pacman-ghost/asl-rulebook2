@@ -65,7 +65,7 @@ class ExtractContent( ExtractBase ):
         # figure out which pages to process
         chapter_pages = {} # maps chapters to page numbers
         page_index = {} # maps page numbers to chapter
-        for key, val in _DEFAULT_ARGS.items():
+        for key, val in self._args.items():
             if key.startswith( "chapter-" ):
                 page_nos = parse_page_numbers( val )
                 assert len(key) == 9
@@ -409,7 +409,7 @@ class ExtractContent( ExtractBase ):
         ]
 
         # process each chapter
-        for arg, val in _DEFAULT_ARGS.items():
+        for arg, val in self._args.items():
             mo = re.search( r"^chapter-([a-z])$", arg )
             if not mo:
                 continue

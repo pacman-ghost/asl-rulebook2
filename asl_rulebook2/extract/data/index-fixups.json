@@ -48,6 +48,13 @@
     ]
 },
 
+"DM": {
+    "replace": [
+        [ "blockedLOSNA", "blocked LOS NA" ],
+        [ "SelfRally", "Self Rally" ]
+    ]
+},
+
 "Direct Fire": {
     "old_content": "(Any fireattackrequiringaLOSfromthe firerwhichdoesnotuseIndirectFire):C.1,C9.1[InterveningUnits:A6.6][LC: G12.61-.62, G12.671]",
     "new_content": "(Any fire attack requiring a LOS from the firer which does not use Indirect Fire): C.1, C9.1 [Intervening Units: A6.6] [LC: G12.61-.62, G12.671]"

@@ -6,8 +6,9 @@ from selenium.webdriver.common.keys import Keys
 
 from asl_rulebook2.webapp.search import load_search_config, _make_fts_query_string
 from asl_rulebook2.webapp.startup import StartupMsgs
-from asl_rulebook2.webapp.tests.utils import init_webapp, select_tabbed_page, get_curr_target, get_classes, \
-    wait_for, find_child, find_children, unload_elem, unload_sr_text
+from asl_rulebook2.webapp.tests.utils import init_webapp, make_webapp_main_url, \
+    select_tabbed_page, get_curr_target, get_classes, \
+    wait_for, wait_for_elem, find_child, find_children, unload_elem, unload_sr_text
 
 # ---------------------------------------------------------------------
 
@@ -206,6 +207,31 @@ def test_bad_sr_highlights( webapp, webdriver ):
     results = do_search( "bar" )
     assert len(results) == 1
     assert results[0]["content"][0]["answers"][0][0] == "..((bar)).. link  ((bar))"
+
+# ---------------------------------------------------------------------
+
+def test_startup_search_query( webapp, webdriver ):
+    """Test starting up with a search query."""
+
+    # initialize
+    webapp.control_tests.set_data_dir( "full" )
+
+    # test starting up with a query
+    init_webapp( webapp, webdriver, q="cc" )
+    wait_for( 2, lambda: len( unload_search_results() ) > 0 )
+
+    # test starting up with a query
+    init_webapp( webapp, webdriver, query="wp" )
+    wait_for_elem( 2,"#rule-info" )
+    find_child( ".close-rule-info" ).click()
+    assert len( unload_search_results() ) > 0
+
+    # test starting up with a query
+    url = make_webapp_main_url( {} )
+    assert "#" not in url
+    url += "#bu"
+    webdriver.get( url )
+    wait_for( 2, lambda: len( unload_search_results() ) > 0 )
 
 # ---------------------------------------------------------------------
 

@@ -36,14 +36,7 @@ def init_webapp( webapp, webdriver, **options ):
 
     # load the webapp
     webapp.control_tests.set_app_config_val( "BLOCKING_FIXUP_CONTENT", True )
-    if get_pytest_option("webdriver") == "chrome" and get_pytest_option("headless"):
-        # FUDGE! Headless Chrome doesn't want to show the PDF in the browser,
-        # it downloads the file and saves it in the current directory :wtf:
-        options["no-content"] = 1
-    options["store-msgs"] = 1 # nb: so that we can retrive notification messages
-    options["no-animations"] = 1
-    options["reload"] = 1 # nb: force the webapp to reload
-    webdriver.get( webapp.url_for( "main", **options ) )
+    webdriver.get( make_webapp_main_url( options ) )
     _wait_for_webapp()
 
     # make sure there were no errors or warnings
@@ -60,6 +53,17 @@ def init_webapp( webapp, webdriver, **options ):
 
     # reset the user settings
     webdriver.delete_all_cookies()
+
+def make_webapp_main_url( options ):
+    """Generate the webapp URL."""
+    if get_pytest_option("webdriver") == "chrome" and get_pytest_option("headless"):
+        # FUDGE! Headless Chrome doesn't want to show the PDF in the browser,
+        # it downloads the file and saves it in the current directory :wtf:
+        options["no-content"] = 1
+    options["store-msgs"] = 1 # nb: so that we can retrive notification messages
+    options["no-animations"] = 1
+    options["reload"] = 1 # nb: force the webapp to reload
+    return _webapp.url_for( "main", **options )
 
 def refresh_webapp( webdriver ):
     """Refresh the webapp."""

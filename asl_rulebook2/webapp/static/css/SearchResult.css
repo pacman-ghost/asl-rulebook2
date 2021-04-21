@@ -1,4 +1,6 @@
 #search-results .sr { padding: 5px ; }
+#search-results .sr p { margin-top: 3px ; }
+#search-results .sr .note { font-size: 90% ; font-style: italic ; color: #666 ; }
 
 #search-results .index-sr>.caption { padding: 3px 6px ; border-radius: 3px ; }
 #search-results .index-sr>.caption img.icon { height: 14px ; float: left ; margin: 2px 4px 0 0 ; }

@@ -2,3 +2,4 @@
 #nav .no-chapters { font-style: italic ; color: #888 ; }
 
 #nav .tabbed-page[data-tabid="chapters"] .wrapper { overflow-y: auto ; }
+#nav .tabbed-page[data-tabid="chapters"] .accordian-pane img.icon { width: 40px ; }

@@ -7,7 +7,7 @@
     padding: 5px 8px ;
     cursor: pointer ;
 }
-.accordian-pane .title .icon { height: 20px ; margin-right: 10px ; }
+.accordian-pane .title .icon { margin-right: 10px ; }
 
 .accordian-pane .entries { margin: 0 0 5px 15px ; list-style-type: none ; }
 .accordian-pane .entries li { list-style-image: none ; }

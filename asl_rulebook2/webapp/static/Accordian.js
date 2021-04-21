@@ -65,10 +65,12 @@ gMainApp.component( "accordian-pane", {
     },
 
     methods: {
+
         onClickEntry( entry ) {
             // notify the parent that an entry was clicked
             this.$emit( "entry-clicked", this.paneKey, entry ) ;
         },
+
         onToggleExpand() {
             // notify the parent
             gEventBus.emit( "expand-pane", this.$parent.accordianId,
@@ -76,6 +78,7 @@ gMainApp.component( "accordian-pane", {
                 true
             ) ;
         },
+
     },
 
 } ) ;

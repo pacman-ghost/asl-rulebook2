@@ -251,6 +251,15 @@ export function wrapMatches( val, searchFor, delim1, delim2 )
     return buf.join("") ;
 }
 
+export function wrapExcBlocks( val )
+{
+    // search for "[EXC: ...]" blocks and wrap them in a <span>
+    return wrapMatches( val,
+        new RegExp( /\[EXC: .*?\]/g ),
+        "<span class='exc'>", "</span>"
+    ) ;
+}
+
 export function isChildOf( elem, elemParent, strict )
 {
     // check if an element is a child of another element

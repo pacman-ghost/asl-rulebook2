@@ -1,5 +1,5 @@
 import { gMainApp, gUrlParams } from "./MainApp.js" ;
-import { linkifyAutoRuleids, fixupSearchHilites, makeImagesZoomable, makeImageUrl } from "./utils.js" ;
+import { linkifyAutoRuleids, fixupSearchHilites, makeImagesZoomable, makeImageUrl, wrapExcBlocks } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -83,11 +83,11 @@ gMainApp.component( "qa-entry", {
                 <img :src=questionImageUrl class="icon" />
                 <div class="question">
                     <img v-if=content.image :src=makeQAImageUrl(content.image) class="imageZoom" />
-                    <div v-html=content.question />
+                    <div v-html=fixupContent(content.question) />
                 </div>
                 <div v-for="answer in content.answers" class="answer" >
                     <img :src=answerImageUrl :title=answer[1] class="icon" />
-                    <div v-html=answer[0] />
+                    <div v-html=fixupContent(answer[0]) />
                 </div>
             </div>
             <div v-else>
@@ -123,6 +123,8 @@ gMainApp.component( "qa-entry", {
             return fixupSearchHilites( val ) ;
         },
 
+        fixupContent( content ) { return wrapExcBlocks( content ) ; },
+
     },
 
 } ) ;
@@ -145,7 +147,7 @@ gMainApp.component( "annotation", {
     <collapsible ref="collapsible" >
         <div class="content">
             <img :src=makeIconImageUrl() :title=anno.source class="icon" />
-            <div v-html=anno.content />
+            <div v-html=fixupContent(anno.content) />
         </div>
     </collapsible>
 </div>`,
@@ -162,6 +164,7 @@ gMainApp.component( "annotation", {
             else
                 return null ;
         },
+        fixupContent( content ) { return wrapExcBlocks( content ) ; },
     },
 
 } ) ;

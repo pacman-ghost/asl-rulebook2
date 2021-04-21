@@ -17,10 +17,10 @@
 { "caption": "A7.7",
   "ruleids": [ "A7.7" ],
   "content": [
-    { "question": "All German units combine as a Fire Group to take a 30/+3 shot at the Russian 447. Given that the 247 is one of two units in the Fire Group that potentially enable the shot to cause Encirclement, and that the 247's shot alone is not sufficient to be an Encirclement-causing shot, does the shot from this Fire Group cause Encirclement?",
+    { "question": "All German units [EXC: the guy no-one likes] combine as a Fire Group to take a 30/+3 shot at the Russian 447. Given that the 247 is one of two units in the Fire Group that potentially enable the shot to cause Encirclement, and that the 247's shot alone is not sufficient to be an Encirclement-causing shot, does the shot from this Fire Group cause Encirclement?",
       "image": "a7.7.png",
       "answers": [
-        [ "Yes.", "ps" ]
+        [ "Yes [EXC: except when it doesn't].", "ps" ]
       ]
     }
   ]

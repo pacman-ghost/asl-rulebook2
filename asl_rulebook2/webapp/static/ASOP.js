@@ -1,5 +1,5 @@
 import { gMainApp, gASOPChapterIndex, gASOPSectionIndex, gEventBus } from "./MainApp.js" ;
-import { getURL, getASOPChapterIdFromSectionId, linkifyAutoRuleids, wrapMatches, isChildOf } from "./utils.js" ;
+import { getURL, getASOPChapterIdFromSectionId, linkifyAutoRuleids, wrapExcBlocks, isChildOf } from "./utils.js" ;
 
 let gSectionContentOverrides = {} ;
 
@@ -182,13 +182,7 @@ gMainApp.component( "asop", {
             return caption ;
         },
 
-        fixupContent( content ) {
-            return wrapMatches(
-                content,
-                new RegExp( /\[EXC: .*?\]/g ),
-                "<span class='exc'>", "</span>"
-            ) ;
-        },
+        fixupContent( content ) { return wrapExcBlocks( content ) ; },
 
     },
 

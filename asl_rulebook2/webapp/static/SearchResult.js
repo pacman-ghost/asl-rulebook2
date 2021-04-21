@@ -1,5 +1,5 @@
 import { gMainApp, gContentDocs, gEventBus, gAppConfig } from "./MainApp.js" ;
-import { findTargets, getPrimaryTarget, isRuleid, getChapterResource, fixupSearchHilites, hasHilite } from "./utils.js" ;
+import { findTargets, getPrimaryTarget, isRuleid, getChapterResource, fixupSearchHilites, hasHilite, wrapExcBlocks } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -31,7 +31,7 @@ gMainApp.component( "index-sr", {
         <span v-if=sr.subtitle class="subtitle" v-html=sr.subtitle />
     </div>
     <div class="body">
-        <div v-if=sr.content class="content" v-html=sr.content />
+        <div v-if=sr.content class="content" v-html=fixupContent(sr.content) />
         <div v-if=sr.see_also class="see-also" > See also:
             <span v-for="(sa, sa_no) in sr.see_also" >
                 {{sa_no == 0 ? "" : ", "}}
@@ -116,6 +116,8 @@ gMainApp.component( "index-sr", {
                 return true ;
             return this.expandRulerefs || hasHilite( ruleref.caption ) ;
         },
+
+        fixupContent( content ) { return wrapExcBlocks( content ) ; },
 
         fixupHilites( val ) {
             // convert search term highlights returned to us by the search engine to HTML

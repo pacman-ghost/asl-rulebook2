@@ -43,14 +43,15 @@ _FIXUP_TEXT_REGEXES = [
     ]
 ]
 
-# NOTE: These regex's identify highlight markers that SQLite has inadvertently inserted *inside* an HTML tag,
-# because it is treating the searchable content as plain-text, and not HTML.
+# NOTE: This regex identifies highlight markers that SQLite has inadvertently inserted *inside* an HTML tag,
+# because it is treating the searchable content as plain-text, and not HTML. There could be multiple cases
+# of this within a single tag, so we identify any such tag first, then do a simple search-and-replace
+# to remove the highlight markers.
 # NOTE: The content has cases of naked <'s e.g. "move < 2 MP", so we need to be careful not to get tripped up
 # by these.
-_HILITES_INSIDE_HTML_TAG_REGEXES = [
-    re.compile( r"\<\S[^>]*?({}).*?\>".format( _BEGIN_HIGHLIGHT ) ),
-    re.compile( r"\<\S[^>]*?({}).*?\>".format( _END_HIGHLIGHT ) ),
-]
+_HILITES_INSIDE_HTML_TAG_REGEX = re.compile(
+    r"\<\S[^>]*?{}.*?\>".format( _BEGIN_HIGHLIGHT )
+)
 
 # these are used to separate ruleref's in the FTS table
 _RULEREF_SEPARATOR = "-:-"
@@ -116,10 +117,10 @@ def _do_search( args ):
         # remove highlight markers that SQLite may have incorrectly inserted into a value
         if val is None:
             return None
-        for regex in _HILITES_INSIDE_HTML_TAG_REGEXES:
-            matches = list( regex.finditer( val ) )
-            for mo in reversed( matches ):
-                val = val[:mo.start(1)] + val[mo.end(1):]
+        matches = list( _HILITES_INSIDE_HTML_TAG_REGEX.finditer( val ) )
+        for mo in reversed( matches ):
+            match = mo.group().replace( _BEGIN_HIGHLIGHT, "" ).replace( _END_HIGHLIGHT, "" )
+            val = val[:mo.start()] + match + val[mo.end():]
         return val
 
     # get the results

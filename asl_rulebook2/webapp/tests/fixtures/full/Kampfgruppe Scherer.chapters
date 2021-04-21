@@ -1,0 +1,16 @@
+[
+
+{ "title": "Kampfgrupper Scherer",
+  "chapter_id": "KGS",
+  "page_no": 1,
+  "sections": [
+    { "caption": ".1 - .9 Miscellaneous", "page_no": 5 },
+    { "caption": "KGS1: Snow-Sangar", "ruleid": "KGS1" },
+    { "caption": "KGS2: Terrain", "ruleid": "KGS2" },
+    { "caption": "KGS3: German Army Characteristics", "ruleid": "KGS3" },
+    { "caption": "KGS4: Russian Army Characteristics", "ruleid": "KGS4" },
+    { "caption": "KGS5: Glossary Of Terms", "ruleid": "KGS5" }
+  ]
+}
+
+]

@@ -68,7 +68,7 @@ def test_footnotes( webdriver, webapp ):
         "content": "This footnote is also for ruleid 1b1.1."
     } ] )
     do_test( "1b.2", [ {
-        "caption": " (1b.2)", "footnote_id": "X20",
+        "caption": "1b.2", "footnote_id": "X20",
         "content": None
     } ] )
 

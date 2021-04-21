@@ -258,6 +258,8 @@ gMainApp.component( "search-results", {
 
             // check if the query string is just a ruleid
             let targets = findTargets( queryString, null ) ;
+            if ( targets == null || targets == undefined || targets.length == 0 )
+                targets = findTargets( queryString.replace( " ", "_" ), null ) ;
             if ( targets && targets.length > 0 ) {
                 // yup - just show it directly (first one, if multiple)
                 this.searchResults = null ;

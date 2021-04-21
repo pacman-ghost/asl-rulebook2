@@ -149,8 +149,18 @@ gMainApp.component( "index-sr", {
             if ( ! target )
                 return null ;
             let ruleid = target.ruleid ;
-            if ( isRuleid( ruleid ) )
-                return ruleid[0] ; // nb: we assume the 1st letter of the ruleid is the chapter ID
+            if ( isRuleid( ruleid ) ) {
+                let pos = ruleid.indexOf( "_" ) ;
+                if ( pos > 0 )
+                    return ruleid.substring( 0, pos ) ; // e.g. "KGS_CG3" -> "KGS"
+                let match = ruleid.match( /^[A-Z]+/ ) ;
+                if ( match ) {
+                    let chapterId = match[0] ;
+                    if ( chapterId.substring( chapterId.length-2 ) == "CG" )
+                        chapterId = chapterId.substring( 0, chapterId.length-1 ) ; // e.g. "OCG3" -> "O"
+                    return chapterId ;
+                }
+            }
             return null ;
         },
 
@@ -201,7 +211,12 @@ gMainApp.component( "ruleid", {
     } ; },
 
     // NOTE: This bit of HTML is sensitive to spaces :-/
-    template: `<span class="ruleid" :class="{unknown:!ruleid}">{{delim[0]}}<a v-if=ruleid @click=onClick :title=title>{{ruleId}}</a><span v-else>{{ruleId}}</span>{{delim[1]}}{{sep}}</span>`,
+    // NOTE: Unfortunately, PDF destinations can't have spaces (see add_pdf_dests.py), so we need to
+    // do a bit of hackery to simulate them :-( We could allow spaces in the ruleid's, and transparently
+    // convert them to underscores when we create the PDF destinations, but it's probably better
+    // to force them to be defined with underscores (and convert them to spaces in the UI), so that
+    // it's a bit clearer what's going on.
+    template: `<span class="ruleid" :class="{unknown:!ruleid}">{{delim[0]}}<a v-if=ruleid @click=onClick :title=title>{{ruleId.replace('_',' ')}}</a><span v-else>{{ruleId}}</span>{{delim[1]}}{{sep}}</span>`,
 
     created() {
         // check if the rule is one we know about

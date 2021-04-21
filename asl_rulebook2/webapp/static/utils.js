@@ -41,7 +41,7 @@ export function findTargets( ruleid, csetId )
 export function isRuleid( val )
 {
     // check if the value looks like a ruleid
-    return val.match( /^[A-Z](\.|CG)?\d/ ) ;
+    return val.match( /^[A-Z]+_?(\.|CG)?\d/ ) ;
 }
 
 export function getASOPChapterIdFromSectionId( sectionId )

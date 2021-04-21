@@ -192,7 +192,9 @@ def load_content_sets( startup_msgs, logger ):
             for ruleid in cdoc.get( "targets", {} ):
                 # nb: we also want to detect things like A1.23-.45
                 _tag_ruleid_regexes[ ruleid ] = re.compile(
-                    r"\b{}(-\.\d+)?\b".format( ruleid.replace( ".", "\\." ) )
+                    r"\b{}(-\.\d+)?\b".format(
+                        ruleid.replace( ".", "\\." ).replace( "_", " " )
+                    )
                 )
 
     return _content_sets

@@ -125,7 +125,14 @@ gMainApp.component( "content-pane", {
             let buf = [] ;
             function addCaption( footnote, caption, style ) {
                 buf.push( "<div class='header' ", style ? "style='"+style+"'" : "", ">",
-                    "<span class='caption'>", caption.caption, " ("+caption.ruleid+")", "</span>", " ",
+                    "<span class='caption'>"
+                ) ;
+                let ruleid = caption.ruleid.replace( "_", " " ) ;
+                if ( caption.caption )
+                    buf.push( caption.caption, " ("+ruleid+")" ) ;
+                else
+                    buf.push( ruleid ) ;
+                buf.push( "</span>", " ",
                     "<span class='footnote-id'>", "["+footnote.display_name+"]", "</span>",
                 "</div>" ) ;
             }

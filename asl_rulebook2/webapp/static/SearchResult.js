@@ -145,6 +145,8 @@ gMainApp.component( "index-sr", {
             // should state which chapter it came from, but this is way overkill for what we need. Instead,
             // we look at the ruleid and infer the chapter ID from the first letter (nb: we need to be careful
             // handle things like "KGP SSR 2" or "RB CG2".
+            if ( this.sr.chapter_id )
+                return this.sr.chapter_id ;
             let target = getPrimaryTarget( this.sr ) ;
             if ( ! target )
                 return null ;

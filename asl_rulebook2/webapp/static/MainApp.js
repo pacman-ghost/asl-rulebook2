@@ -186,15 +186,28 @@ gMainApp.component( "main-app", {
                 }
             } ) ;
             // build an index of the available chapters resources
+            function preloadImage( url ) {
+                // FUDGE! If we try to preload the image immediately (even using a Promise), it causes
+                // a delay showing the search box background, so we give it a chance to show first.
+                setTimeout( () => {
+                    // FUDGE! $.get() doesn't do the trick, we have to insert an image element into the DOM :-/
+                    let $img = $( "<img src='" + url + "' style='display:none'></img>" ) ;
+                    $("body").append( $img ) ;
+                }, 200 ) ;
+            }
             gChapterResources = { background: {}, icon: {} } ;
             Object.values( contentDocs ).forEach( (cdoc) => {
                 if ( ! cdoc.chapters )
                     return ;
                 cdoc.chapters.forEach( (chapter) => {
-                    if ( "background" in chapter )
+                    if ( "background" in chapter ) {
                         gChapterResources.background[ chapter.chapter_id ] = chapter.background ;
-                    if ( "icon" in chapter )
+                        preloadImage( chapter.background ) ;
+                    }
+                    if ( "icon" in chapter ) {
                         gChapterResources.icon[ chapter.chapter_id ] = chapter.icon ;
+                        preloadImage( chapter.icon ) ;
+                    }
                 } ) ;
             } ) ;
         },

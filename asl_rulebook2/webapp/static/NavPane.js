@@ -194,8 +194,8 @@ gMainApp.component( "nav-pane-asop", {
                 this.$nextTick( () => {
                     linkifyAutoRuleids( $( this.$refs.footer ) ) ;
                 } ) ;
-            } ).catch( (errorMsg) => {
-                console.log( "Couldn't get the ASOP footer: " + errorMsg ) ;
+            } ).catch( (xhr) => {
+                console.log( "Couldn't get the ASOP footer: " + xhr.statusText ) ;
             } ) ;
         } ) ;
 

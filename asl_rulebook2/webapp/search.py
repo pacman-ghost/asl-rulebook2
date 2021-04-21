@@ -417,7 +417,7 @@ def _adjust_sort_order( results ):
 
 # ---------------------------------------------------------------------
 
-def init_search( content_sets, qa, errata, user_anno, asop, asop_content, startup_msgs, logger ):
+def init_search( content_sets, qa, errata, user_anno, asop, asop_preambles, asop_content, startup_msgs, logger ):
     """Initialize the search engine."""
 
     # initialize
@@ -458,7 +458,7 @@ def init_search( content_sets, qa, errata, user_anno, asop, asop_content, startu
     if user_anno:
         _init_user_anno( curs, user_anno, logger )
     if asop:
-        _init_asop( curs, asop, asop_content, logger )
+        _init_asop( curs, asop, asop_preambles, asop_content, logger )
     conn.commit()
 
     # load the search config
@@ -611,15 +611,14 @@ def _do_init_anno( curs, anno, atype ):
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def _init_asop( curs, asop, asop_content, logger ):
+def _init_asop( curs, asop, asop_preambles, asop_content, logger ):
     """Add the ASOP to the search index."""
 
     logger.info( "- Adding the ASOP." )
     sr_type = "asop-entry"
-    fixup_chapters, fixup_sections = [], []
+    fixup_sections = []
     nentries = 0
     for chapter in asop.get( "chapters", [] ):
-        fixup_chapters.append( chapter )
         for section in chapter.get( "sections", [] ):
             content = asop_content.get( section["section_id"] )
             if not content:
@@ -646,8 +645,8 @@ def _init_asop( curs, asop, asop_content, logger ):
         _fixup_searchable_content( sr_type, fixup_entry, make_fields )
         # we also need to fixup the in-memory data structures
         cset_id = None
-        for chapter in fixup_chapters:
-            _tag_ruleids_in_field( chapter, "preamble", cset_id )
+        for chapter_id in asop_preambles:
+            _tag_ruleids_in_field( asop_preambles, chapter_id, cset_id )
         for section in fixup_sections:
             _tag_ruleids_in_field( asop_content, section["section_id"], cset_id )
     def fixup_entry( rowid, cset_id ):

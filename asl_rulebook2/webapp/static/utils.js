@@ -210,8 +210,8 @@ export function getURL( url )
     return new Promise( (resolve, reject) => {
         $.get( url, (resp) => {
             resolve( resp ) ;
-        } ).fail( (xhr, status, errorMsg) => {
-            reject( errorMsg ) ;
+        } ).fail( (xhr, status, errorMsg) => { //eslint-disable-line no-unused-vars
+            reject( xhr ) ;
         } ) ;
     } ) ;
 }

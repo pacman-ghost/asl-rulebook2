@@ -16,6 +16,7 @@ ul ul ul { list-style-image: url(../images/bullet3.png) ; }
 /* content */
 .hilite { padding: 0 2px ; background: #ffa ; }
 .exc { font-style: italic ; color: #666 ; }
+.exc .auto-ruleid { color: #555 ; }
 .auto-ruleid { color: red ; }
 .auto-ruleid:hover { background: #ffffcc ; }
 

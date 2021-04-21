@@ -21,7 +21,7 @@ gMainApp.component( "asop", {
     <div v-if=isActive :data-chapterid=chapterId id="asop" class="asop" >
         <div class="title">
             <span v-html=title />
-            <collapser collapserId="asop-preamble" ref="collapser" />
+            <collapser v-if=preamble collapserId="asop-preamble" ref="collapser" />
         </div>
         <collapsible collapsedHeight=5 ref="collapsible">
             <div v-html=preamble class="preamble" />
@@ -80,15 +80,14 @@ gMainApp.component( "asop", {
         showIntro() {
             // show the ASOP intro
             this.title = "Advanced Sequence Of Play" ;
-            this.preamble = null ;
             this.sections = [] ;
             this.isSingleSection = true ;
             this.chapterId = "intro" ;
             getURL( gGetASOPIntroUrl ).then( (resp) => { //eslint-disable-line no-undef
                 this.sections = [ this.fixupContent( resp ) ] ;
-            } ).catch( (errorMsg) => {
+            } ).catch( (xhr) => {
                 // NOTE: We show the error in the content, not as a notification balloon.
-                this.sections = [ "Couldn't get the ASOP intro." + " <div class='pre'>" + errorMsg + "</div>" ] ;
+                this.sections = [ "Couldn't get the ASOP intro." + " <div class='pre'>" + xhr.statusText + "</div>" ] ;
             } ) ;
         } ,
 
@@ -98,13 +97,13 @@ gMainApp.component( "asop", {
             // prepare to show the ASOP chapter (with all sections combined)
             this.isActive = true ;
             this.title = this.makeTitle( chapter, chapter.caption ) ;
-            this.preamble = this.fixupContent( chapter.preamble ) ;
             this.sections = chapter.sections ? Array( chapter.sections.length ) : [] ;
             this.isSingleSection = false ;
             this.chapterId = chapter.chapter_id ;
+            // show the preamble and each section
+            this.showPreamble( chapter.chapter_id ) ;
             if ( this.sections.length == 0 )
                 return ;
-            // show each section
             let addSectionContent = (sectionNo, content) => {
                 this.sections[ sectionNo ] =
                     "<div class='caption'>" + chapter.sections[sectionNo].caption + "</div>"
@@ -122,11 +121,11 @@ gMainApp.component( "asop", {
                     let url = gGetASOPSectionUrl.replace( "SECTION_ID", sectionId ) ; //eslint-disable-line no-undef
                     getURL( url ).then( (resp) => {
                         addSectionContent( sectionNo, resp ) ;
-                    } ).catch( (errorMsg) => {
+                    } ).catch( (xhr) => {
                         // NOTE: We show the error in the content, not as a notification balloon.
                         this.sections[ sectionNo ] =
                             "Couldn't get ASOP section <tt>" + sectionId + "</tt>."
-                            + " <div class='pre'>" + errorMsg + "</div>" ;
+                            + " <div class='pre'>" + xhr.statusText + "</div>" ;
                     } ) ;
                 }
             } ) ;
@@ -134,15 +133,16 @@ gMainApp.component( "asop", {
 
         showASOPSection( chapter, section ) {
             this.doShowASOPSection( chapter, section, "" ) ;
-            // show the specified ASOP section
+            // show the preamble and specified ASOP section
+            this.showPreamble( chapter.chapter_id ) ;
             let sectionId = section.section_id ;
             let url = gGetASOPSectionUrl.replace( "SECTION_ID", sectionId ) ; //eslint-disable-line no-undef
             getURL( url ).then( (resp) => {
                 this.doShowASOPSection( chapter, section, resp ) ;
-            } ).catch( (errorMsg) => {
+            } ).catch( (xhr) => {
                 // NOTE: We show the error in the content, not as a notification balloon.
                 this.sections = [
-                    "Couldn't get ASOP section <tt>"+sectionId+"</tt>." + " <div class='pre'>" + errorMsg + "</div>"
+                    "Couldn't get ASOP section <tt>"+sectionId+"</tt>." + " <div class='pre'>" + xhr.statusText + "</div>"
                 ] ;
             } ) ;
         },
@@ -164,11 +164,24 @@ gMainApp.component( "asop", {
             this.doShowASOPSection( chapter, section, content ) ;
         },
 
+        showPreamble( chapterId ) {
+            let url = gGetASOPPreambleUrl.replace( "CHAPTER_ID", chapterId ) ; //eslint-disable-line no-undef
+            getURL( url ).then( (resp) => {
+                this.preamble = this.fixupContent( resp ) ;
+            } ).catch( (xhr) => {
+                if ( xhr.status == 404 )
+                    this.preamble = null ;
+                else {
+                    this.preamble = "Couldn't get ASOP preamble <tt>" + chapterId + "</tt>."
+                    + " <div class='pre'>" + xhr.statusText + "</div>" ;
+                }
+            } ) ;
+        },
+
         doShowASOPSection( chapter, section, content ) {
             // show the specified ASOP section
             this.isActive = true ;
             this.title = this.makeTitle( chapter, section.caption ) ;
-            this.preamble = this.fixupContent( chapter.preamble ) ;
             let contentOverride = gSectionContentOverrides[ section.section_id ] ;
             this.sections = [ this.fixupContent( contentOverride || content ) ] ;
             this.isSingleSection = true ;

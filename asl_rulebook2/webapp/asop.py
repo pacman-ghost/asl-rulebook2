@@ -10,6 +10,7 @@ from asl_rulebook2.webapp.utils import load_data_file
 
 _asop = None
 _asop_dir = None
+_asop_preambles = None
 _asop_section_content = None
 _footer = None
 user_css_url = None
@@ -20,16 +21,16 @@ def init_asop( startup_msgs, logger ):
     """Initialize the ASOP."""
 
     # initiailize
-    global _asop, _asop_dir, _asop_section_content, _footer, user_css_url
-    _asop, _asop_section_content, _footer = {}, {}, ""
+    global _asop, _asop_dir, _asop_preambles, _asop_section_content, _footer, user_css_url
+    _asop, _asop_preambles, _asop_section_content, _footer = {}, {}, {}, ""
 
     # get the data directory
     data_dir = app.config.get( "DATA_DIR" )
     if not data_dir:
-        return None, None
+        return None, None, None
     base_dir = os.path.join( data_dir, "asop/" )
     if not os.path.isdir( base_dir ):
-        return None, None
+        return None, None, None
     _asop_dir = base_dir
     fname = os.path.join( base_dir, "asop.css" )
     if os.path.isfile( fname ):
@@ -39,17 +40,18 @@ def init_asop( startup_msgs, logger ):
     fname = os.path.join( base_dir, "index.json" )
     _asop = load_data_file( fname, "ASOP index", False, logger, startup_msgs.error )
     if not _asop:
-        return None, None
+        return None, None, None
 
     # load the ASOP content
     for chapter in _asop.get( "chapters", [] ):
+        chapter_id = chapter[ "chapter_id" ]
         # load the chapter preamble
-        preamble = _render_template( chapter["chapter_id"] + "-0.html" )
+        preamble = _render_template( chapter_id + "-0.html" )
         if preamble:
-            chapter["preamble"] = preamble
+            _asop_preambles[chapter_id] = preamble
         # load the content for each section
         for section_no, section in enumerate( chapter.get( "sections", [] ) ):
-            section_id = "{}-{}".format( chapter["chapter_id"], 1+section_no )
+            section_id = "{}-{}".format( chapter_id, 1+section_no )
             section[ "section_id" ] = section_id
             content = _render_template( section_id + ".html" )
             _asop_section_content[ section_id ] = content
@@ -58,7 +60,7 @@ def init_asop( startup_msgs, logger ):
     footer = _render_template( "footer.html" )
     _footer = tag_ruleids( footer, None )
 
-    return _asop, _asop_section_content
+    return _asop, _asop_preambles, _asop_section_content
 
 # ---------------------------------------------------------------------
 
@@ -81,6 +83,14 @@ def get_asop_footer():
     if not _footer:
         abort( 404 )
     return _footer
+
+@app.route( "/asop/preamble/<chapter_id>" )
+def get_asop_preamble( chapter_id ):
+    """Return the specified ASOP chapter preamble."""
+    content = _asop_preambles.get( chapter_id )
+    if not content:
+        abort( 404 )
+    return content
 
 @app.route( "/asop/section/<section_id>" )
 def get_asop_section( section_id ):

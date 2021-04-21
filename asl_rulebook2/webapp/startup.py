@@ -52,11 +52,11 @@ def init_webapp():
     user_anno = init_annotations( _startup_msgs, _logger )
     if user_anno:
         _capabilities[ "user-anno" ] = True
-    asop, asop_content = init_asop( _startup_msgs, _logger )
+    asop, asop_preambles, asop_content = init_asop( _startup_msgs, _logger )
     if asop:
         _capabilities[ "asop" ] = True
     init_search(
-        content_sets, qa, errata, user_anno, asop, asop_content,
+        content_sets, qa, errata, user_anno, asop, asop_preambles, asop_content,
         _startup_msgs, _logger
     )
 

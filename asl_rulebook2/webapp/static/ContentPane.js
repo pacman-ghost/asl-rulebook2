@@ -228,6 +228,10 @@ gMainApp.component( "content-doc", {
                 url += "#nameddest=" + this.ruleid ;
             else if ( this.pageNo )
                 url += "#page=" + this.pageNo ;
+            // FUDGE! Firefox's "pdfjs.defaultDefaultZoom" doesn't work inside an iframe :-/, so we force
+            // the PDF to show at page width here.
+            // NOTE: The syntax is, indeed, &-separated values in the anchor :-/
+            url += (url.indexOf("#") > 0 ? "&" : "#") + "zoom=FitH" ;
             return url ;
         }
 

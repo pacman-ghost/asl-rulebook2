@@ -71,9 +71,9 @@ def init_webapp():
         # NOTE: It's useful to do this synchronously when running the test suite, since if the tests
         # need the linkified ruleid's, they can't start until the fixup has finished (and if they don't
         # it won't really matter, since there will be so little data, this process will be fast).
-        _do_fixup_content()
+        _do_fixup_content( False )
     else:
-        threading.Thread( target = _do_fixup_content ).start()
+        threading.Thread( target=_do_fixup_content, args=(True,) ).start()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -83,10 +83,25 @@ def add_fixup_content_task( ctype, func ):
         return
     _fixup_content_tasks.append( ( ctype, func ) )
 
-def _do_fixup_content():
+def _do_fixup_content( delay ):
     """Run each task to fixup content."""
+
     if not _fixup_content_tasks:
         return
+
+    # FUDGE! If we start processing straight away, the main PDF loads very slowly because of us :-/,
+    # and since there's no way to set thread priorities in Python, we delay for a short time, to give
+    # the PDF time to load, before we start working.
+    # NOTE: This delay only helps the initial load of the main ASLRB PDF. After processing has started,
+    # if the user reloads the page, or tries to load another PDF, they will have the same problem of
+    # very slow loads. To work around this, _tag_ruleids_in_field() sleeps periodically, to give
+    # other threads a chance to run. The PDF's load a bit slowly, but it's acceptable.
+    if delay:
+        delay = parse_int( app.config.get( "FIXUP_CONTENT_DELAY" ), 5 )
+        time.sleep( delay )
+
+    # process each fixup task
+    _logger.info( "Processing fixup tasks..." )
     start_time = time.time()
     for task_no, (ctype, func) in enumerate( _fixup_content_tasks ):
         _logger.debug( "Fixing up %s (%d/%d)...", ctype, 1+task_no, len(_fixup_content_tasks) )
@@ -98,6 +113,7 @@ def _do_fixup_content():
             continue
         elapsed_time = datetime.timedelta( seconds = int( time.time() - start_time2 ) )
         _logger.debug( "- Finished fixing up %s (%s): %s", ctype, elapsed_time, msg )
+
     elapsed_time = datetime.timedelta( seconds = int( time.time() - start_time ) )
     _logger.info( "All fixup tasks completed (%s).", elapsed_time )
 

@@ -2,7 +2,6 @@
 
 import os
 import re
-import io
 
 from flask import jsonify, send_file, url_for, abort
 
@@ -85,8 +84,10 @@ def load_content_sets( startup_msgs, logger ):
                         if ruleid not in _footnote_index[ cdoc_id ]:
                             _footnote_index[ cdoc_id ][ ruleid ] = []
                         _footnote_index[ cdoc_id ][ ruleid ].append( footnote )
-        fname = fname_stem + ".pdf"
-        if not load_file( fname, content_doc, "content", startup_msgs.warning, binary=True ):
+        fname = os.path.join( data_dir, fname_stem+".pdf" )
+        if os.path.isfile( fname ):
+            content_doc["filename"] = fname
+        else:
             # NOTE: Things will work without this file, but from the user's point of view,
             # they've probably set something up incorrectly, so we give them a hint.
             if not app.config.get( "IGNORE_MISSING_DATA_FILES" ):
@@ -211,7 +212,7 @@ def _dump_content_sets():
         print( "=== {} ({}) ===".format( cset["title"], cset_id ) )
         for cdoc_id, cdoc in cset["content_docs"].items():
             print( "Content doc: {} ({})".format( cdoc["title"], cdoc_id ) )
-            for key in [ "targets", "footnotes", "content" ]:
+            for key in [ "targets", "footnotes", "filename" ]:
                 if key in cdoc:
                     print( "- {}: {}".format( key, len(cdoc[key]) ))
 
@@ -305,7 +306,7 @@ def get_content_docs():
                 "parent_cset_id": cset["cset_id"],
                 "title": cdoc["title"],
             }
-            if "content" in cdoc:
+            if "filename" in cdoc:
                 cdoc2["url"] = url_for( "get_content", cdoc_id=cdoc["cdoc_id"] )
             for key in [ "targets", "chapters", "background", "icon" ]:
                 if key in cdoc:
@@ -320,9 +321,14 @@ def get_content( cdoc_id ):
     """Return the content for the specified document."""
     for cset in _content_sets.values():
         for cdoc in cset["content_docs"].values():
-            if cdoc["cdoc_id"] == cdoc_id and "content" in cdoc:
-                buf = io.BytesIO( cdoc["content"] )
-                return send_file( buf, mimetype="application/pdf" )
+            if cdoc["cdoc_id"] == cdoc_id and "filename" in cdoc:
+                # NOTE: Important information is stored at the end of a PDF document, and PDF.js
+                # can get it early, *if* the server supports range requests, which will allow it
+                # to start rendering the document before it's received the entire file.
+                #   https://github.com/mozilla/pdf.js/wiki/Frequently-Asked-Questions#range
+                #   https://flask.palletsprojects.com/en/1.1.x/api/?highlight=send_file#flask.send_file
+                return send_file( cdoc["filename"], mimetype="application/pdf", conditional=True )
+
     abort( 404 )
     return None # stupid pylint :-/
 

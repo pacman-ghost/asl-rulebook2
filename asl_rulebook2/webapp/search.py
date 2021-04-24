@@ -825,6 +825,8 @@ def _fixup_searchable_content( sr_type, fixup_row, make_fields ):
 
     return plural( nrows, "row", "rows" )
 
+_last_sleep_time = 0
+
 def _tag_ruleids_in_field( obj, key, cset_id ):
     """Tag ruleid's in an optional field."""
     if isinstance( key, int ) or key in obj:
@@ -837,6 +839,11 @@ def _tag_ruleids_in_field( obj, key, cset_id ):
         new_val = tag_ruleids( val, cset_id )
         with webapp_startup.fixup_content_lock:
             obj[key] = new_val
+        # FUDGE! Give other threads a chance to run :-/
+        global _last_sleep_time
+        if time.time() - _last_sleep_time > 1:
+            time.sleep( 0.1 )
+            _last_sleep_time = time.time()
 
 def _get_row_count( conn, table_name ):
     """Get the number of rows in a table."""

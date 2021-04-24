@@ -33,8 +33,8 @@ def pytest_addoption( parser ):
         help="Webapp server to test against."
     )
     parser.addoption(
-        "--webdriver", action="store", dest="webdriver", default="chrome",
-        help="Webdriver to use (Chrome/Firefox)."
+        "--webdriver", action="store", dest="webdriver", default="firefox",
+        help="Webdriver to use (chrome/firefox)."
     )
     parser.addoption(
         "--headless", action="store_true", dest="headless", default=False,

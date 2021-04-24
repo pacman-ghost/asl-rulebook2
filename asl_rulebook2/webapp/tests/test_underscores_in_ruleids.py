@@ -23,7 +23,9 @@ def test_search_results( webdriver, webapp ):
         refresh_webapp( webdriver )
         results = do_search( ruleid )
         assert results == []
-        assert get_curr_target() == ( 'kampfgruppe-scherer!', 'KGS_CG1' )
+        wait_for( 2,
+            lambda: get_curr_target() == ( 'kampfgruppe-scherer!', 'KGS_CG1' )
+        )
 
 # ---------------------------------------------------------------------
 

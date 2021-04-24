@@ -215,7 +215,7 @@ gMainApp.component( "ruleid", {
     } ; },
 
     // NOTE: This bit of HTML is sensitive to spaces :-/
-    // NOTE: Unfortunately, PDF destinations can't have spaces (see add_pdf_dests.py), so we need to
+    // NOTE: Unfortunately, PDF destinations can't have spaces (see prepare_pdf.py), so we need to
     // do a bit of hackery to simulate them :-( We could allow spaces in the ruleid's, and transparently
     // convert them to underscores when we create the PDF destinations, but it's probably better
     // to force them to be defined with underscores (and convert them to spaces in the UI), so that

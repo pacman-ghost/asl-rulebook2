@@ -16,6 +16,10 @@ _chapter_resources = None
 
 _tag_ruleid_regexes = None
 
+_WELL_KNOWN_CHAPTER_IDS = {
+    "RB": "O", "KGP": "P", "PB": "Q", "ABtF": "R", "BRT": "T"
+}
+
 # ---------------------------------------------------------------------
 
 def load_content_sets( startup_msgs, logger ):
@@ -213,7 +217,6 @@ def _dump_content_sets():
 
 # ---------------------------------------------------------------------
 
-
 def tag_ruleids( content, cset_id ):
     """Identify ruleid's in a piece of content and tag them.
 
@@ -234,6 +237,12 @@ def tag_ruleids( content, cset_id ):
         return content
     if all( not c.isdigit() for c in content ):
         return content
+
+    # translate well-known chapter ID's for CG ruleid's
+    #   e.g. "OCG8" is often written as "RB CG8" or "RB SSR CG8"
+    # NOTE: It would be nice to leave the original text as it is, but this gets quite messy :-/
+    for key, val in _WELL_KNOWN_CHAPTER_IDS.items():
+        content = content.replace( key+" CG", val+"CG" ).replace( key+" SSR CG", val+"CG" )
 
     # NOTE: To avoid excessive string operations, we identify all ruleid matches first,
     # then fixup the string content in one pass.

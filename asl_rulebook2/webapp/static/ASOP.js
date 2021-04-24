@@ -195,7 +195,11 @@ gMainApp.component( "asop", {
             return caption ;
         },
 
-        fixupContent( content ) { return wrapExcBlocks( content ) ; },
+        fixupContent( content ) {
+            content = content.replace( /{.+?}/, "<i>$&</i>" ) ; // nb: nested comments are written as {...} :-/
+            content = wrapExcBlocks( content ) ;
+            return content ;
+        },
 
     },
 

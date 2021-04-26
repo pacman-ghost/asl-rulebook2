@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+<title> Prepare {{APP_NAME}} data </title>
+<link rel="shortcut icon" href="{{url_for('static', filename='images/favicon.ico')}}">
+<link rel="stylesheet" type="text/css" href="{{ url_for( 'static',
+    filename = 'jquery-ui/jquery-ui' + WEB_DEBUG_MIN + '.css'
+) }}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/global.css' ) }}" />
+<link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='css/prepare.css' ) }}" />
+</head>
+
+<body>
+    <div id="prepare-app"></div>
+</body>
+
+{%if WEB_DEBUG%}
+    <script src="{{ url_for( 'static', filename='vue/vue.global.js' ) }}"></script>
+{%else%}
+    <script src="{{ url_for( 'static', filename='vue/vue.global.prod.js' ) }}"></script>
+{%endif%}
+<script src="{{ url_for( 'static', filename='jquery/jquery-3.6.0.js') }}"></script>
+<script src="{{ url_for( 'static',
+    filename = 'jquery-ui/jquery-ui' + WEB_DEBUG_MIN + '.js'
+) }}"></script>
+<script src="{{ url_for( 'static',
+    filename = 'socketio/socket.io' + WEB_DEBUG_MIN + '.js'
+) }}"></script>
+
+<script type="module" src="{{ url_for( 'static', filename='prepare.js' ) }}"></script>
+<script>
+gHaveGhostscript = "{{HAVE_GHOSTSCRIPT}}" ;
+gImagesBaseUrl = "{{ url_for( 'static', filename='images/' ) }}" ;
+gPrepareDataFilesUrl = "{{ url_for( 'prepare_data_files' ) }}" ;
+</script>
+
+</html>

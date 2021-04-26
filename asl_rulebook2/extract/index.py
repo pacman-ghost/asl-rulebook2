@@ -8,9 +8,9 @@ import re
 import click
 from pdfminer.layout import LTChar
 
-from asl_rulebook2.extract.base import ExtractBase, log_msg_stderr
+from asl_rulebook2.extract.base import ExtractBase
 from asl_rulebook2.pdf import PdfDoc, PageIterator, PageElemIterator
-from asl_rulebook2.utils import parse_page_numbers, fixup_text, extract_parens_content, jsonval
+from asl_rulebook2.utils import parse_page_numbers, fixup_text, extract_parens_content, jsonval, log_msg_stderr
 
 # ---------------------------------------------------------------------
 
@@ -49,7 +49,7 @@ class ExtractIndex( ExtractBase ):
             if page_no not in page_nos:
                 self.log_msg( "progress", "- Skipping page {}.", page_no )
                 continue
-            self.log_msg( "progress", "- Processing page {}...", page_no )
+            self.log_msg( "progress", "- Analyzing page {}.", page_no )
 
             # process each element on the page
             self._prev_y0 = 99999

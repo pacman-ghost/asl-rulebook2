@@ -22,8 +22,8 @@ def init_webapp( webapp, webdriver, **options ):
     """Initialize the webapp."""
 
     # initialize
-    expected_warnings = options.pop( "warnings", [] )
-    expected_errors = options.pop( "errors", [] )
+    expected_warnings = options.pop( "expected_warnings", [] )
+    expected_errors = options.pop( "expected_errors", [] )
 
     # initialize
     global _webapp, _webdriver
@@ -73,7 +73,10 @@ def refresh_webapp( webdriver ):
 def _wait_for_webapp():
     """Wait for the webapp to finish initialization."""
     timeout = 5
-    wait_for( timeout, lambda: find_child("#_mainapp-loaded_") )
+    wait_for( timeout,
+        lambda: find_child("#_mainapp-loaded_") \
+          or ( webapp_tests.pytest_options.enable_prepare and find_child("#_prepareapp-loaded_") )
+    )
 
 # ---------------------------------------------------------------------
 
@@ -243,9 +246,13 @@ def wait_for_elem( timeout, sel, parent=None ):
 
 def wait_for( timeout, func ):
     """Wait for a condition to become true."""
-    WebDriverWait( _webdriver, timeout, poll_frequency=0.1 ).until(
-        lambda driver: func()
-    )
+    last_val = None
+    def wrapper( driver ): #pylint: disable=unused-argument
+        nonlocal last_val
+        last_val = func()
+        return last_val
+    WebDriverWait( _webdriver, timeout, poll_frequency=0.1 ).until( wrapper )
+    return last_val
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

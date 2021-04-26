@@ -3,5 +3,6 @@
 flask==1.1.2
 pdfminer.six==20201018
 pikepdf==2.5.2
+python-socketio==5.2.1
 pyyaml==5.4.1
 click==7.1.2

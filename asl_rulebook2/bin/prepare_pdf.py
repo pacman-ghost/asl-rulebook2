@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""" Add named destinations to a PDF file. """
+""" Prepare the MMP eASLRB PDF. """
 
 import subprocess
 import json
@@ -8,7 +8,7 @@ import datetime
 
 import click
 
-from asl_rulebook2.utils import TempFile
+from asl_rulebook2.utils import TempFile, log_msg_stderr
 
 # NOTE: "screen" gives significant savings (~65%) but scanned PDF's become very blurry. The main MMP eASLRB
 # is not too bad, but some images are also a bit unclear. "ebook" gives no savings for scanned PDF's, but
@@ -23,22 +23,8 @@ _COMPRESSION_CHOICES = [
 
 # ---------------------------------------------------------------------
 
-@click.command()
-@click.argument( "pdf_file", nargs=1, type=click.Path(exists=True,dir_okay=False) )
-@click.option( "--title", help="Document title." )
-@click.option( "--targets","-t","targets_fname", required=True, type=click.Path(dir_okay=False),
-    help="Target definition file."
-)
-@click.option( "--yoffset", default=5, help="Offset to add to y co-ordinates." )
-@click.option( "--output","-o","output_fname", required=True, type=click.Path(dir_okay=False),
-    help="Output PDF file."
-)
-@click.option( "--compression", type=click.Choice(_COMPRESSION_CHOICES), default="ebook",
-    help="Level of compression."
-)
-@click.option( "--gs","gs_path", default="gs",  help="Path to the Ghostscript executable." )
-def main( pdf_file, title, targets_fname, yoffset, output_fname, compression, gs_path ):
-    """Add named destinations to a PDF file."""
+def prepare_pdf( pdf_file, title, targets_fname, yoffset, output_fname, compression, gs_path, log_msg ):
+    """Prepare the MMP eASLRB PDF."""
 
     # load the targets
     with open( targets_fname, "r" ) as fp:
@@ -48,7 +34,7 @@ def main( pdf_file, title, targets_fname, yoffset, output_fname, compression, gs
 
         # compress the PDF
         if compression and compression != "none":
-            print( "Compressing the PDF ({})...".format( compression ) )
+            log_msg( "progress", "Compressing the PDF ({})...".format( compression ) )
             compressed_file.close( delete=False )
             args = [ gs_path, "-sDEVICE=pdfwrite", "-dNOPAUSE", "-dQUIET", "-dBATCH",
                 "-dPDFSETTINGS=/{}".format( compression ),
@@ -58,11 +44,13 @@ def main( pdf_file, title, targets_fname, yoffset, output_fname, compression, gs
             start_time = time.time()
             subprocess.run( args, check=True )
             elapsed_time = time.time() - start_time
-            print( "- Elapsed time: {}".format( datetime.timedelta(seconds=int(elapsed_time)) ) )
+            log_msg( "timestamp", "- Elapsed time: {}".format(
+                datetime.timedelta( seconds=int(elapsed_time) ) )
+            )
             pdf_file = compressed_file.name
 
         # generate the pdfmarks
-        print( "Generating the pdfmarks..." )
+        log_msg( "progress", "Generating the pdfmarks..." )
         if title:
             print( "[ /Title ({})".format( title ), file=pdfmarks_file )
         else:
@@ -84,8 +72,7 @@ def main( pdf_file, title, targets_fname, yoffset, output_fname, compression, gs
         pdfmarks_file.close( delete=False )
 
         # generate the pdfmark'ed document
-        print( "Generating the pdfmark'ed document..." )
-        print( "- {} => {}".format( pdf_file, output_fname ) )
+        log_msg( "progress", "Adding targets to the PDF..." )
         args = [ gs_path, "-q", "-dBATCH", "-dNOPAUSE", "-sDEVICE=pdfwrite" ]
         args.extend( [ "-o", output_fname ] )
         args.extend( [ "-f", pdf_file ] )
@@ -93,9 +80,44 @@ def main( pdf_file, title, targets_fname, yoffset, output_fname, compression, gs
         start_time = time.time()
         subprocess.run( args, check=True )
         elapsed_time = time.time() - start_time
-        print( "- Elapsed time: {}".format( datetime.timedelta(seconds=int(elapsed_time)) ) )
+        log_msg( "timestamp", "- Elapsed time: {}".format(
+            datetime.timedelta( seconds=int(elapsed_time) ) )
+        )
 
 # ---------------------------------------------------------------------
+
+@click.command()
+@click.argument( "pdf_file", nargs=1, type=click.Path(exists=True,dir_okay=False) )
+@click.option( "--title", help="Document title." )
+@click.option( "--targets","-t","targets_fname", required=True, type=click.Path(dir_okay=False),
+    help="Target definition file."
+)
+@click.option( "--yoffset", default=5, help="Offset to add to y co-ordinates." )
+@click.option( "--output","-o","output_fname", required=True, type=click.Path(dir_okay=False),
+    help="Output PDF file."
+)
+@click.option( "--compression", type=click.Choice(_COMPRESSION_CHOICES), default="ebook",
+    help="Level of compression."
+)
+@click.option( "--gs","gs_path", default="gs",  help="Path to the Ghostscript executable." )
+@click.option( "--progress","-p", is_flag=True, default=False, help="Log progress." )
+def main( pdf_file, title, targets_fname, yoffset, output_fname, compression, gs_path, progress ):
+    """Prepare the MMP eASLRB PDF."""
+
+    # initialize
+    def log_msg( msg_type, msg ):
+        if msg_type in ("progress", "start", "timestamp", None) and not progress:
+            return
+        log_msg_stderr( msg_type, msg )
+
+    # prepare the PDF
+    prepare_pdf(
+        pdf_file, title,
+        targets_fname, yoffset,
+        output_fname, compression,
+        gs_path,
+        log_msg
+    )
 
 if __name__ == "__main__":
     main() #pylint: disable=no-value-for-parameter

@@ -9,7 +9,7 @@ import glob
 
 import click
 
-from asl_rulebook2.webapp import app
+from asl_rulebook2.webapp import app, globvars
 
 # ---------------------------------------------------------------------
 
@@ -79,10 +79,32 @@ def main( bind_addr, data_dir, force_init_delay, flask_debug ):
             _ = urllib.request.urlopen( url )
         threading.Thread( target=_start_server, daemon=True ).start()
 
+    # check if the user needs to prepare their data files
+    if not app.config.get( "DATA_DIR" ):
+        # yup - initialize the socketio server
+        init_prepare_socketio( app )
+
     # run the server
     app.run( host=host, port=port, debug=flask_debug,
         extra_files = extra_files
     )
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def init_prepare_socketio( flask_app ):
+    """Initialize the socketio server needed to prepare the data files."""
+    # NOTE: We only set this up if it's needed (i.e. because there is no data directory,
+    # and the user needs to prepare their data files), rather than always having it running
+    # on the off-chance that the user might need it :-/
+    # NOTE: socketio doesn't really work well with threads, and it's tricky to get it to
+    # send events to the client if we're using e.g. eventlet:
+    #   https://stackoverflow.com/questions/43801884/how-to-run-python-socketio-in-thread
+    #   https://python-socketio.readthedocs.io/en/latest/server.html#standard-threads
+    # Using native threads is less-performant, but it's not an issue for us, and it works :-/
+    import socketio
+    sio = socketio.Server( async_mode="threading" )
+    flask_app.wsgi_app = socketio.WSGIApp( sio, flask_app.wsgi_app )
+    globvars.socketio_server = sio
 
 # ---------------------------------------------------------------------
 

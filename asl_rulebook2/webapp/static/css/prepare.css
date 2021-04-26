@@ -1,0 +1,37 @@
+p { margin: 5px 0 ; }
+code { display: block ; margin: 5px 0 5px 20px ; }
+.info {
+    margin-top: 10px ; min-height: 25px ;
+    padding-left: 30px ; background: no-repeat url(../images/info.png) ;
+    font-size: 80% ; font-style: italic ; color: #444 ;
+}
+
+#prepare-app { height: 100% ; display: flex ; }
+#header { margin-bottom: 5px ; }
+#main { width: 100% ; margin: 10px ; display: flex ; flex-direction: column ; }
+
+#fatal-error { margin-bottom: 10px ; font-size: 120% ; font-weight: bold ; }
+
+#upload-panel { align-self: start ; border: 1px solid black ; border-radius: 5px ; padding: 10px ; }
+#upload-panel button { height: 70px ; margin-right: 10px ; }
+#upload-panel button img { margin-top: 3px ; height: 60px ; }
+
+#progress-panel {
+    flex-grow: 1 ; overflow-y: auto ;
+    border: 1px solid black ; border-radius: 5px ; padding: 10px ;
+    font-family: monospace ; font-size: 90% ;
+}
+#progress-panel .progress { font-style: italic ; }
+#progress-panel .status { margin: 5px 0 ; }
+#progress-panel .status:first-of-type { margin-top: 0 ; }
+#progress-panel .status table { margin-left: 2px ; }
+#progress-panel .status table td { vertical-align: top ; }
+#progress-panel .status img.icon { height: 15px ; margin: 1px 3px 0 0 ; }
+
+#download-panel {
+    position: fixed ; bottom: 18px ; right: 18px ; width: 75% ;
+    border: 1px solid black ; border-radius: 5px ; background: white ;
+    padding: 10px ;
+}
+#download-panel button { height: 40px ; margin-right: 10px ; padding: 5px ; }
+#download-panel button img { height: 30px ; }

@@ -1,5 +1,6 @@
 """ Miscellaneous utilities. """
 
+import sys
 import os
 import pathlib
 import tempfile
@@ -7,6 +8,8 @@ import re
 import math
 from io import StringIO
 from html.parser import HTMLParser
+
+import click
 
 # ---------------------------------------------------------------------
 
@@ -159,6 +162,14 @@ def jsonval( val ):
         return '"{}"'.format( val.replace('"',r'\"') )
     assert False, "Unknown JSON data type: {}".format( type(val) )
     return '"???"'
+
+def log_msg_stderr( msg_type, msg ):
+    """Log a message to stderr."""
+    if msg_type == "warning":
+        msg = click.style( "WARNING: {}".format( msg ), fg="yellow" )
+    elif msg_type == "error":
+        msg = click.style( "ERROR: {}".format( msg ), fg="red" )
+    click.echo( msg, file=sys.stderr )
 
 def change_extn( fname, extn ):
     """Change a filename's extension."""

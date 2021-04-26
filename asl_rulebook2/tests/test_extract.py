@@ -10,6 +10,7 @@ from asl_rulebook2.extract.index import ExtractIndex
 from asl_rulebook2.extract.content import ExtractContent
 from asl_rulebook2.extract.all import ExtractAll
 from asl_rulebook2.tests import pytest_options
+from asl_rulebook2.tests.utils import for_each_easlrb_version
 
 # ---------------------------------------------------------------------
 
@@ -34,7 +35,7 @@ def test_extract_index():
         assert open( fname, "r", encoding="utf-8" ).read() == buf
 
     # run the test
-    _for_each_version( do_test )
+    for_each_easlrb_version( do_test )
 
 # ---------------------------------------------------------------------
 
@@ -65,7 +66,7 @@ def test_extract_content():
         assert open( fname2, "r", encoding="utf-8" ).read() == footnotes_buf
 
     # run the test
-    _for_each_version( do_test )
+    for_each_easlrb_version( do_test )
 
 # ---------------------------------------------------------------------
 
@@ -101,20 +102,9 @@ def test_extract_all():
         assert open( fname2, "r", encoding="utf-8" ).read() == footnotes_buf
 
     # run the test
-    _for_each_version( do_test )
+    for_each_easlrb_version( do_test )
 
 # ---------------------------------------------------------------------
-
-def _for_each_version( func ):
-    """Run tests for each version of the eASLRB."""
-    base_dir = pytest_options.easlrb_path
-    ncalls = 0
-    for name in os.listdir( base_dir ):
-        dname = os.path.join( base_dir, name )
-        if os.path.isfile( os.path.join( dname, "eASLRB.pdf" ) ):
-            func( dname )
-            ncalls += 1
-    assert ncalls > 0
 
 def _check_log_msg( msg_type, msg ):
     """Check a log message."""

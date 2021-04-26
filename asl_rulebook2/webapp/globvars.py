@@ -9,6 +9,8 @@ from asl_rulebook2.webapp.config.constants import APP_NAME, APP_VERSION
 
 cleanup_handlers = []
 
+socketio_server = None
+
 # ---------------------------------------------------------------------
 
 _init_lock = threading.Lock()

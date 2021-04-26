@@ -1,6 +1,7 @@
 """Helper functions."""
 
 import os
+import shutil
 import pathlib
 import re
 import json
@@ -66,3 +67,7 @@ def parse_int( val, default=None ):
         return int( val )
     except (ValueError, TypeError):
         return default
+
+def get_gs_path():
+    """Find the Ghostscript executable."""
+    return app.config.get( "GS_PATH", shutil.which("gs") )

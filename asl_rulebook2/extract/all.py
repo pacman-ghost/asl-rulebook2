@@ -8,10 +8,11 @@ import importlib
 
 import click
 
-from asl_rulebook2.pdf import PdfDoc
-from asl_rulebook2.extract.base import ExtractBase, log_msg_stderr
+from asl_rulebook2.extract.base import ExtractBase
 from asl_rulebook2.extract.index import ExtractIndex
 from asl_rulebook2.extract.content import ExtractContent
+from asl_rulebook2.pdf import PdfDoc
+from asl_rulebook2.utils import log_msg_stderr
 
 # ---------------------------------------------------------------------
 
@@ -34,13 +35,13 @@ class ExtractAll( ExtractBase ):
             default_args.update( getattr( mod, "_DEFAULT_ARGS" ) )
 
         # extract the index
-        self.log_msg( "progress",  "\nExtracting the index..." )
+        self.log_msg( "status",  "\nExtracting the index..." )
         args = ExtractBase.parse_args( self._args, default_args )
         self.extract_index = ExtractIndex( args, self._log )
         self.extract_index.extract_index( pdf )
 
         # extract the content
-        self.log_msg( "progress",  "\nExtracting the content..." )
+        self.log_msg( "status",  "\nExtracting the content..." )
         args = ExtractBase.parse_args( self._args, default_args )
         self.extract_content = ExtractContent( args, self._log )
         self.extract_content.extract_content( pdf )
@@ -125,13 +126,16 @@ class ExtractAll( ExtractBase ):
 )
 @click.option( "--save-index","save_index_fname", required=True, help="Where to save the extracted index." )
 @click.option( "--save-targets","save_targets_fname", required=True, help="Where to save the extracted targets." )
+@click.option( "--save-chapters","save_chapters_fname", required=True, help="Where to save the extracted chaopters." )
 @click.option( "--save-footnotes","save_footnotes_fname", required=True, help="Where to save the extracted footnotes." )
-def main( pdf_file, args, progress, output_fmt, save_index_fname, save_targets_fname, save_footnotes_fname ):
+def main( pdf_file, args, progress, output_fmt,
+  save_index_fname, save_targets_fname, save_chapters_fname, save_footnotes_fname
+):
     """Extract everything we need from the MMP eASLRB."""
 
     # extract everything
     def log_msg( msg_type, msg ):
-        if msg_type == "progress" and not progress:
+        if msg_type in ("status", "progress") and not progress:
             return
         log_msg_stderr( msg_type, msg )
     extract = ExtractAll( args, log_msg )
@@ -142,9 +146,10 @@ def main( pdf_file, args, progress, output_fmt, save_index_fname, save_targets_f
     # save the results
     with open( save_index_fname, "w", encoding="utf-8" ) as index_out, \
          open( save_targets_fname, "w", encoding="utf-8" ) as targets_out, \
+         open( save_chapters_fname, "w", encoding="utf-8" ) as chapters_out, \
          open( save_footnotes_fname, "w", encoding="utf-8" ) as footnotes_out:
         getattr( extract.extract_index, "save_as_"+output_fmt )( index_out )
-        getattr( extract.extract_content, "save_as_"+output_fmt )( targets_out, footnotes_out )
+        getattr( extract.extract_content, "save_as_"+output_fmt )( targets_out, chapters_out, footnotes_out )
 
 if __name__ == "__main__":
     main() #pylint: disable=no-value-for-parameter

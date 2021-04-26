@@ -8,17 +8,27 @@ import logging
 from flask import render_template, jsonify, abort
 
 from asl_rulebook2.webapp import app, globvars, shutdown_event
-from asl_rulebook2.webapp.utils import parse_int
+from asl_rulebook2.webapp.utils import parse_int, get_gs_path
 
 # ---------------------------------------------------------------------
 
 @app.route( "/" )
 def main():
     """Return the main page."""
-    from asl_rulebook2.webapp.asop import user_css_url
-    return render_template( "index.html",
-        ASOP_CSS_URL = user_css_url
-    )
+    if app.config.get( "DATA_DIR" ):
+        # return the main page
+        from asl_rulebook2.webapp.asop import user_css_url
+        return render_template( "index.html",
+            ASOP_CSS_URL = user_css_url
+        )
+    else:
+        # NOTE: If a data directory has not been configured, this is probably the first time the user
+        # has run the application, so we show the page that explains how to set things up.
+        # NOTE: Check for Ghostscript before we start.
+        args = {}
+        if get_gs_path():
+            args["HAVE_GHOSTSCRIPT"] = 1
+        return render_template( "prepare.html", **args )
 
 # ---------------------------------------------------------------------
 

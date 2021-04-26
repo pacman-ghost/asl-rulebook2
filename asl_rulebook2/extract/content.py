@@ -9,9 +9,9 @@ import math
 import click
 from pdfminer.layout import LTChar
 
-from asl_rulebook2.extract.base import ExtractBase, log_msg_stderr
+from asl_rulebook2.extract.base import ExtractBase
 from asl_rulebook2.pdf import PdfDoc, PageIterator, PageElemIterator
-from asl_rulebook2.utils import parse_page_numbers, fixup_text, append_text, remove_trailing, jsonval
+from asl_rulebook2.utils import parse_page_numbers, fixup_text, append_text, remove_trailing, jsonval, log_msg_stderr
 
 # NOTE: Characters are laid out individually on the page, and we generally want to process them top-to-bottom,
 # left-to-right, but in some cases, alignment is messed up (e.g. the bounding boxes don't line up properly
@@ -104,7 +104,7 @@ class ExtractContent( ExtractBase ):
             self._curr_pageid = "{}{}".format( # nb: this is the ASL page# (e.g. "A42"), not the PDF page#
                 self._curr_chapter, curr_chapter_pageno
             )
-            self.log_msg( "progress", "- Processing page {} ({})...", page_no, self._curr_pageid )
+            self.log_msg( "progress", "- Analyzing page {} ({}).", page_no, self._curr_pageid )
 
             # process each element on the page
             curr_caption = None

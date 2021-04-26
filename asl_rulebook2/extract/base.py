@@ -1,9 +1,5 @@
 """ Base class for the extraction classes. """
 
-import sys
-
-import click
-
 # ---------------------------------------------------------------------
 
 class ExtractBase:
@@ -50,11 +46,3 @@ class ExtractBase:
             return
         msg = msg.format( *args, **kwargs )
         self._log( msg_type, msg )
-
-# ---------------------------------------------------------------------
-
-def log_msg_stderr( msg_type, msg ):
-    """Log a message to stderr."""
-    if msg_type == "warning":
-        msg = click.style( "WARNING: {}".format( msg ), fg="yellow" )
-    click.echo( msg, file=sys.stderr )

@@ -56,6 +56,13 @@ def pytest_addoption( parser ):
         "--short-tests", action="store_true", dest="short_tests", default=False,
         help="Skip running the longer tests."
     )
+    # NOTE: Care needs to be taken with this option if running the tests against a remote server,
+    # since it will need to be started with no data directory configured (so that the socketio server
+    # gets initialized).
+    parser.addoption(
+        "--prepare", action="store_true", dest="enable_prepare", default=False,
+        help="Enable the prepare tests."
+    )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -122,6 +129,11 @@ def _make_webapp():
         app.config.pop( "WEBAPP_INITIAL_QUERY_STRING", None )
         app.config.pop( "DISABLE_FIXUP_CONTENT", None )
         app.config[ "IGNORE_MISSING_DATA_FILES" ] = True
+        # check if we will be running the prepare tests
+        if _pytest_options.enable_prepare:
+            # yup - initialize the socketio server
+            from asl_rulebook2.webapp.run_server import init_prepare_socketio
+            init_prepare_socketio( app )
         # NOTE: We run the server thread as a daemon so that it won't prevent the tests from finishing
         # when they're done. However, this makes it difficult to know when to shut the server down,
         # and, in particular, clean up the gRPC service. We send an EndTests message at the end of each test,

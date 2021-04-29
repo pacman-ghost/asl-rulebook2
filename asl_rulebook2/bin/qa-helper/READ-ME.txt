@@ -1,0 +1,12 @@
+This tool helps generate the JSON for Q+A entries. It's rough-and-ready, but it helps get the job done.
+
+Note that "<q> ... </q>" can be used as a shortcut for "<span class='quote'> ... </span>", and there is CSS in the main program for this.
+
+Keyboard shortcuts:
+  ^p = <p>
+  ^i = wrap selected text in <em>
+  ^e = wrap selected text in <q>
+
+Keyboard shortcuts (answers only):
+  ^X = Yes.
+  ^c = No.

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<head>
+<meta charset="utf-8">
+<title> Q+A Helper </title>
+<link rel="stylesheet" type="text/css" href="global.css" />
+</head>
+
+<!-- ----------------------------------------------------------------- -->
+
+<body>
+
+<div id="left">
+
+    <div style="display:flex;align-items:center;">
+    <b>Rules:</b> &nbsp; <input class="rules" style="flex:1;">
+    <button id="add-qa" title="Add another Q+A"> + </button>
+    </div>
+
+    <div id="qa"></div>
+
+</div>
+
+<div id="right">
+    <div id="html-preview"> </div>
+    <div id="json-preview"> </div>
+</div>
+
+<button id="copy-json"> Copy </button>
+
+</body>
+
+<!-- ----------------------------------------------------------------- -->
+
+<script src="../../webapp/static/jquery/jquery-3.6.0.min.js"></script>
+<script src="main.js"></script>

@@ -28,16 +28,16 @@ def init_asop( startup_msgs, logger ):
     data_dir = app.config.get( "DATA_DIR" )
     if not data_dir:
         return None, None, None
-    base_dir = os.path.join( data_dir, "asop/" )
-    if not os.path.isdir( base_dir ):
+    dname = os.path.join( data_dir, "asop/" )
+    if not os.path.isdir( dname ):
         return None, None, None
-    _asop_dir = base_dir
-    fname = os.path.join( base_dir, "asop.css" )
+    _asop_dir = dname
+    fname = os.path.join( _asop_dir, "asop.css" )
     if os.path.isfile( fname ):
         user_css_url = url_for( "get_asop_file", path="asop.css" )
 
     # load the ASOP index
-    fname = os.path.join( base_dir, "index.json" )
+    fname = os.path.join( _asop_dir, "index.json" )
     _asop = load_data_file( fname, "ASOP index", False, logger, startup_msgs.error )
     if not _asop:
         return None, None, None

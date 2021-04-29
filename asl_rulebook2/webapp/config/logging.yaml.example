@@ -1,0 +1,42 @@
+version: 1
+
+formatters:
+    standard:
+        format: "%(asctime)s | [%(name)s/%(levelname)s] %(message)s"
+        datefmt: "%H:%M:%S"
+
+handlers:
+    console:
+        class: "logging.StreamHandler"
+        formatter: "standard"
+        stream: "ext://sys.stdout"
+    file:
+        class: "logging.FileHandler"
+        formatter: "standard"
+        filename: "/tmp/asl-rulebook2.log"
+        mode: "w"
+
+root:
+    level: "WARNING"
+    handlers: [ "console", "file" ]
+loggers:
+    werkzeug:
+        level: "WARNING"
+        handlers: [ "console", "file" ]
+        propagate: 0
+    startup:
+        level: "WARNING"
+        handlers: [ "console", "file" ]
+        propagate: 0
+    search:
+        level: "WARNING"
+        handlers: [ "console", "file" ]
+        propagate: 0
+    prepare:
+        level: "WARNING"
+        handlers: [ "console", "file" ]
+        propagate: 0
+    control_tests:
+        level: "WARNING"
+        handlers: [ "console", "file" ]
+        propagate: 0

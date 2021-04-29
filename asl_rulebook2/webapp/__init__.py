@@ -27,6 +27,12 @@ def _load_config( fname, section ):
     config_parser.read( fname )
     app.config.update( dict( config_parser.items( section ) ) )
 
+def _set_config_from_env( key ):
+    """Set an app config setting from an environment variable."""
+    val = os.environ.get( "DOCKER_" + key )
+    if val:
+        app.config[ key ] = val
+
 # ---------------------------------------------------------------------
 
 def _on_sigint( signum, stack ): #pylint: disable=unused-argument
@@ -54,9 +60,12 @@ app = Flask( __name__ )
 _load_config( "app.cfg", "System" )
 _load_config( "site.cfg", "Site Config" )
 _load_config( "debug.cfg", "Debug" )
-for key, val in app.config.items():
-    if str( val ).isdigit():
-        app.config[ key ] = int( val )
+for _key, _val in app.config.items():
+    if str( _val ).isdigit():
+        app.config[ _key ] = int( _val )
+
+# load any config from environment variables (e.g. set in the Docker container)
+_set_config_from_env( "DATA_DIR" )
 
 # initialize logging
 _fname = os.path.join( CONFIG_DIR, "logging.yaml" )

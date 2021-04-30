@@ -77,11 +77,7 @@ gMainApp.component( "main-app", {
             this.getFootnoteIndex(),
             this.getASOP(),
         ] ).then( () => {
-            this.isLoaded = true ;
-            gEventBus.emit( "app-loaded" ) ;
-            $( "#watermark" ).css( "opacity", 0.15 ) ;
-            this.showStartupMsgs() ;
-            $( "#query-string" ).focus() ; // nb: because autofocus on the <input> doesn't work :-/
+            this.onStartupDone() ;
         } ).catch( () => {
             // NOTE: Each individual Promise should report their own errors i.e. what could we do here,
             // other than show a generic "startup failed" error?
@@ -115,21 +111,6 @@ gMainApp.component( "main-app", {
                     resp["empty"] = { "cdoc_id": "empty", "title": "Empty document" } ; // nb: for testing porpoises
                 self.contentDocs = resp ;
                 self.installContentDocs( resp ) ;
-                // start off showing the main ASL rulebook
-                // NOTE: To avoid forcing the user to configure which document this is, we assume that
-                // it's the one with the most targets.
-                let targetCdocId = null ;
-                for ( let cdocId in self.contentDocs ) {
-                    if ( self.contentDocs[cdocId].targets == undefined )
-                        continue
-                    if ( targetCdocId == null || Object.keys(self.contentDocs[cdocId].targets).length > Object.keys(self.contentDocs[targetCdocId].targets).length )
-                        targetCdocId = cdocId ;
-                }
-                if ( targetCdocId != null ) {
-                    Vue.nextTick( () => {
-                        gEventBus.emit( "show-page", targetCdocId, 1 ) ;
-                    } ) ;
-                }
             } ).catch( (errorMsg) => {
                 showErrorMsg( "Couldn't get the content docs.", errorMsg ) ;
             } ) ;
@@ -212,9 +193,9 @@ gMainApp.component( "main-app", {
             } ) ;
         },
 
-        showStartupMsgs() {
+        onStartupDone() {
             // show any startup messages
-            return getJSON( gGetStartupMsgsUrl ).then( (resp) => { //eslint-disable-line no-undef
+            getJSON( gGetStartupMsgsUrl ).then( (resp) => { //eslint-disable-line no-undef
                 [ "info", "warning", "error" ].forEach( (msgType) => {
                     if ( ! resp[msgType] )
                         return ;
@@ -227,6 +208,40 @@ gMainApp.component( "main-app", {
             } ).catch( (errorMsg) => {
                 showErrorMsg( "Couldn't get the startup messages.", errorMsg ) ;
             } ) ;
+            // check if we should start with a query
+            let queryString = gUrlParams.get( "query" ) || gUrlParams.get( "q" ) ;
+            if ( window.location.hash != "" )
+                queryString = window.location.hash.substring( 1 ) ;
+            if ( queryString != null && queryString != undefined ) {
+                // yup - make it so
+                // NOTE: The content pane flickers as it shows the cover page, then jumps to search result.
+                // I tried opening the PDF at the target destination, but the same thing still happens :-(
+                gEventBus.emit( "search", queryString ) ;
+            } else {
+                // start off showing the main ASL rulebook
+                // NOTE: To avoid forcing the user to configure which document this is,
+                // we assume that it's the one with the most targets.
+                let targetCdocId = null ;
+                for ( let cdocId in this.contentDocs ) {
+                    if ( this.contentDocs[cdocId].targets == undefined )
+                        continue
+                    if ( targetCdocId == null || Object.keys(this.contentDocs[cdocId].targets).length > Object.keys(this.contentDocs[targetCdocId].targets).length )
+                        targetCdocId = cdocId ;
+                }
+                if ( targetCdocId != null ) {
+                    Vue.nextTick( () => {
+                        gEventBus.emit( "show-page", targetCdocId, 1 ) ;
+                    } ) ;
+                }
+            }
+            // update the UI
+            $( "#watermark" ).css( "opacity", 0.15 ) ;
+            this.$nextTick( () => {
+                $( "#query-string" ).focus() ; // nb: because autofocus on the <input> doesn't work :-/
+            } ) ;
+            // notify everyone that startup has completed
+            this.isLoaded = true ;
+            gEventBus.emit( "app-loaded" ) ;
         },
 
         onEscapePressed() {

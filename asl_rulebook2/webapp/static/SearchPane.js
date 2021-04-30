@@ -1,4 +1,4 @@
-import { gMainApp, gAppConfig, gUrlParams, gEventBus } from "./MainApp.js" ;
+import { gMainApp, gAppConfig, gEventBus } from "./MainApp.js" ;
 import { gUserSettings, saveUserSettings } from "./UserSettings.js" ;
 import { postURL, findTargets, getPrimaryTarget, linkifyAutoRuleids, fixupSearchHilites, hideFootnotes } from "./utils.js" ;
 
@@ -69,15 +69,6 @@ gMainApp.component( "search-box", {
                 // there are multiple checkboxes - show them to the user
                 $( this.$refs.srFilters ).show() ;
             }
-        } ) ;
-
-        gEventBus.on( "app-loaded", () => {
-            // check if we should start off with a query
-            let queryString = gUrlParams.get( "query" ) || gUrlParams.get( "q" ) || gAppConfig.WEBAPP_INITIAL_QUERY_STRING ;
-            if ( window.location.hash != "" )
-                queryString = window.location.hash.substring( 1 ) ;
-            if ( queryString != null && queryString != undefined )
-                gEventBus.emit( "search-for", queryString ) ;
         } ) ;
 
         gEventBus.on( "tab-activated", (tabbedPages, tabId) => {

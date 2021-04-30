@@ -28,7 +28,11 @@ gPrepareApp.component( "prepare-app", {
     <div id="header">
         No data directory has been configured.
         <p> If you haven't used this program before, a few things need to be prepared first.
-        It will take around 10-15 minutes. </p>
+            It will take around 10-15 minutes.
+        </p>
+        <p> If there are problems, you can try to prepare your data files manually,
+            as described <a href="https://github.com/pacman-ghost/asl-rulebook2/blob/master/doc/prepare.md" target="_blank">here</a>.
+        </p>
     </div>
     <div v-show=fatalErrorMsg id="fatal-error" >
         <img :src=fatalErrorIconUrl style="float:left;margin-right:5px;" />
@@ -132,12 +136,11 @@ gPrepareApp.component( "upload-panel", {
     <div v-else style="display:flex;">
         <input type="file" @change=onFileSelected accept=".pdf" style="display:none;" ref="selectFile" >
         <button @click=onUploadProxy id="upload-proxy" ref="uploadProxy"> <img :src=uploadIconUrl /> </button>
-        <div> Click on the button, and select your copy <br> of MMP's electronic ASLRB.
+        <div style="width:29em;">
+            Click on the button, and select your copy of MMP's eASLRB.
             <div class="info"> You <u>must</u> use the <a href="https://www.wargamevault.com/product/344879/Electronic-Advanced-Squad-Leader-Rulebook" target="_blank">offical MMP eASLRB</a>. <br>
-                A scanned copy of a printed RB <u>will not work</u>!
-            </div>
-            <div class="info"> If there are problems here, you can try to prepare <br>
-                your data files <a href="https://github.com/pacman-ghost/asl-rulebook2/blob/master/doc/prepare.md" target="_blank">manually</a>.
+                A scan of a printed rulebook <u>will not work</u>!
+                <p> You should use v1.05 of the eASLRB PDF (normal version, not the "inherited zoom" version). Other versions <i>may</i> work, but may have warnings and/or errors. </p>
             </div>
         </div>
     </div>

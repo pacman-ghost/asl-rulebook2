@@ -147,7 +147,7 @@ def _do_prepare_data_files( args, download_url ):
             fixedup_file.close( delete=False )
             fixup_mmp_pdf( prepared_file.name,
                 fixedup_file.name,
-                True, True,
+                False, True, True,
                 log_msg
             )
             # read the final PDF data

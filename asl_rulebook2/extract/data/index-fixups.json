@@ -30,6 +30,12 @@
     "new_content": null
 },
 
+"Bog": {
+    "replace": [
+        [ "BarbedWire", "Barbed-Wire" ]
+    ]
+},
+
 "Broken Units": {
     "replace": [
         [ "[Pin NA: A7.8(EXCInterdiction and Huts)]", "[Pin NA (EXC Interdiction and Huts): A7.8]" ]
@@ -133,12 +139,6 @@
     ]
 },
 
-"Minefield": {
-    "replace": [
-        [ "[fully-tracked A FV T B: B 8.61]", "[fully-tracked AFV TB: B8.61]" ]
-    ]
-},
-
 "Morale": {
     "replace": [
         [ "[Gain:", "Gain:" ],
@@ -167,12 +167,6 @@
 "PAATC": {
     "old_content": "(Pre-AFVAdvance/AttackTaskCheck;NAtoberserk/Fanatic/Japanese/SMC): A11.6, G1.62 [vs Armored Cupola: O.7] [DC Placement: A23.3] [ENEMY Advance into CC/Melee: S11.4] [1PAATC: Chinese, NonElite Italians, Inexperienced, Allied/Axis Minors] [OVR vs \"?\": A12.41] [CC Reaction Fire: D7.21]",
     "new_content": "(Pre-AFV Advance/Attack Task Check; NA to berserk/Fanatic/Japanese/SMC): A11.6, G1.62 [vs Armored Cupola: O.7] [DC Placement: A23.3] [ENEMY Advance into CC/Melee: S11.4] [1PAATC: Chinese, Non-Elite Italians, Inexperienced, Allied/Axis Minors] [OVR vs \"?\": A12.41] [CC Reaction Fire: D7.21]"
-},
-
-"PBF": {
-    "replace": [
-        [ "A11.l", "A11.1" ]
-    ]
 },
 
 "Pillbox": {
@@ -236,19 +230,10 @@
     ]
 },
 
-"Stall": {
-    "old_content": "(Rules are givenin a ChapterH Vehicle Note ifa nationality's AFV are subject to Stall; for example, German Multi-Applicable Vehicle Note H): [Platoon Movement: D14.22]",
-    "new_content": "(Rules are given in a Chapter H Vehicle Note if a nationality's AFV are subject to Stall; for example, German Multi-Applicable Vehicle Note H): [Platoon Movement: D14.22]"
-},
-
 "Target Size": {
     "replace": [
         [ "[Vehicular: D1.7, Concealment: D1.76]", "[Vehicular: D1.7] [Vehicular (Concealment): D1.76]" ]
     ]
-},
-
-"Uncon irmed Kill": {
-    "new_title": "Unconfirmed Kill"
 },
 
 "Unarmored Vehicles": {

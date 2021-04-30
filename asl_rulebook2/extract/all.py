@@ -112,7 +112,7 @@ class ExtractAll( ExtractBase ):
                     first = False
                 errors = [ "- {}".format( e ) for e in errors ]
                 self.log_msg( "warning", "{}:\n{}",
-                    index_entry["caption"], "\n".join(errors)
+                    index_entry.get("caption","???"), "\n".join(errors)
                 )
 
 # ---------------------------------------------------------------------

@@ -10,8 +10,13 @@ from asl_rulebook2.utils import log_msg_stderr
 
 # ---------------------------------------------------------------------
 
-def fixup_mmp_pdf( fname, output_fname, optimize_web, rotate, log=None ):
+def fixup_mmp_pdf( fname, output_fname, fix_zoom, optimize_web, rotate, log=None ):
     """Fixup the MMP eASLRB PDF."""
+
+    # NOTE: v1.03 had problems with links within the PDF being of type /Fit rather than /XYZ,
+    # which meant that the document viewer kept changing the zoom when you clicked on them :-/
+    # This seems to have been fixed in v1.05 (even in the non-"inherit zoom" version), but
+    # we leave the code in-place, just in case, accessible via a switch.
 
     def log_msg( msg_type, msg, *args, **kwargs ):
         if not log:
@@ -35,29 +40,30 @@ def fixup_mmp_pdf( fname, output_fname, optimize_web, rotate, log=None ):
         log_msg( None, "" )
 
         # fixup bookmarks in the TOC
-        log_msg( "progress", "Fixing up the TOC..." )
-        def walk_toc( items, depth ):
-            for item_no,item in enumerate(items):
-                if item.destination[0].Type != "/Page" or item.destination[1] != "/Fit" \
-                   or item.page_location is not None or item.page_location_kwargs != {}:
-                    log_msg( "warning", "Unexpected TOC item: {}/{}".format( depth, item_no ) )
-                    continue
-                page = Page( item.destination[0] )
-                page_height = page.mediabox[3]
-                bullet = "#" if depth <= 1 else "-"
-                log_msg( "verbose", "  {}{} {} => p{}",
-                    depth*"  ", bullet, item.title, 1+page.index
-                )
-                walk_toc( item.children, depth+1 )
-                new_item = OutlineItem( item.title, page.index, "XYZ", top=page_height )
-                new_item.children = item.children
-                new_item.is_closed = True
-                items[ item_no ] = new_item
-        with pdf.open_outline() as outline:
-            walk_toc( outline.root, 0 )
-            # NOTE: The TOC will be updated when we exit the context manager, and can take some time.
-            log_msg( "progress", "Installing the new TOC..." )
-        log_msg( None, "" )
+        if fix_zoom:
+            log_msg( "progress", "Fixing up the TOC..." )
+            def walk_toc( items, depth ):
+                for item_no,item in enumerate(items):
+                    if item.destination[0].Type != "/Page" or item.destination[1] != "/Fit" \
+                       or item.page_location is not None or item.page_location_kwargs != {}:
+                        log_msg( "warning", "Unexpected TOC item: {}/{}".format( depth, item_no ) )
+                        continue
+                    page = Page( item.destination[0] )
+                    page_height = page.mediabox[3]
+                    bullet = "#" if depth <= 1 else "-"
+                    log_msg( "verbose", "  {}{} {} => p{}",
+                        depth*"  ", bullet, item.title, 1+page.index
+                    )
+                    walk_toc( item.children, depth+1 )
+                    new_item = OutlineItem( item.title, page.index, "XYZ", top=page_height )
+                    new_item.children = item.children
+                    new_item.is_closed = True
+                    items[ item_no ] = new_item
+            with pdf.open_outline() as outline:
+                walk_toc( outline.root, 0 )
+                # NOTE: The TOC will be updated when we exit the context manager, and can take some time.
+                log_msg( "progress", "Installing the new TOC..." )
+            log_msg( None, "" )
 
         # fixup up each page
         log_msg( "progress", "Fixing up the content..." )
@@ -70,16 +76,17 @@ def fixup_mmp_pdf( fname, output_fname, optimize_web, rotate, log=None ):
                     raw_page.Rotate = 270
                 else:
                     raw_page.Rotate = 0
-            page = Page( raw_page )
-            page_height = page.mediabox[3]
-            for annot in raw_page.get( "/Annots", [] ):
-                dest = annot.get( "/Dest" )
-                if dest:
-                    page_no = Page( dest[0] ).index
-                    log_msg( "verbose", "  - {} => p{}",
-                        repr(annot.Rect), 1+page_no
-                    )
-                    annot.Dest = make_page_destination( pdf, page_no, "XYZ", top=page_height )
+            if fix_zoom:
+                page = Page( raw_page )
+                page_height = page.mediabox[3]
+                for annot in raw_page.get( "/Annots", [] ):
+                    dest = annot.get( "/Dest" )
+                    if dest:
+                        page_no = Page( dest[0] ).index
+                        log_msg( "verbose", "  - {} => p{}",
+                            repr(annot.Rect), 1+page_no
+                        )
+                        annot.Dest = make_page_destination( pdf, page_no, "XYZ", top=page_height )
         log_msg( None, "" )
 
         # save the updated PDF
@@ -110,11 +117,12 @@ def fixup_mmp_pdf( fname, output_fname, optimize_web, rotate, log=None ):
 @click.command()
 @click.argument( "pdf_file", nargs=1, type=click.Path(exists=True,dir_okay=False) )
 @click.option( "--output","-o", required=True, type=click.Path(dir_okay=False), help="Where to save the fixed-up PDF." )
+@click.option( "--fix-zoom", is_flag=True, default=False, help="Fix zoom problems for links within the PDF." )
 @click.option( "--optimize-web", is_flag=True, default=False, help="Optimize for use in a browser (larger file)." )
 @click.option( "--rotate", is_flag=True, default=False, help="Rotate landscape pages." )
 @click.option( "--progress","-p", is_flag=True, default=False, help="Log progress." )
 @click.option( "--verbose","-v", is_flag=True, default=False, help="Verbose output." )
-def main( pdf_file, output, optimize_web, rotate, progress, verbose ):
+def main( pdf_file, output, fix_zoom, optimize_web, rotate, progress, verbose ):
     """Fixup the eASLRB."""
 
     def log_msg( msg_type, msg ):
@@ -123,7 +131,7 @@ def main( pdf_file, output, optimize_web, rotate, progress, verbose ):
         if msg_type == "verbose" and not verbose:
             return
         log_msg_stderr( msg_type, msg )
-    fixup_mmp_pdf( pdf_file, output, optimize_web, rotate, log=log_msg )
+    fixup_mmp_pdf( pdf_file, output, fix_zoom, optimize_web, rotate, log=log_msg )
 
 if __name__ == "__main__":
     main() #pylint: disable=no-value-for-parameter

@@ -3,7 +3,7 @@ code { display: block ; margin: 5px 0 5px 20px ; }
 .info {
     margin-top: 10px ; min-height: 25px ;
     padding-left: 30px ; background: no-repeat url(../images/info.png) ;
-    font-size: 80% ; font-style: italic ; color: #444 ;
+    font-style: italic ; color: #444 ;
 }
 
 #prepare-app { height: 100% ; display: flex ; }

@@ -47,7 +47,7 @@ Finally, we need to fixup some issues in the PDF:
         --output /tmp/prepared/ASL\ Rulebook.pdf \
         --progress
 ```
-This fixes the zoom problem when clicking on links within the PDF, and rotates any landscape pages.
+This rotates any landscape pages, so that the browser shows pages at the correct width (without a horizontal scrollbar).
 
 ### Using the prepared files
 

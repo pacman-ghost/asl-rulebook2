@@ -20,7 +20,9 @@ from asl_rulebook2.utils import parse_page_numbers, fixup_text, append_text, rem
 # they appear in the PDF document.
 _DISABLE_SORT_ITEMS = [
     "B40", # nb: to detect B31.1 NARROW STREET
+    "A16",
     "A58","A59","A60", # Chapter A footnotes (nb: page A61 is a mess wrt element order :-/)
+    "B1",
     "B45", "B46", # Chapter B footnotes
     "C25", "C26", # Chapter C footnotes
     "D27", # Chapter D footnotes
@@ -112,6 +114,13 @@ class ExtractContent( ExtractBase ):
             elem_filter = lambda e: isinstance( e, LTChar )
             sort_elems = self._curr_pageid not in disable_sort_items
             for _, elem in PageElemIterator( lt_page, elem_filter=elem_filter, sort_elems=sort_elems ):
+
+                # skip problematic elements
+                if elem.fontname == "OYULKV+MyriadPro-Regular":
+                    # FUDGE! Some symbols are represented as characters, which can sometimes cause problems
+                    # (e.g. in v1.05, the diamond for A7.8 PIN broke caption parsing), and the easiest way
+                    # to work-around this is to just ignore those characters.
+                    continue
 
                 # keep track of the top-left-most bold element
                 if self._is_bold( elem ):

@@ -26,6 +26,16 @@
     }
 },
 
+"A24": {
+    "K2M2": { "new_ruleid": null },
+    "J2L2N2": { "new_ruleid": null },
+    "K3M3": { "new_ruleid": null },
+    "J3L3N3": { "new_ruleid": null },
+    "K4M4O4": { "new_ruleid": null },
+    "J4L4N4": { "new_ruleid": null },
+    "K5": { "new_ruleid": null }
+},
+
 "A28": {
     "1 -": { "new_ruleid": null }
 },
@@ -110,6 +120,19 @@
         "new_ruleid": "A26",
         "new_caption": "VICTORY CONDITIONS"
     }
+},
+
+"B1": {
+    "N5": { "new_ruleid": null },
+    "N6": { "new_ruleid": null },
+    "N8": { "new_ruleid": null },
+    "S5": { "new_ruleid": null },
+    "S6": { "new_ruleid": null },
+    "R5": { "new_ruleid": null },
+    "T10": { "new_ruleid": null },
+    "W5": { "new_ruleid": null },
+    "V5": { "new_ruleid": null },
+    "X6": { "new_ruleid": null }
 },
 
 "B4": {

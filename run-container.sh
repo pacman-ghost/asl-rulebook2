@@ -17,6 +17,7 @@ function main
     CONTAINER_NAME=asl-rulebook2
     DETACH=
     NO_BUILD=
+    BUILD_NETWORK=
     CONTROL_TESTS_PORT=
 
     # parse the command-line arguments
@@ -24,7 +25,7 @@ function main
         print_help
         exit 0
     fi
-    params="$(getopt -o p:d:t: -l port:,data:,qa:,errata:,annotations:,asop:,tag:,name:,detach,no-build,control-tests-port:,help --name "$0" -- "$@")"
+    params="$(getopt -o p:d:t: -l port:,data:,qa:,errata:,annotations:,asop:,tag:,name:,detach,no-build,build-network:,control-tests-port:,help --name "$0" -- "$@")"
     if [ $? -ne 0 ]; then exit 1; fi
     eval set -- "$params"
     while true; do
@@ -59,6 +60,11 @@ function main
             --no-build )
                 NO_BUILD=1
                 shift 1 ;;
+            --build-network )
+                # FUDGE! We sometimes can't get out to the internet from the container (DNS problems) using the default
+                # "bridge" network, so we offer the option of using an alternate network (e.g. "host").
+                BUILD_NETWORK="--network $2"
+                shift 2 ;;
             --control-tests-port )
                 CONTROL_TESTS_PORT=$2
                 shift 2 ;;
@@ -140,6 +146,7 @@ function main
         docker build \
             --tag asl-rulebook2:$IMAGE_TAG \
             $CONTROL_TESTS_PORT_BUILD \
+            $BUILD_NETWORK \
             . 2>&1 \
           | sed -e 's/^/  /'
         if [ ${PIPESTATUS[0]} -ne 0 ]; then exit 10 ; fi

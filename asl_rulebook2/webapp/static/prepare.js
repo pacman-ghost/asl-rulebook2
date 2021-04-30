@@ -136,6 +136,9 @@ gPrepareApp.component( "upload-panel", {
             <div class="info"> You <u>must</u> use the <a href="https://www.wargamevault.com/product/344879/Electronic-Advanced-Squad-Leader-Rulebook" target="_blank">offical MMP eASLRB</a>. <br>
                 A scanned copy of a printed RB <u>will not work</u>!
             </div>
+            <div class="info"> If there are problems here, you can try to prepare <br>
+                your data files <a href="https://github.com/pacman-ghost/asl-rulebook2/blob/master/doc/prepare.md" target="_blank">manually</a>.
+            </div>
         </div>
     </div>
 </div>`,

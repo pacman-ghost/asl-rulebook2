@@ -1,0 +1,8 @@
+.ruleid { font-family: monospace ; }
+
+.info {
+    margin-top: 10px ; min-height: 25px ;
+    padding-left: 30px ; background: no-repeat url(info.png) ;
+    font-size: 90% ; font-style: italic ; color: #444 ;
+}
+

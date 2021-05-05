@@ -29,11 +29,12 @@ _DISABLE_SORT_ITEMS = [
     "E28", "E29", "E30", # Chapter E footnotes
     "F20", "F21", # Chapter F footnotes
     "G48", "G49", "G50", # Chapter G footnotes
+    "H9", # Chapter H footnotes
 ]
 
 _DEFAULT_ARGS = {
     "chapter-a": "42-102", "chapter-b": "109-154", "chapter-c": "158-183", "chapter-d": "187-213",
-    "chapter-e": "216-245", "chapter-f": "247-267", "chapter-g": "270-319",
+    "chapter-e": "216-245", "chapter-f": "247-267", "chapter-g": "270-319", "chapter-h": "322-324,326-330",
     "chapter-j": "593",
     "chapter-w": "647-664",
     "content_vp_left": 0, "content_vp_right": 565, "content_vp_top": 715, "content_vp_bottom": 28, # viewport
@@ -95,6 +96,8 @@ class ExtractContent( ExtractBase ):
                 break
             if page_no not in page_index:
                 self.log_msg( "progress", "- Skipping page {}.", page_no )
+                if curr_chapter_pageno is not None:
+                    curr_chapter_pageno += 1
                 continue
             if not self._curr_chapter or self._curr_chapter != page_index[page_no]:
                 # we've found the start of a new chapter
@@ -289,7 +292,7 @@ class ExtractContent( ExtractBase ):
             else:
                 self._curr_footnote[1] += elem.get_text()
 
-    def _save_footnote( self ):
+    def _save_footnote( self ): #pylint: disable=too-many-branches
         """Save a parsed footnote."""
 
         if not self._curr_footnote:
@@ -330,6 +333,11 @@ class ExtractContent( ExtractBase ):
                 return
             if footnote_id == "9" and "9" in footnote_ids:
                 footnote_id = "29"
+
+        # check if we've gone past the end of the Chapter H footnotes
+        if self._curr_chapter == "H" and len(footnote_id) > 1:
+            self._curr_footnote = None
+            return
 
         # clean up the content
         content = re.sub( r"\s+", " ", content ).strip()
@@ -388,9 +396,15 @@ class ExtractContent( ExtractBase ):
                 )
 
         # check for the credits at the end of the Chapter F footnotes
-        pos = content.find( "WEST OF ALAMEIN CREDITS" )
-        if pos > 0:
-            content = content[:pos]
+        if self._curr_chapter == "F":
+            pos = content.find( "WEST OF ALAMEIN CREDITS" )
+            if pos > 0:
+                content = content[:pos]
+        # check for the start of the vehicle notes at the end of the Chapter H footnotes
+        if self._curr_chapter == "H":
+            pos = content.find( "GERMAN VEHICLE NOTES" )
+            if pos > 0:
+                content = content[:pos]
 
         # save the footnote
         self._footnotes[ self._curr_chapter ].append( {

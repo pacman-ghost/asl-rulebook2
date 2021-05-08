@@ -52,10 +52,12 @@ def test_extract_content():
             extract = ExtractContent( args={}, log=_check_log_msg )
             extract.extract_content( pdf )
         targets_buf, chapters_buf, footnotes_buf = io.StringIO(), io.StringIO(), io.StringIO()
-        extract.save_as_text( targets_buf, chapters_buf, footnotes_buf )
+        vo_notes_buf = io.StringIO()
+        extract.save_as_text( targets_buf, chapters_buf, footnotes_buf, vo_notes_buf )
         targets_buf = targets_buf.getvalue()
         chapters_buf = chapters_buf.getvalue()
         footnotes_buf = footnotes_buf.getvalue()
+        vo_notes_buf = vo_notes_buf.getvalue()
 
         # check the results
         fname2 = os.path.join( dname, "targets.txt" )
@@ -64,6 +66,8 @@ def test_extract_content():
         assert open( fname2, "r", encoding="utf-8" ).read() == chapters_buf
         fname2 = os.path.join( dname, "footnotes.txt" )
         assert open( fname2, "r", encoding="utf-8" ).read() == footnotes_buf
+        fname2 = os.path.join( dname, "vo-notes.txt" )
+        assert open( fname2, "r", encoding="utf-8" ).read() == vo_notes_buf
 
     # run the test
     for_each_easlrb_version( do_test )
@@ -86,10 +90,12 @@ def test_extract_all():
         extract.extract_index.save_as_json( index_buf )
         index_buf = index_buf.getvalue()
         targets_buf, chapters_buf, footnotes_buf = io.StringIO(), io.StringIO(), io.StringIO()
-        extract.extract_content.save_as_json( targets_buf, chapters_buf, footnotes_buf )
+        vo_notes_buf = io.StringIO()
+        extract.extract_content.save_as_json( targets_buf, chapters_buf, footnotes_buf, vo_notes_buf )
         targets_buf = targets_buf.getvalue()
         chapters_buf = chapters_buf.getvalue()
         footnotes_buf = footnotes_buf.getvalue()
+        vo_notes_buf = vo_notes_buf.getvalue()
 
         # check the results
         fname2 = os.path.join( dname, "index.json" )
@@ -100,6 +106,8 @@ def test_extract_all():
         assert open( fname2, "r", encoding="utf-8" ).read() == chapters_buf
         fname2 = os.path.join( dname, "footnotes.json" )
         assert open( fname2, "r", encoding="utf-8" ).read() == footnotes_buf
+        fname2 = os.path.join( dname, "vo-notes.json" )
+        assert open( fname2, "r", encoding="utf-8" ).read() == vo_notes_buf
 
     # run the test
     for_each_easlrb_version( do_test )

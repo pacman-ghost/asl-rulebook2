@@ -23,12 +23,17 @@ _COMPRESSION_CHOICES = [
 
 # ---------------------------------------------------------------------
 
-def prepare_pdf( pdf_file, title, targets_fname, yoffset, output_fname, compression, gs_path, log_msg ):
+def prepare_pdf( pdf_file, title, targets_fname, vo_notes_fname, yoffset, output_fname, compression, gs_path, log_msg ):
     """Prepare the MMP eASLRB PDF."""
 
     # load the targets
     with open( targets_fname, "r" ) as fp:
         targets = json.load( fp )
+    if vo_notes_fname:
+        with open( vo_notes_fname, "r" ) as fp:
+            vo_notes_targets = json.load( fp )
+    else:
+        vo_notes_targets = None
 
     with TempFile(mode="w") as compressed_file, TempFile(mode="w") as pdfmarks_file:
 
@@ -49,6 +54,16 @@ def prepare_pdf( pdf_file, title, targets_fname, yoffset, output_fname, compress
             )
             pdf_file = compressed_file.name
 
+        def add_vo_notes_dests( key, vo_entries, yoffset, out ):
+            for vo_note_id, vo_entry in vo_entries.items():
+                dest = "{}:{}".format( key, vo_note_id )
+                xpos, ypos = vo_entry.get( "pos", ["null","null"] )
+                if isinstance( ypos, int ):
+                    ypos += yoffset
+                print( "[ /Dest /{} /Page {} /View [/XYZ {} {}] /DEST pdfmark".format(
+                    dest, vo_entry["page_no"], xpos, ypos
+                ), file=out )
+
         # generate the pdfmarks
         log_msg( "progress", "Generating the pdfmarks..." )
         if title:
@@ -68,7 +83,15 @@ def prepare_pdf( pdf_file, title, targets_fname, yoffset, output_fname, compress
             print( "[ /Dest /{} /Page {} /View [/XYZ {} {}] /DEST pdfmark".format(
                 ruleid, target["page_no"], xpos, ypos
             ), file=pdfmarks_file )
-        print( file=pdfmarks_file )
+        if vo_notes_targets:
+            print( file=pdfmarks_file )
+            for nat in vo_notes_targets:
+                if nat == "landing-craft":
+                    add_vo_notes_dests( nat, vo_notes_targets[nat], yoffset, pdfmarks_file )
+                    continue
+                for vo_type, vo_entries in vo_notes_targets[nat].items():
+                    key = "{}_{}".format( nat, vo_type )
+                    add_vo_notes_dests( key, vo_entries, yoffset, pdfmarks_file )
         pdfmarks_file.close( delete=False )
 
         # generate the pdfmark'ed document
@@ -92,6 +115,9 @@ def prepare_pdf( pdf_file, title, targets_fname, yoffset, output_fname, compress
 @click.option( "--targets","-t","targets_fname", required=True, type=click.Path(dir_okay=False),
     help="Target definition file."
 )
+@click.option( "--vo-notes","vo_notes_fname", required=False, type=click.Path(dir_okay=False),
+    help="Vehicle/ordnance notes definition file."
+)
 @click.option( "--yoffset", default=5, help="Offset to add to y co-ordinates." )
 @click.option( "--output","-o","output_fname", required=True, type=click.Path(dir_okay=False),
     help="Output PDF file."
@@ -101,7 +127,7 @@ def prepare_pdf( pdf_file, title, targets_fname, yoffset, output_fname, compress
 )
 @click.option( "--gs","gs_path", default="gs",  help="Path to the Ghostscript executable." )
 @click.option( "--progress","-p", is_flag=True, default=False, help="Log progress." )
-def main( pdf_file, title, targets_fname, yoffset, output_fname, compression, gs_path, progress ):
+def main( pdf_file, title, targets_fname, vo_notes_fname, yoffset, output_fname, compression, gs_path, progress ):
     """Prepare the MMP eASLRB PDF."""
 
     # initialize
@@ -113,7 +139,7 @@ def main( pdf_file, title, targets_fname, yoffset, output_fname, compression, gs
     # prepare the PDF
     prepare_pdf(
         pdf_file, title,
-        targets_fname, yoffset,
+        targets_fname, vo_notes_fname, yoffset,
         output_fname, compression,
         gs_path,
         log_msg

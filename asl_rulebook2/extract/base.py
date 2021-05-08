@@ -38,7 +38,7 @@ class ExtractBase:
     @staticmethod
     def _is_bold( elem ):
         """Check if an element is using a bold font."""
-        return elem.fontname.endswith( ( "-Bold", ",Bold", "-BoldMT" ) )
+        return elem.fontname.endswith( ( ",Bold", "-BoldMT" ) ) or "-Bold" in elem.fontname
 
     def log_msg( self, msg_type, msg, *args, **kwargs ):
         """Log a message."""

@@ -1,0 +1,734 @@
+{
+
+"skips": {
+    "382": [ "1, 3" ],
+    "429": [ "^1,660,", "^1and Fiat 3000", "^9/43 armistice", "^4/41 (.9)" ],
+    "431": [ "^1, for East Africa", "^9/42 (1.4)," ],
+    "432": [ "^1 (l.2),", "^1. Sources vary" ],
+    "434": [ "1-", "^1.5 for 11/41-6/42," ],
+    "438": [ "^1/41-5/43" ],
+    "439": [ "1 (1", "^1/43 ( 1.2),", "^1/43 (1.3),", "^1/42-5/43." ],
+    "492": [ "1B11CE/FPNA", "1B11CE/FPNA" ],
+    "493": [ "1T", "1B" ],
+    "496": [ "1B" ],
+    "501": [ "1h-d" ],
+    "502": [ "1s5", "1s5" ],
+    "503": [ "1AP5", "1s6" ],
+    "504": [ "^1.3)" ],
+    "514": [ "1.4 for 45" ],
+    "556": [ "1#" ],
+    "560": [ "1, 3" ]
+},
+
+"german": {
+"vehicles": {
+    "9.1": {
+        "old_caption": "FT-17 730(f) &",
+        "new_caption": "FT-17 730(f) & FT-17 730m(f)"
+    },
+    "22": {
+        "old_caption": "PzKpfw IVF: 1",
+        "new_caption": "PzKpfw IVF(1)"
+    },
+    "23": {
+        "old_caption": "PzKpfw IVF:2",
+        "new_caption": "PzKpfw IVF(2)"
+    },
+    "35": {
+        "old_caption": "StuG IIIG (L) &",
+        "new_caption": "StuG IIIG (L) & StuH 42 (L)"
+    },
+    "52": {
+        "old_caption": "JgdPz IV & JgdPz",
+        "new_caption": "JgdPz IV & JgdPz IV(L)"
+    },
+    "58": {
+        "old_caption": "SPW 250/sMG",
+        "new_caption": "SPW 250/sMG & 251/sMG"
+    },
+    "59": {
+        "old_caption": "SPW 250/7 &",
+        "new_caption": "SPW 250/7 & 251/2"
+    },
+    "72": {
+        "old_caption": "PSW 231(8 rad)",
+        "new_caption": "PSW 231(8 rad) & 232"
+    },
+    "85.37": {
+        "old_caption": "FlaK/Pz IV",
+        "new_vo_note_id": "85", "new_caption": "37 FlaK/Pz IV"
+    },
+    "92": {
+        "old_caption": "2cm & 3.7cm",
+        "new_caption": "2cm & 3.7cm FlaK LKW"
+    },
+    "96": {
+        "old_caption": "Opel 6700 &Buessing-NAG",
+        "new_caption": "Opel 6700 & Buessing-NAG 4500"
+    },
+    "add": [
+        { "_comment_": "This gets parsed as '4' and '5.1 GSW 39H(f) PaK' :-/",
+          "vo_note_id": "45.1", "caption": "GSW 39H(f) PaK", "page_no": 337, "page_pos": [380,561]
+        },
+        { "vo_note_id": "37.1", "caption": "Sturmtiger", "page_no": 532, "page_pos": [118,640] },
+        { "vo_note_id": "88.1", "caption": "SdKfz 10/5", "page_no": 532, "page_pos": [399,713] }
+    ]
+}
+},
+
+"russian": {
+"vehicles": {
+    "4": {
+        "old_caption": "T-60 M40 &",
+        "new_caption": "T-60 M40 & M42"
+    },
+    "6": {
+        "old_caption": "T-26 M33 & T-",
+        "new_caption": "T-26 M33 & T-26S M37/39"
+    },
+    "1": {
+        "old_caption": "T-28 M34",
+        "new_vo_note_id": "11"
+    },
+    "11.1": {
+        "old_caption": "T-28 M34(L) & 12.1. T-28E M40(L)",
+        "new_caption": "T-28 M34(L)"
+    },
+    "23": {
+        "old_caption": "KV-lE, KV-1 M41,",
+        "new_caption": "KV-lE, KV-1 M41, & KV-1 M-42"
+    },
+    "34": {
+        "old_caption": "ISU-122 & ISU-",
+        "new_caption": "ISU-122 & ISU-152"
+    },
+    "add": [
+        { "vo_note_id": "12.1", "caption": "T-28E M40(L)", "page_no": 364, "page_pos": [394,289] }
+    ]
+}
+},
+
+"american": {
+"vehicles": {
+    "14": {
+        "old_caption": "M4A3E2 & M4A3E2 (L) MediumTanks",
+        "new_caption": "M4A3E2 & M4A3E2 (L) Medium Tanks"
+    },
+    "17": {
+        "old_caption": "M4(105) & M4A3(105) MediumTanks",
+        "new_caption": "M4(105) & M4A3(105) Medium Tanks"
+    }
+}
+},
+
+"british": {
+"vehicles": {
+    "2": {
+        "old_caption": "(A17) Tetrarch & Tetrarch CS[Light Tanks Mk VII & Mk VII CS]",
+        "new_caption": "(A17) Tetrarch & Tetrarch CS [Light Tanks Mk VII & Mk VII CS]"
+    },
+    "6": {
+        "old_caption": "A9 & A9 CS [Cruiser Tanks Mk I& Mk I CS]",
+        "new_caption": "A9 & A9 CS [Cruiser Tanks Mk I & Mk I CS]"
+    },
+    "26": {
+        "old_caption": "(A12) Matilda II & II CS [In-fantry Tank Mk II]",
+        "new_caption": "(A12) Matilda II & II CS [Infantry Tank Mk II]"
+    },
+    "36": {
+        "old_caption": "Valentine & Churchill Bridgelay-ers",
+        "new_caption": "Valentine & Churchill Bridgelayers"
+    },
+    "45": {
+        "old_caption": "Humber III & Otter Light Re-connaissance Cars",
+        "new_caption": "Humber III & Otter Light Reconnaissance Cars"
+    },
+    "82": {
+        "old_caption": "",
+        "new_caption": "30-cwt Lorry"
+    },
+    "83": {
+        "old_caption": "",
+        "new_caption": "3-Ton Lorry"
+    }
+}
+},
+
+"italian": {
+"vehicles": {
+    "1": {
+        "old_caption": "LS/21 & LS/3",
+        "new_caption": "L5/21 & L5/30"
+    },
+    "2": {
+        "old_caption": "^L3/35: Derived from",
+        "new_caption": "L3/35"
+    },
+    "3": {
+        "old_caption": "^L3 aa: Some L3",
+        "new_caption": "L3 aa"
+    },
+    "4": {
+        "old_caption": "^L3 cc: During the early months",
+        "new_caption": "L3 cc"
+    },
+    "5": {
+        "old_caption": "^L3 Lf: Development of",
+        "new_caption": "L3 Lf"
+    },
+    "6": {
+        "old_caption": "^L6/40: Designed to replace",
+        "new_caption": "L6/40"
+    },
+    "7": {
+        "old_caption": "^Mll/39: This tank carried",
+        "new_caption": "M11/39"
+    },
+    "8": {
+        "old_caption": "^Ml3/40: Replacing the",
+        "new_caption": "M13/40"
+    },
+    "9": {
+        "old_caption": "^M14/41: This tank,",
+        "new_caption": "M14/41"
+    },
+    "10": {
+        "old_caption": "^M15/42: This, the last version",
+        "new_caption": "M15/42"
+    },
+    "11": {
+        "old_caption": "^MR/35(f): The Germans provided",
+        "new_caption": "MR/35(f)"
+    },
+    "12": {
+        "old_caption": "Semovente M40 & M41 da",
+        "new_caption": "Semovente M40 & M41 da 75/18"
+    },
+    "13": {
+        "old_caption": "^Semovente M42 da 75/1&75/32: The last model",
+        "new_caption": "Semovente M42 da 75/18 & 75/32"
+    },
+    "14": {
+        "old_caption": "^Semovente M43 da 105/25: Nicknathe",
+        "new_caption": "Semovente M43 da 105/25"
+    },
+    "15": {
+        "old_caption": "Semovente L40 da 47/32: The SMV",
+        "new_caption": "Semovente L40 da 47/32"
+    },
+    "16": {
+        "old_caption": "^Semovente M41M da 90/53: This AFV",
+        "new_caption": "Semovente M41M da 90/53"
+    },
+    "18": {
+        "old_caption": "^Lince: The Lince (Lynx)",
+        "new_caption": "Lince"
+    },
+    "19": {
+        "old_caption": "^Lancia lZM: In late 1912",
+        "new_caption": "Lancia 1ZM"
+    },
+    "20": {
+        "old_caption": "^Fiat 611A & 611BThese armoredcars",
+        "new_caption": "Fiat 611A & 611B"
+    },
+    "21": {
+        "old_caption": "^AB 40 & AB41These two auto",
+        "new_caption": "AB 40 & AB 41"
+    },
+    "22": {
+        "old_caption": "^Autoprotetto S37: This APC",
+        "new_caption": "Autoprotetto S37"
+    },
+    "23": {
+        "old_caption": "Autocannoni da",
+        "new_caption": "Autocannoni da 20/65(b) & 65/17(b)"
+    },
+    "24": {
+        "old_caption": "Autocannoni da",
+        "new_caption": "Autocannoni da 75/27 CK & 90/53"
+    },
+    "25": {
+        "old_caption": "^TL 37, TM 40 &TP 32",
+        "new_caption": "TL 37, TM 40 & TP 32"
+    },
+    "26": {
+        "old_caption": "^Autocarretta: As the portee",
+        "new_caption": "Autocarretta"
+    },
+    "27": {
+        "old_caption": "^Fiat 508 MC: Derived from",
+        "new_caption": "Fiat 508 MC"
+    },
+    "28": {
+        "old_caption": "^Autocarri L, M & P: The ItalianArmy",
+        "new_caption": "Autocarri L, M & P"
+    }
+},
+"ordnance": {
+    "1": {
+        "old_caption": "^Mortaio da 45 \"Brixia\": This weapon,",
+        "new_caption": "Mortaio da 45 \"Brixia\""
+    },
+    "2": {
+        "old_caption": "^Mortaio da 81/14: First usedi",
+        "new_caption": "Mortaio da 81/14"
+    },
+    "3": {
+        "old_caption": "^Fucile-cc S: Like several other",
+        "new_caption": "Fucile-cc S"
+    },
+    "4": {
+        "old_caption": "^Cannone-cc da 37/45: This was",
+        "new_caption": "Cannone-cc da 37/45"
+    },
+    "5": {
+        "old_caption": "^Cannone da 47/32: This was",
+        "new_caption": "Cannone da 47/32"
+    },
+    "6": {
+        "old_caption": "^Cannone da 65/17: This was",
+        "new_caption": "Cannone da 65/17"
+    },
+    "7": {
+        "old_caption": "^Cannone da 70/15: This",
+        "new_caption": "Cannone da 70/15"
+    },
+    "8": {
+        "old_caption": "^Obice da 75/13: The Skoda",
+        "new_caption": "Obice da 75/13"
+    },
+    "9": {
+        "old_caption": "^Cannone da 75/27: This was",
+        "new_caption": "Cannone da 75/27"
+    },
+    "10": {
+        "old_caption": "^Obice da 75/18: This game piece",
+        "new_caption": "Obice da 75/18"
+    },
+    "11": {
+        "old_caption": "^Cannone da 75/32: The 75/32",
+        "new_caption": "Cannone da 75/32"
+    },
+    "12": {
+        "old_caption": "^Obice da 100/17: Another old",
+        "new_caption": "Obice da 100/17"
+    },
+    "13": {
+        "old_caption": "^Cannone da 105/28: This was",
+        "new_caption": "Cannone da 105/28"
+    },
+    "14": {
+        "old_caption": "^Obice da 149/13: This piece",
+        "new_caption": "Obice da 149/13"
+    },
+    "15": {
+        "old_caption": "^Cannone da 149/35: Another",
+        "new_caption": "Cannone da 149/35"
+    },
+    "16": {
+        "old_caption": "^Cannone da 149/40: To replace",
+        "new_caption": "Cannone da 149/40"
+    },
+    "17": {
+        "old_caption": "^Cannone-mitragliera da 20/65: Thiswas",
+        "new_caption": "Cannone-mitragliera da 20/65"
+    },
+    "18": {
+        "old_caption": "^Cannone-aa da 75/39: This was",
+        "new_caption": "Cannone-aa da 75/39"
+    },
+    "add": [
+        { "vo_note_id": "19", "caption": "Cannone-aa da 75/46", "page_no": 439, "page_pos": [283,42] },
+        { "vo_note_id": "20", "caption": "Cannone-aa da 90/53", "page_no": 439, "page_pos": [384,541] }
+    ]
+}
+},
+
+"japanese": {
+"vehicles": {
+    "3": {
+        "old_caption": "Type 95 SO-KI Armored Railway Ve-hicle",
+        "new_caption": "Type 95 SO-KI Armored Railway Vehicle"
+    },
+    "4": {
+        "old_caption": "Types 97A & 97B TE-KE Light Ar-mored Vehicles",
+        "new_caption": "Types 97A & 97B TE-KE Light Armored Vehicles"
+    },
+    "7": {
+        "old_caption": "Types 89A & 89B CHI-RO MediumTanks",
+        "new_caption": "Types 89A & 89B CHI-RO Medium Tanks"
+    },
+    "8": {
+        "old_caption": "Types 97A & 97B CHI-HA MediumTanks",
+        "new_caption": "Types 97A & 97B CHI-HA Medium Tanks"
+    },
+    "13": {
+        "old_caption": "Type 4 HO-RO Self-Propelled How-itzer",
+        "new_caption": "Type 4 HO-RO Self-Propelled Howitzer"
+    },
+    "14": {
+        "old_caption": "Type 1 HO-KI Armored Troop-Vehi-cle",
+        "new_caption": "Type 1 HO-KI Armored Troop-Vehicle"
+    }
+},
+"ordnance": {
+    "2": {
+        "old_caption": "Year-11 Type Curved-Fire InfantryGun",
+        "new_caption": "Year-11 Type Curved-Fire Infantry Gun"
+    },
+    "1": {
+        "old_caption": "Type 98 High-Angle Machine Can-non",
+        "new_vo_note_id": "21",
+        "new_caption": "Type 98 High-Angle Machine Cannon"
+    },
+    "17": {
+        "old_caption": "Year-3 Type 14cm Naval SeacoastGun",
+        "new_caption": "Year-3 Type 14cm Naval Seacoast Gun"
+    },
+    "20": {
+        "old_caption": "Type 93 Twin-Mount High-Angle Ma-chine Gun",
+        "new_caption": "Type 93 Twin-Mount High-Angle Machine Gun"
+    },
+    "22": {
+        "old_caption": "Type 96 Single-, Twin-, & Triple-Mount Naval High-Angle Machine Can-",
+        "new_caption": "Type 96 Single-, Twin-, & Triple-Mount Naval High-Angle Machine Cannons"
+    },
+    "24": {
+        "old_caption": "Year-10 Type 12cm Naval High-AngleGun",
+        "new_caption": "Year-10 Type 12cm Naval High-Angle Gun"
+    }
+}
+},
+
+"chinese": {
+"ordnance": {
+    "2": {
+        "old_caption": "Mortaio da 45 “Brixia”, 5cm leGrW 36,",
+        "new_caption": "Mortaio da 45 “Brixia”, 5cm leGrW 36, 50mm RM obr.38, & Type 89 Heavy Grenade Launcher"
+    },
+    "4": {
+        "old_caption": "Stokes 3-in., 8cm GrW 34, & 82mmBM obr. 37",
+        "new_caption": "Stokes 3-in., 8cm GrW 34, & 82mm BM obr. 37"
+    },
+    "7": {
+        "old_caption": "37mm PP obr. 15R & Cannone da",
+        "new_caption": "37mm PP obr. 15R & Cannone da 70/15"
+    },
+    "11": {
+        "old_caption": "7.7cm FK 16, 76.2mm P obr. 02/30, &OQF 18-Pounder",
+        "new_caption": "7.7cm FK 16, 76.2mm P obr. 02/30, & OQF 18-Pounder"
+    },
+    "12": {
+        "old_caption": "10.5cm leFH 16, Cannone da 105/28,& M2A1 105mm Howitzer",
+        "new_captipn": "10.5cm leFH 16, Cannone da 105/28, & M2A1 105mm Howitzer"
+    },
+    "15": {
+        "old_caption": "Oerlikon FF, Cannone-mitragliera da",
+        "new_caption": "Oerlikon FF, Cannone-mitragliera da 20/65, & 2cm FlaK 30"
+    },
+    "16": {
+        "old_caption": "3.7cm FlaK 36 o. 37 & Bofors 40mmL/60",
+        "new_caption": "3.7cm FlaK 36 o. 37 & Bofors 40mm L/60"
+    }
+}
+},
+
+"french": {
+"vehicles": {
+    "20": {
+        "old_caption": "Autocanon de 75 mle 97 & Autocanonde 75 Conus(b)",
+        "new_caption": "Autocanon de 75 mle 97 & Autocanon de 75 Conus(b)"
+    },
+    "21": {
+        "old_caption": "Camion de Mitrailleuse Contre-Avions, Camion de 13.2 CAJ, Camion de",
+        "new_caption": "Camion de Mitrailleuse Contre-Avions, Camion de 13.2 CAJ, Camion de 20 CA, & Autocanon de 25 CA"
+    },
+    "36": {
+        "old_caption": "Peugeot 202, Citroën 23, & RenaultAGR2",
+        "new_caption": "Peugeot 202, Citroën 23, & Renault AGR2"
+    },
+    "40": {
+        "old_caption": "M4A3(75)W, M4A3(76)W, & M4A3(105) Medium Tanks, & M4Tankdozer",
+        "new_caption": "M4A3(75)W, M4A3(76)W, & M4A3(105) Medium Tanks, & M4 Tankdozer"
+    }
+},
+"ordnance": {
+    "6": {
+        "old_caption": "Canon Antichar de 47SA mle 37 APX",
+        "new_caption": "Canon Antichar de 47 SA mle 37 APX"
+    },
+    "18": {
+        "old_caption": "Mitrailleuse de 13.2 CAJmle 30",
+        "new_caption": "Mitrailleuse de 13.2 CAJ mle 30"
+    }
+}
+},
+
+"allied-minor": {
+"vehicles": {
+    "1": {
+        "old_caption": "TKS&TKS(L)",
+        "new_caption": "TKS & TKS(L)"
+    },
+    "2": {
+        "old_caption": "VickersEdw(b)&Ejw(b)",
+        "new_caption": "Vickers Edw(b) & Ejw(b)"
+    },
+    "3.7": {
+        "old_caption": "TPdw & 7TPjw",
+        "new_vo_note_id": "3",
+        "new_caption": "7TPdw & 7TPjw"
+    },
+    "6": {
+        "old_caption": "wz.29",
+        "new_caption": "wz.29 \"Ursus\""
+    },
+    "10.302": {
+        "old_caption": "T",
+        "new_vo_note_id": "10",
+        "new_caption": "302T"
+    },
+    "13": {
+        "old_caption": "Horse-Drawn",
+        "new_caption": "Horse-Drawn \"Taczanka\""
+    },
+    "22": {
+        "old_caption": "M3A3(a) FlaK38",
+        "new_caption": "M3A3(a) FlaK 38"
+    },
+    "29": {
+        "old_caption": "Marmon-Herrington III(b) Armored",
+        "new_caption": "Marmon-Herrington III(b) Armored Cars"
+    },
+    "31": {
+        "old_caption": "L5/30(i) & L3/35(i) &",
+        "new_caption": "L5/30(i) & L3/35(i) & L6/40(i) & M13/40(i)"
+    },
+    "37": {
+        "old_caption": "Light Truck & Medium Truck &",
+        "new_caption": "Light Truck & Medium Truck & Heavy Truck"
+    }
+},
+"ordnance": {
+    "30.75": {
+        "old_caption": "M 19S",
+        "new_vo_note_id": "30",
+        "new_caption": "75M 19S"
+    },
+    "add": [
+        { "vo_note_id": "20", "caption": "3.7cm Infantry Gun", "page_no": 502, "page_pos": [393,616] }
+    ]
+}
+},
+
+"axis-minor": {
+"vehicles": {
+    "7.38": {
+        "old_caption": "M Toldi I",
+        "new_vo_note_id": "7",
+        "new_caption": "38M Toldi I"
+    },
+    "8.38": {
+        "old_caption": "M Toldi IIA",
+        "new_vo_note_id": "8",
+        "new_caption": "38M Toldi IIA"
+    },
+    "9.40": {
+        "old_caption": "M Turan I(r)",
+        "new_vo_note_id": "9",
+        "new_caption": "40M Turan I(r)"
+    },
+    "10.41": {
+        "old_caption": "M Turan II(r)",
+        "new_vo_note_id": "10",
+        "new_caption": "41M Turan II(r)"
+    },
+    "13.43": {
+        "old_caption": "M Zrinyi II",
+        "new_vo_note_id": "13",
+        "new_caption": "43M Zrinyi II"
+    },
+    "14.39": {
+        "old_caption": "M Csaba & 40M Csaba",
+        "new_vo_note_id": "14",
+        "new_caption": "39M Csaba & 40M Csaba"
+    },
+    "16.40": {
+        "old_caption": "M Nimrod",
+        "new_vo_note_id": "16",
+        "new_caption": "40M Nimrod"
+    },
+    "50": {
+        "old_caption": "Light Truck, Medium Truck, &Heavy Truck",
+        "new_caption": "Light Truck, Medium Truck, & Heavy Truck"
+    }
+},
+"ordnance": {
+    "20": {
+        "old_caption": "Canon Automatique de 25 CAmle 38",
+        "new_caption": "Canon Automatique de 25 CA mle 38"
+    },
+    "29": {
+        "old_caption": "47mm KanonPUV vz. 36(t)",
+        "new_caption": "47mm Kanon PUV vz. 36(t)"
+    }
+}
+},
+
+"finnish": {
+"vehicles": {
+    "27": {
+        "old_caption": "Light Truck, Medium Truck, &Heavy Truck",
+        "new_caption": "Light Truck, Medium Truck, & Heavy Truck"
+    }
+},
+"ordnance": {
+    "1.47": {
+        "old_caption": "Krh/41",
+        "new_vo_note_id": "1",
+        "new_caption": "47 Krh/41"
+    },
+    "2.50": {
+        "old_caption": "Krh/39(r)",
+        "new_vo_note_id": "2",
+        "new_caption": "50 Krh/39(r)"
+    },
+    "3.81": {
+        "old_caption": "Krh/32",
+        "new_vo_note_id": "3",
+        "new_caption": "81 Krh/32"
+    },
+    "4.81": {
+        "old_caption": "Savunheitin M/42",
+        "new_vo_note_id": "4",
+        "new_caption": "81 Savunheitin M/42"
+    },
+    "5.120": {
+        "old_caption": "Krh/40",
+        "new_vo_note_id": "5",
+        "new_caption": "120 Krh/40"
+    },
+    "8.20": {
+        "old_caption": "PstK/40",
+        "new_vo_note_id": "8",
+        "new_caption": "20 PstK/40"
+    },
+    "11.37": {
+        "old_caption": "PstK/37(g)",
+        "new_vo_note_id": "11",
+        "new_caption": "37 PstK/37(g)"
+    },
+    "12.45": {
+        "old_caption": "PstK/32(r)",
+        "new_vo_note_id": "12",
+        "new_caption": "45 PstK/32(r)"
+    },
+    "13.50": {
+        "old_caption": "PstK/38(g)",
+        "new_vo_note_id": "13",
+        "new_caption": "50 PstK/38(g)"
+    },
+    "14.75": {
+        "old_caption": "PstK/97-38(g)",
+        "new_vo_note_id": "14",
+        "new_caption": "75 PstK/97-38(g)"
+    },
+    "15.75": {
+        "old_caption": "PstK/40(g)",
+        "new_vo_note_id": "15",
+        "new_caption": "75 PstK/40(g)"
+    },
+    "16.76": {
+        "old_caption": "RK/27(r)",
+        "new_vo_note_id": "16",
+        "new_caption": "76 RK/27(r)"
+    },
+    "17.75": {
+        "old_caption": "K/02",
+        "new_vo_note_id": "17",
+        "new_caption": "75 K/02"
+    },
+    "18.76": {
+        "old_caption": "LK/13",
+        "new_vo_note_id": "18",
+        "new_caption": "76 LK/13"
+    },
+    "30.150": {
+        "old_caption": "H/40(g)",
+        "new_vo_note_id": "30",
+        "new_caption": "150 H/40(g)"
+    },
+    "31.155": {
+        "old_caption": "H/17(f)",
+        "new_vo_note_id": "31",
+        "new_caption": "155 H/17(f)"
+    },
+    "33.20": {
+        "old_caption": "ItK/30 BSW(g)",
+        "new_vo_note_id": "33",
+        "new_caption": "20 ItK/30 BSW(g)"
+    },
+    "34.20": {
+        "old_caption": "ItK/38 BSW(g)",
+        "new_vo_note_id": "34",
+        "new_caption": "20 ItK/38 BSW(g)"
+    },
+    "35.20": {
+        "old_caption": "ItK/35 Br",
+        "new_vo_note_id": "35",
+        "new_caption": "20 ItK/35 Br"
+    },
+    "36.20": {
+        "old_caption": "ItK/40 VKT",
+        "new_vo_note_id": "36",
+        "new_caption": "20 ItK/40 VKT"
+    },
+    "38.76": {
+        "old_caption": "ItK/28 B(s)",
+        "new_vo_note_id": "38",
+        "new_caption": "76 ItK/28 B(s)"
+    },
+    "39.76": {
+        "old_caption": "ItK/31(r)",
+        "new_vo_note_id": "39",
+        "new_caption": "76 ItK/31(r)"
+    }
+}
+},
+
+"un-forces": {
+"vehicles": {
+    "19": {
+        "old_caption": "M39 Armored Utility Vehicle & M39Mortar Carrier",
+        "new_caption": "M39 Armored Utility Vehicle & M39 Mortar Carrier"
+    },
+    "7": {
+        "old_caption": "Churchill VII",
+        "new_vo_note_id": "37"
+    },
+    "34": {
+        "old_caption": "M4A3E8(a) Medium Tank & M4A3E8Dozer(a)",
+        "new_caption": "M4A3E8(a) Medium Tank & M4A3E8 Dozer(a)"
+    },
+    "47": {
+        "old_caption": "Oxford Carrier, MMG & Oxford Car-rier, HMG",
+        "new_caption": "Oxford Carrier, MMG & Oxford Carrier, HMG"
+    },
+    "57": {
+        "old_caption": "Jeep, ⁄-Ton Truck, & 2½-Ton Truck:4",
+        "new_caption": "Jeep, ¾-Ton Truck, & 2½-Ton Truck"
+    }
+}
+},
+
+"communist-forces": {
+"ordnance": {
+    "32": {
+        "old_caption": "Type 93 Twin-Mount High-Angle Ma-chine Gun",
+        "new_caption": "Type 93 Twin-Mount High-Angle Machine Gun"
+    }
+}
+}
+
+}

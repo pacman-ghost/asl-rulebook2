@@ -5,6 +5,7 @@ import os
 import json
 import re
 import math
+from collections import defaultdict
 
 import click
 from pdfminer.layout import LTChar
@@ -30,6 +31,8 @@ _DISABLE_SORT_ITEMS = [
     "F20", "F21", # Chapter F footnotes
     "G48", "G49", "G50", # Chapter G footnotes
     "H9", # Chapter H footnotes
+    429,431,432,433,434,435, # Italian vehicle notes
+    436,437,438,439, # Italian ordnance notes
 ]
 
 _DEFAULT_ARGS = {
@@ -38,8 +41,43 @@ _DEFAULT_ARGS = {
     "chapter-j": "593",
     "chapter-w": "647-664",
     "content_vp_left": 0, "content_vp_right": 565, "content_vp_top": 715, "content_vp_bottom": 28, # viewport
-    "disable-sort-items": ",".join( _DISABLE_SORT_ITEMS )
+    "disable-sort-items": ",".join( str(si) for si in _DISABLE_SORT_ITEMS )
 }
+
+# NOTE: The exact mappings here are actually not that important. What's important is:
+# - the order of the nationality + V/O types
+# - the page numbers themselves (so that they get parsed)
+_VO_NOTE_SECTIONS = [
+    [ "german", "vehicles", "330,332,334-343", True ],
+    [ "german", "ordnance", "344-348", True ],
+    [ "russian", "vehicles", "348,350-355", True ],
+    [ "russian", "ordnance", "356-358", True ],
+    [ "russian", "vehicles", "362,364-368", False ],
+    [ "russian", "ordnance", "369", False ],
+    [ "american", "vehicles", "371,373-383", True ],
+    [ "american", "ordnance", "385-389", True ],
+    [ "british", "vehicles", "395,398-417", True ],
+    [ "british", "ordnance", "419-423", True ],
+    [ "italian", "vehicles", "429,431-435", True ],
+    [ "italian", "ordnance", "436-439", True ],
+    [ "japanese", "vehicles", "443-448", True ],
+    [ "japanese", "ordnance", "448-452", True ],
+    [ "chinese", "vehicles", "456-459", True ],
+    [ "chinese", "ordnance", "459-463", True ],
+    [ "landing-craft", "vehicles", "467-468", True ],
+    [ "french", "vehicles", "470,472-480", True ],
+    [ "french", "ordnance", "482-487", True ],
+    [ "allied-minor", "vehicles", "492-493,495-500", True ],
+    [ "allied-minor", "ordnance", "501-504", True ],
+    [ "axis-minor", "vehicles", "506,508-515", True ],
+    [ "axis-minor", "ordnance", "516,518-527", True ],
+    [ "finnish", "vehicles", "536,538-541", True ],
+    [ "finnish", "ordnance", "543,545-549", True ],
+    [ "un-forces", "vehicles", "554,556-565", True ],
+    [ "un-forces", "ordnance", "567-570", True ],
+    [ "communist-forces", "vehicles", "580", True ],
+    [ "communist-forces", "ordnance", "581-585", True ],
+]
 
 # ---------------------------------------------------------------------
 
@@ -51,6 +89,8 @@ class ExtractContent( ExtractBase ):
         self.targets = {}
         self._chapters = []
         self._footnotes = {}
+        self._vo_notes = self._prev_vo_note_id = None
+        self._curr_vo_note_section = 0
         self._curr_chapter = self._curr_footnote = self._curr_pageid = None
         self._prev_elem = self._top_left_elem = None
         # prepare to fixup problems in the content
@@ -61,6 +101,7 @@ class ExtractContent( ExtractBase ):
         self._target_fixups = load_fixup( "target-fixups.json" )
         self._chapter_fixups = load_fixup( "chapter-fixups.json" )
         self._footnote_fixups = load_fixup( "footnote-fixups.json" )
+        self._vo_note_fixups = load_fixup( "vo-note-fixups.json" )
 
     def extract_content( self, pdf ):
         """Extract content from the MMP eASLRB."""
@@ -77,6 +118,12 @@ class ExtractContent( ExtractBase ):
                 for page_no in page_nos:
                     page_index[ page_no ] = chapter
         disable_sort_items = set( self._args["disable-sort-items"].split( "," ) )
+
+        # include the pages for the Chapter H vehicle/ordnance notes
+        for _, _, page_nos, _ in _VO_NOTE_SECTIONS:
+            page_nos = parse_page_numbers( page_nos )
+            for page_no in page_nos:
+                page_index[ page_no ] = "H"
 
         # initialize
         self._curr_chapter = None
@@ -109,13 +156,18 @@ class ExtractContent( ExtractBase ):
             self._curr_pageid = "{}{}".format( # nb: this is the ASL page# (e.g. "A42"), not the PDF page#
                 self._curr_chapter, curr_chapter_pageno
             )
-            self.log_msg( "progress", "- Analyzing page {} ({}).", page_no, self._curr_pageid )
+            # NOTE: There have been so many extra pages added to Chapter H, there's no easy way to calculate
+            # the page ID. We could set up a table mapping physical page numbers to page ID's, but that's
+            # far more trouble than it's worth.
+            self.log_msg( "progress", "- Analyzing page {}{}.",
+                page_no, " ({})".format( self._curr_pageid ) if not self._curr_pageid.startswith("H") else ""
+            )
 
             # process each element on the page
             curr_caption = None
             self._top_left_elem = self._prev_elem = None
             elem_filter = lambda e: isinstance( e, LTChar )
-            sort_elems = self._curr_pageid not in disable_sort_items
+            sort_elems = self._curr_pageid not in disable_sort_items and str(page_no) not in disable_sort_items
             for _, elem in PageElemIterator( lt_page, elem_filter=elem_filter, sort_elems=sort_elems ):
 
                 # skip problematic elements
@@ -137,7 +189,7 @@ class ExtractContent( ExtractBase ):
 
                 # check if we're currently extracting footnotes
                 if self._curr_footnote is not None:
-                    self._on_footnote_elem( elem, lt_page )
+                    self._on_footnote_elem( elem, lt_page, page_no )
                     self._prev_elem = elem
                     continue
 
@@ -195,6 +247,8 @@ class ExtractContent( ExtractBase ):
             self.log_msg( "warning", "Unused fixups: {}", self._target_fixups )
         if self._footnote_fixups:
             self.log_msg( "warning", "Unused fixups: {}", self._footnote_fixups )
+        if self._vo_note_fixups:
+            self.log_msg( "warning", "Unused fixups: {}", self._vo_note_fixups )
 
         # extract the chapters
         self._extract_chapters()
@@ -215,7 +269,7 @@ class ExtractContent( ExtractBase ):
             # yup - notify the main loop
             self._curr_footnote = []
             if elem:
-                self._on_footnote_elem( elem, lt_page )
+                self._on_footnote_elem( elem, lt_page, page_no )
             return
 
         # check if the entry needs to be fixed up
@@ -266,14 +320,15 @@ class ExtractContent( ExtractBase ):
             "raw_caption": orig_caption
         }
 
-    def _on_footnote_elem( self, elem, lt_page ):
+    def _on_footnote_elem( self, elem, lt_page, page_no ):
         """Process an element while we're parsing footnotes."""
         # check if we've found the start of a new footnote
         if self._is_bold( elem ):
             if elem.get_text().isdigit() and self._is_start_of_line( elem, lt_page ):
                 # yup - save the current footnote, start collecting the new one
                 self._save_footnote()
-                self._curr_footnote = [ elem.get_text(), "" ]
+                elem_pos = ( elem.x0, elem.y1 )
+                self._curr_footnote = [ elem.get_text(), "", page_no, elem_pos ]
             else:
                 if self._curr_footnote[1]:
                     # FUDGE! Some footnote content has bold text hard-up at the left margin,
@@ -334,10 +389,17 @@ class ExtractContent( ExtractBase ):
             if footnote_id == "9" and "9" in footnote_ids:
                 footnote_id = "29"
 
-        # check if we've gone past the end of the Chapter H footnotes
-        if self._curr_chapter == "H" and len(footnote_id) > 1:
-            self._curr_footnote = None
-            return
+        if self._curr_chapter == "H":
+            # check if we've gone past the end of the Chapter H footnotes
+            if self._vo_notes is None and len(footnote_id) > 1:
+                # yup - start collecting vehicle/ordnance notes
+                self._vo_notes = defaultdict( lambda: defaultdict( list ) )
+            # check if we're collecting Chapter H vehicle/ordnance notes
+            if self._vo_notes is not None:
+                # yup - save the next entry (the "footnote" is actually a vehicle/ordnance note)
+                self._save_vo_note( footnote_id, self._curr_footnote[2], self._curr_footnote[3] )
+                self._curr_footnote = None
+                return
 
         # clean up the content
         content = re.sub( r"\s+", " ", content ).strip()
@@ -414,6 +476,108 @@ class ExtractContent( ExtractBase ):
             "raw_content": orig_content
         } )
         self._curr_footnote = None
+
+    def _save_vo_note( self, caption, page_no, page_pos ):
+        """Save an extracted vehicle/ordnance note."""
+
+        # NOTE: Some pieces of text cause the parsing code to go wonky (typically because it's seen
+        # a "1" and so thinks it's found the start of a new section), so we manually skip over these.
+        skips = self._vo_note_fixups.get( "skips", {} ).get( str(page_no) )
+        if skips:
+            for i, target in enumerate(skips):
+                if self._check_string( caption, target ):
+                    # we've got a caption that should be skipped - remove it from the list, and return
+                    del skips[i]
+                    if not skips:
+                        del self._vo_note_fixups["skips"][ str(page_no) ]
+                        if not self._vo_note_fixups["skips"]:
+                            del self._vo_note_fixups["skips"]
+                    return
+        if caption.isdigit() and page_no not in (354, 417):
+            return
+
+        def apply_fixups( vo_note_id, caption ):
+            nat, vo_type, _, _ = _VO_NOTE_SECTIONS[ self._curr_vo_note_section ]
+            fixup = self._vo_note_fixups.get( nat, {} ).get( vo_type, {} ).get( vo_note_id )
+            if fixup:
+                if self._check_string( caption, fixup["old_caption"] ):
+                    # remove the fixup
+                    del self._vo_note_fixups[ nat ][ vo_type ][ vo_note_id ]
+                    cleanup_fixups( nat, vo_type )
+                    # apply the fixup
+                    if "new_vo_note_id" in fixup:
+                        vo_note_id = fixup["new_vo_note_id"]
+                    if "new_caption" in fixup:
+                        caption = fixup["new_caption"]
+            return vo_note_id, caption
+
+        def cleanup_fixups( nat, vo_type ):
+            if nat not in self._vo_note_fixups:
+                return
+            if vo_type in self._vo_note_fixups[nat] and not self._vo_note_fixups[ nat ][ vo_type ]:
+                del self._vo_note_fixups[ nat ][ vo_type ]
+                if nat in self._vo_note_fixups and not self._vo_note_fixups[ nat ]:
+                    del self._vo_note_fixups[ nat ]
+
+        # extract the note number and caption
+        mo = re.search( r"^[1-9][0-9.]*", caption )
+        if not mo:
+            return
+        vo_note_id = mo.group()
+        caption = caption[ mo.end() : ].strip()
+        if vo_note_id.endswith( "." ):
+            vo_note_id = vo_note_id[:-1]
+        if caption.endswith( ":" ):
+            caption = caption[:-1].strip()
+        if caption.startswith( ( "cm ", "mm ", "pdr", "-cwt" ) ):
+            # FUDGE! Things like "5.1 2.2cm Big Gun" are getting parsed as "5.12.2: + "cm Big Gun" :-/
+            pos = vo_note_id.find( "." )
+            if pos >= 0:
+                caption = vo_note_id[pos+1:] + caption
+                vo_note_id = vo_note_id[:pos]
+
+        # check for any fixups
+        vo_note_id, caption = apply_fixups( vo_note_id, caption )
+
+        # compare the note ID with the previous one
+        nat, vo_type, _, check_seq = _VO_NOTE_SECTIONS[ self._curr_vo_note_section ]
+        def get_base_note_id( val ):
+            pos = val.find( "." )
+            return int( val[:pos] if pos >= 0 else val )
+        base_note_id = get_base_note_id( vo_note_id )
+        if self._prev_vo_note_id:
+            # check if we've found the start of the next section
+            if base_note_id == 1:
+                # yup - add any extra entries to the current section
+                add_vo_entries = self._vo_note_fixups.get( nat, {} ).get( vo_type, {} ).pop( "add", [] )
+                for vo_entry in add_vo_entries:
+                    self._vo_notes[ nat ][ vo_type ].append( vo_entry )
+                cleanup_fixups( nat, vo_type )
+                # get the next nationality + V/O type
+                self._curr_vo_note_section += 1
+                nat, vo_type, _, _ = _VO_NOTE_SECTIONS[ self._curr_vo_note_section ]
+                # check for any fixups
+                vo_note_id, caption = apply_fixups( vo_note_id, caption )
+            elif check_seq:
+                # compare the note ID with the previous one
+                prev_base_note_id = get_base_note_id( self._prev_vo_note_id )
+                if base_note_id == prev_base_note_id + 1:
+                    pass # nb: this is the normal case, we've found the next V/O note
+                elif base_note_id == prev_base_note_id and "." in vo_note_id:
+                    pass # nb: this is to allow things like "9.1" following "9"
+                else:
+                    return # nb: we got some junk that can be ignored
+
+        # save the V/O note
+        self._vo_notes[ nat ][ vo_type ].append( {
+            "vo_note_id": vo_note_id, "caption": caption,
+            "page_no": page_no, "page_pos": page_pos
+        } )
+        if nat == "allied-minor" and vo_type == "ordnance" and vo_note_id == "19":
+            # FUDGE! Because we're not seing Allied Minor Ordnance Note 20 :-/
+            self._prev_vo_note_id = "20"
+        else:
+            self._prev_vo_note_id = vo_note_id
 
     def _extract_chapters( self ):
         """Extract the chapters and their sections."""
@@ -492,15 +656,15 @@ class ExtractContent( ExtractBase ):
             return True # the element is at the top of the right column
         return False
 
-    def save_as_raw( self, targets_out, chapters_out, footnotes_out ):
+    def save_as_raw( self, targets_out, chapters_out, footnotes_out, vo_notes_out ):
         """Save the raw results."""
-        self._save_as_raw_or_text( targets_out, chapters_out, footnotes_out, True )
+        self._save_as_raw_or_text( targets_out, chapters_out, footnotes_out, vo_notes_out, True )
 
-    def save_as_text( self, targets_out, chapters_out, footnotes_out ):
+    def save_as_text( self, targets_out, chapters_out, footnotes_out, vo_notes_out ):
         """Save the results as plain-text."""
-        self._save_as_raw_or_text( targets_out, chapters_out, footnotes_out, False )
+        self._save_as_raw_or_text( targets_out, chapters_out, footnotes_out, vo_notes_out, False )
 
-    def _save_as_raw_or_text( self, targets_out, chapters_out, footnotes_out, raw ):
+    def _save_as_raw_or_text( self, targets_out, chapters_out, footnotes_out, vo_notes_out, raw ):
         """Save the results as raw or plain-text."""
 
         # save the targets
@@ -511,7 +675,7 @@ class ExtractContent( ExtractBase ):
                     print( file=targets_out )
                 print( "=== p{} ===".format( target["page_no"] ), file=targets_out )
                 curr_page_no = target["page_no"]
-            xpos, ypos = self._get_target_pos( target )
+            xpos, ypos = self._get_page_pos( target["pos"] )
             if raw:
                 print( "[{},{}] = {}".format(
                     xpos, ypos, target["raw_caption"]
@@ -556,13 +720,35 @@ class ExtractContent( ExtractBase ):
                     print( " ; ".join( make_caption(c) for c in footnote["captions"] ), file=footnotes_out )
                     print( footnote["content"], file=footnotes_out )
 
-    def save_as_json( self, targets_out, chapters_out, footnotes_out ):
+        # save the vehicle/ordnance notes
+        first = True
+        for nat, vo_types in self._vo_notes.items():
+            for vo_type, vo_entries in vo_types.items():
+                if first:
+                    first = False
+                else:
+                    print( file=vo_notes_out )
+                print( "=== {} ===".format(
+                    nat if nat == "landing-craft" else "{} {}".format( nat, vo_type )
+                ), file=vo_notes_out )
+                for vo_entry in vo_entries:
+                    if "page_pos" in vo_entry:
+                        xpos, ypos = ExtractContent._get_page_pos( vo_entry["page_pos"] )
+                        page_pos = "[{},{}]".format( xpos, ypos )
+                    else:
+                        page_pos = None
+                    print( "{:<5} {} @p{}{}".format(
+                        vo_entry["vo_note_id"]+":", vo_entry["caption"], vo_entry["page_no"],
+                        ":"+page_pos if page_pos else ""
+                    ), file=vo_notes_out )
+
+    def save_as_json( self, targets_out, chapters_out, footnotes_out, vo_notes_out ):
         """Save the results as JSON."""
 
         # save the targets
         targets, curr_chapter = [], None
         for ruleid, target in self.targets.items():
-            xpos, ypos = self._get_target_pos( target )
+            xpos, ypos = self._get_page_pos( target["pos"] )
             targets.append( "{}: {{ \"caption\": {}, \"page_no\": {}, \"pos\": [{},{}] }}".format(
                 jsonval( ruleid ),
                 jsonval(target["caption"]), target["page_no"], xpos, ypos
@@ -613,12 +799,46 @@ class ExtractContent( ExtractBase ):
             ",\n\n".join( chapters )
         ), file=footnotes_out )
 
+        # save the vehicle/ordnance notes
+        vo_notes = []
+        for nat in self._vo_notes:
+            vo_types = []
+            for vo_type, vo_entries in self._vo_notes[nat].items():
+                entries = []
+                for vo_entry in vo_entries:
+                    val = "{}: {{ \"caption\": {}, \"page_no\": {}".format(
+                        jsonval(vo_entry["vo_note_id"]), jsonval(vo_entry["caption"]), jsonval(vo_entry["page_no"])
+                    )
+                    if "page_pos" in vo_entry:
+                        xpos, ypos = self._get_page_pos( vo_entry["page_pos"] )
+                        val += ", \"pos\": [{},{}]".format( xpos, ypos )
+                    val += " }"
+                    entries.append( "    {}".format( val ) )
+                if nat == "landing-craft":
+                    vo_types.append( ",\n".join( entries ) )
+                else:
+                    vo_types.append( "{}: {{\n{}\n}}".format(
+                        jsonval(vo_type), ",\n".join( entries )
+                    ) )
+            vo_notes.append( "{}: {{\n{}\n}}".format(
+                jsonval(nat), ",\n".join( vo_types )
+            ) )
+        print( "{{\n\n{}\n\n}}".format(
+            ",\n\n".join( vo_notes )
+        ), file=vo_notes_out )
+
     @staticmethod
-    def _get_target_pos( target ):
-        """Return a target's X/Y position on the page."""
-        xpos = math.floor( target["pos"][0] )
-        ypos = math.ceil( target["pos"][1] )
-        return xpos, ypos
+    def _check_string( val, target ):
+        """Check if a string matches a target."""
+        if target.startswith( "^" ):
+            return val.startswith( target[1:] )
+        else:
+            return val == target
+
+    @staticmethod
+    def _get_page_pos( pos ):
+        """Return a X/Y position on the page."""
+        return math.floor( pos[0] ), math.ceil( pos[1] )
 
 # ---------------------------------------------------------------------
 
@@ -632,7 +852,12 @@ class ExtractContent( ExtractBase ):
 @click.option( "--save-targets","save_targets_fname", required=True, help="Where to save the extracted targets." )
 @click.option( "--save-chapters","save_chapters_fname", required=True, help="Where to save the extracted chaopters." )
 @click.option( "--save-footnotes","save_footnotes_fname", required=True, help="Where to save the extracted footnotes." )
-def main( pdf_file, args, progress, output_fmt, save_targets_fname, save_chapters_fname, save_footnotes_fname ):
+@click.option( "--save-vo-notes","save_vo_notes_fname", required=True,
+    help="Where to save the extracted vehicle/ordnance notes."
+)
+def main( pdf_file, args, progress, output_fmt,
+  save_targets_fname, save_chapters_fname, save_footnotes_fname, save_vo_notes_fname
+):
     """Extract content from the MMP eASLRB."""
 
     # initialize
@@ -651,8 +876,9 @@ def main( pdf_file, args, progress, output_fmt, save_targets_fname, save_chapter
     # save the results
     with open( save_targets_fname, "w", encoding="utf-8" ) as targets_out, \
          open( save_chapters_fname, "w", encoding="utf-8" ) as chapters_out, \
-         open( save_footnotes_fname, "w", encoding="utf-8" ) as footnotes_out:
-        getattr( extract, "save_as_"+output_fmt, )( targets_out, chapters_out, footnotes_out )
+         open( save_footnotes_fname, "w", encoding="utf-8" ) as footnotes_out, \
+         open( save_vo_notes_fname, "w", encoding="utf-8" ) as vo_notes_out:
+        getattr( extract, "save_as_"+output_fmt, )( targets_out, chapters_out, footnotes_out, vo_notes_out )
 
 if __name__ == "__main__":
     main() #pylint: disable=no-value-for-parameter

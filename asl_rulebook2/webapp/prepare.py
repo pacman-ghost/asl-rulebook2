@@ -114,28 +114,33 @@ def _do_prepare_data_files( args, download_url ):
         index_buf = io.StringIO()
         extract.extract_index.save_as_json( index_buf )
         targets_buf, chapters_buf, footnotes_buf = io.StringIO(), io.StringIO(), io.StringIO()
-        extract.extract_content.save_as_json( targets_buf, chapters_buf, footnotes_buf )
+        vo_notes_buf = io.StringIO()
+        extract.extract_content.save_as_json( targets_buf, chapters_buf, footnotes_buf, vo_notes_buf )
         file_data = {
             "index": index_buf.getvalue(),
             "targets": targets_buf.getvalue(),
             "chapters": chapters_buf.getvalue(),
             "footnotes": footnotes_buf.getvalue(),
+            "vo-notes": vo_notes_buf.getvalue(),
         }
 
         # prepare the PDF
         gs_path = get_gs_path()
         if not gs_path:
             raise RuntimeError( "Ghostscript is not available." )
-        with TempFile( mode="w", encoding="utf-8" ) as targets_file:
+        with TempFile( mode="w", encoding="utf-8" ) as targets_file, \
+          TempFile( mode="w", encoding="utf-8" ) as vo_notes_file:
             log_msg( "status", "Preparing the final PDF..." )
             # save the extracted targets
             targets_file.temp_file.write( file_data["targets"] )
             targets_file.close( delete=False )
+            vo_notes_file.temp_file.write( file_data["vo-notes"] )
+            vo_notes_file.close( delete=False )
             # prepare the PDF
             prepared_file.close( delete=False )
             prepare_pdf( input_file.name,
                 "ASL Rulebook",
-                targets_file.name, 5,
+                targets_file.name, vo_notes_file.name, 5,
                 prepared_file.name, "ebook",
                 gs_path,
                 log_msg

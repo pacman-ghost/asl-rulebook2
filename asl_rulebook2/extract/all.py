@@ -128,8 +128,11 @@ class ExtractAll( ExtractBase ):
 @click.option( "--save-targets","save_targets_fname", required=True, help="Where to save the extracted targets." )
 @click.option( "--save-chapters","save_chapters_fname", required=True, help="Where to save the extracted chaopters." )
 @click.option( "--save-footnotes","save_footnotes_fname", required=True, help="Where to save the extracted footnotes." )
+@click.option( "--save-vo-notes","save_vo_notes_fname", required=True,
+    help="Where to save the extracted vehicle/ordnance notes targets."
+)
 def main( pdf_file, args, progress, output_fmt,
-  save_index_fname, save_targets_fname, save_chapters_fname, save_footnotes_fname
+  save_index_fname, save_targets_fname, save_chapters_fname, save_footnotes_fname, save_vo_notes_fname
 ):
     """Extract everything we need from the MMP eASLRB."""
 
@@ -147,9 +150,12 @@ def main( pdf_file, args, progress, output_fmt,
     with open( save_index_fname, "w", encoding="utf-8" ) as index_out, \
          open( save_targets_fname, "w", encoding="utf-8" ) as targets_out, \
          open( save_chapters_fname, "w", encoding="utf-8" ) as chapters_out, \
-         open( save_footnotes_fname, "w", encoding="utf-8" ) as footnotes_out:
+         open( save_footnotes_fname, "w", encoding="utf-8" ) as footnotes_out, \
+         open( save_vo_notes_fname, "w", encoding="utf-8" ) as vo_notes_out:
         getattr( extract.extract_index, "save_as_"+output_fmt )( index_out )
-        getattr( extract.extract_content, "save_as_"+output_fmt )( targets_out, chapters_out, footnotes_out )
+        getattr( extract.extract_content, "save_as_"+output_fmt )(
+            targets_out, chapters_out, footnotes_out, vo_notes_out
+        )
 
 if __name__ == "__main__":
     main() #pylint: disable=no-value-for-parameter

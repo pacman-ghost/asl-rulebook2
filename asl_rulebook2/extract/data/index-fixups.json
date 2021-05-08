@@ -83,12 +83,6 @@
     ]
 },
 
-"EX": {
-    "old_content": "ExampleEXC: Exception",
-    "new_content": "Example",
-    "_comment_": "The code manually inserts an entry for EXC: Exception"
-},
-
 "Fortification": {
     "replace": [
         [ "[in BRT: SSR1 (BRT Sand: T3.2) (NA in Betio Piers: T9.2)]", "[in BRT: SSR1 (BRT Sand): T3.2] [in BRT: SSR1 (NA in Betio Piers): T9.2]" ]

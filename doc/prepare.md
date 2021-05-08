@@ -18,6 +18,7 @@ The first step is to extract the information we need from the eASLRB PDF.
         --save-targets /tmp/prepared/ASL\ Rulebook.targets \
         --save-chapters /tmp/prepared/ASL\ Rulebook.chapters \
         --save-footnotes /tmp/prepared/ASL\ Rulebook.footnotes \
+        --save-vo-notes /tmp/prepared/ASL\ Rulebook.vo-notes \
         --progress
 ```
 This extracts the information we need, and saves it in the 4 data files.
@@ -29,6 +30,7 @@ Next, we need to prepare the eASLRB PDF, namely create bookmarks for each rule, 
     asl_rulebook2/bin/prepare_pdf.py \
         $EASLRB \
         --targets /tmp/prepared/ASL\ Rulebook.targets \
+        --vo-notes /tmp/prepared/ASL\ Rulebook.vo-notes \
         --yoffset 5 \
         --output /tmp/prepared.pdf \
         --compression ebook \

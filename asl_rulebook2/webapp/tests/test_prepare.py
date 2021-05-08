@@ -83,7 +83,7 @@ def test_full_prepare( webapp, webdriver ):
         with zipfile.ZipFile( io.BytesIO( zip_data ) ) as zip_file:
             assert set( zip_file.namelist() ) == set( [
                 "ASL Rulebook.pdf", "ASL Rulebook.index",
-                "ASL Rulebook.targets", "ASL Rulebook.chapters", "ASL Rulebook.footnotes"
+                "ASL Rulebook.targets", "ASL Rulebook.chapters", "ASL Rulebook.footnotes", "ASL Rulebook.vo-notes"
             ] )
             assert zip_file.getinfo( "ASL Rulebook.pdf" ).file_size > 40*1000
             for ftype in [ "index", "targets", "chapters", "footnotes" ]:

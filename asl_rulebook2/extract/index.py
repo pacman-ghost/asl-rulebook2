@@ -146,9 +146,6 @@ class ExtractIndex( ExtractBase ):
             index_entry = self._make_index_entry( title, content )
             if index_entry:
                 self.index_entries.append( index_entry )
-            # FUDGE! EX/EXC are mis-parsed as a single index entry - we correct that in the fixups, and here.
-            if title == "EX":
-                self.index_entries.append( self._make_index_entry( "EXC", "Exception" ) )
 
     def _make_index_entry( self, title, content ):
         """Create a new index entry."""

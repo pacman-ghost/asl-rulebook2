@@ -2,6 +2,7 @@
 
 import os
 import re
+from collections import defaultdict
 
 from flask import jsonify, send_file, url_for, abort
 
@@ -70,6 +71,7 @@ def load_content_sets( startup_msgs, logger ):
             if not app.config.get( "IGNORE_MISSING_DATA_FILES" ):
                 logger.warn( "Didn't find targets file: %s", fname )
         load_file( fname_stem+".chapters", content_doc, "chapters", startup_msgs.warning )
+        load_file( fname_stem+".vo-notes", content_doc, "vo-notes", startup_msgs.warning )
         if load_file( fname_stem+".footnotes", content_doc, "footnotes", startup_msgs.warning ):
             # update the footnote index
             # NOTE: The front-end doesn't care about what chapter a footnote belongs to,
@@ -308,7 +310,7 @@ def get_content_docs():
             }
             if "filename" in cdoc:
                 cdoc2["url"] = url_for( "get_content", cdoc_id=cdoc["cdoc_id"] )
-            for key in [ "targets", "chapters", "background", "icon" ]:
+            for key in [ "targets", "vo-notes", "chapters", "background", "icon" ]:
                 if key in cdoc:
                     cdoc2[key] = cdoc[key]
             resp[ cdoc["cdoc_id"] ] = cdoc2
@@ -348,3 +350,30 @@ def get_chapter_resource( chapter_id, rtype ):
     if not fname:
         abort( 404 )
     return send_file( fname )
+
+# ---------------------------------------------------------------------
+
+@app.route( "/vo-note-targets" )
+def get_vo_note_targets():
+    """Return the Chapter H vehicle/ordnance note targets."""
+    targets = defaultdict( lambda: defaultdict( dict ) )
+    def add_targets( dest, key, vo_entries ):
+        for vo_note_id, vo_entry in vo_entries.items():
+            dest[ vo_note_id ] = {
+                "caption": vo_entry["caption"],
+                "target": "{}:{}".format( key, vo_note_id ),
+            }
+    for cset in _content_sets.values():
+        for cdoc in cset["content_docs"].values():
+            vo_notes = cdoc.get( "vo-notes" )
+            if not vo_notes:
+                continue
+            for nat in vo_notes:
+                if nat == "landing-craft":
+                    key = "{}/{}".format( cdoc["cdoc_id"], nat )
+                    add_targets( targets["landing-craft"], key, vo_notes[nat] )
+                else:
+                    for vo_type in ["vehicles","ordnance"]:
+                        key = "{}/{}_{}".format( cdoc["cdoc_id"], nat, vo_type )
+                        add_targets( targets[nat][vo_type], key, vo_notes[nat][vo_type] )
+    return jsonify( targets )

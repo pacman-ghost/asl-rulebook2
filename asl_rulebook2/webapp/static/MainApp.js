@@ -151,19 +151,45 @@ gMainApp.component( "main-app", {
             // install the content docs
             gContentDocs = contentDocs ;
             // build an index of all the targets
-            gTargetIndex = {} ;
-            Object.values( contentDocs ).forEach( (cdoc) => {
-                if ( ! cdoc.targets )
-                    return ;
-                for ( let ruleid in cdoc.targets ) {
-                    let ruleidLC = ruleid.toLowerCase() ;
-                    if ( ! gTargetIndex[ ruleidLC ] )
-                        gTargetIndex[ ruleidLC ] = [] ;
-                    gTargetIndex[ ruleidLC ].push( {
+            function updateTargetIndex( entries, key, cdoc ) {
+                for ( let vo_note_id in entries ) {
+                    let dest = key + ":" + vo_note_id ;
+                    if ( ! gTargetIndex[ dest ] )
+                        gTargetIndex[ dest ] = [] ;
+                    gTargetIndex[ dest ].push( {
                         cset_id: cdoc.parent_cset_id,
                         cdoc_id: cdoc.cdoc_id,
-                        ruleid: ruleid
+                        ruleid: dest,
                     } ) ;
+                }
+            }
+            gTargetIndex = {} ;
+            Object.values( contentDocs ).forEach( (cdoc) => {
+                if ( cdoc.targets ) {
+                    // add entries for each of the normal rules
+                    for ( let ruleid in cdoc.targets ) {
+                        let ruleidLC = ruleid.toLowerCase() ;
+                        if ( ! gTargetIndex[ ruleidLC ] )
+                            gTargetIndex[ ruleidLC ] = [] ;
+                        gTargetIndex[ ruleidLC ].push( {
+                            cset_id: cdoc.parent_cset_id,
+                            cdoc_id: cdoc.cdoc_id,
+                            ruleid: ruleid
+                        } ) ;
+                    }
+                }
+                if ( cdoc["vo-notes"] ) {
+                    // add entries for each of the vehicle/ordnance notes
+                    for ( let nat in cdoc["vo-notes"] ) {
+                        if ( nat == "landing-craft" ) {
+                            updateTargetIndex( cdoc["vo-notes"][nat], nat, cdoc ) ;
+                            continue ;
+                        }
+                        for ( let vo_type in cdoc["vo-notes"][nat] ) {
+                            let key = nat + "_" + vo_type ;
+                            updateTargetIndex( cdoc["vo-notes"][nat][vo_type], key, cdoc ) ;
+                        }
+                    }
                 }
             } ) ;
             // build an index of the available chapters resources
@@ -208,15 +234,20 @@ gMainApp.component( "main-app", {
             } ).catch( (errorMsg) => {
                 showErrorMsg( "Couldn't get the startup messages.", errorMsg ) ;
             } ) ;
-            // check if we should start with a query
+            // check if we should start with a query or target
             let queryString = gUrlParams.get( "query" ) || gUrlParams.get( "q" ) ;
             if ( window.location.hash != "" )
                 queryString = window.location.hash.substring( 1 ) ;
+            let target = gUrlParams.get( "target" ) || gUrlParams.get( "t" ) || "" ;
+            let targetSplitPos = target.indexOf( "/" ) ;
             if ( queryString != null && queryString != undefined ) {
                 // yup - make it so
                 // NOTE: The content pane flickers as it shows the cover page, then jumps to search result.
                 // I tried opening the PDF at the target destination, but the same thing still happens :-(
                 gEventBus.emit( "search", queryString ) ;
+            } else if ( targetSplitPos > 0 ) {
+                // yup - make it so
+                gEventBus.emit( "show-target", target.substring(0,targetSplitPos), target.substring(targetSplitPos+1) ) ;
             } else {
                 // start off showing the main ASL rulebook
                 // NOTE: To avoid forcing the user to configure which document this is,

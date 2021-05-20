@@ -23,12 +23,15 @@ export function findTargets( ruleid, csetId )
     // also have the concept of a "target", which is a ruleid plus the content set it's in.
     // One can only hope that ruleid's are unique in this context, even if there are multiple documents
     // in each content set...
+    // NOTE: With vasl-templates integrations, there are destinations within the PDF that are not
+    // actually ruleid's (i.e. Chapter H vehicle/ordnance notes), but we retain the old terminology,
+    // since it will usually be the case.
 
     // check if the ruleid is known to us
-    let pos = ruleid.indexOf( "-" ) ;
-    if ( pos >= 0 ) {
+    let match = ruleid.match( /-[0-9.]/ ) ;
+    if ( match ) {
         // NOTE: For ruleid's of the form "A12.3-.4", we want to target "A12.3".
-        ruleid = ruleid.substring( 0, pos ) ;
+        ruleid = ruleid.substring( 0, match.index ) ;
     }
     let targets = gTargetIndex[ ruleid.toLowerCase() ] ;
     if ( targets && csetId )

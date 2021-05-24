@@ -25,7 +25,7 @@
 #search-box .sr-filters { margin-top: 4px ; font-size: 80% ; }
 #search-box .sr-filters input[type="checkbox"] { margin-right: 2px ; }
 #search-box .sr-filters label { margin-right: 6px ; }
-#search-box .sr-count { position: absolute ; bottom: 18px ; right: 2px ; font-size: 60% ; font-style: italic ; color: #444 ; }
+#search-box .sr-count { position: absolute ; bottom: 20px ; right: 4px ; font-size: 60% ; font-style: italic ; color: #444 ; }
 
 /* search results */
 #search-results { flex-grow: 1 ; overflow-y: auto ;  }

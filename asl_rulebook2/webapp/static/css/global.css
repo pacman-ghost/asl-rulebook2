@@ -22,7 +22,7 @@ ul ul ul { list-style-image: url(../images/bullet3.png) ; }
 span.pre { font-family: monospace ; }
 
  /* notification balloons */
-#growls-br { bottom: 22px ; right: 0 ; max-height: 40% ; }
+#growls-br { bottom: 0 ; right: 0 ; max-height: 40% ; }
 .growl { cursor: pointer ; }
 .growl .growl-close { position: absolute ; top: 0 ; right: 6px ; }
 .growl .growl-title { display: none ; }

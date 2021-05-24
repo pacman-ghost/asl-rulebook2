@@ -2,7 +2,7 @@
 
 #content .tabbed-page { border-bottom: 1px solid #aaa ; background: white ; }
 #content .tabbed-page .wrapper { flex-grow: 1 ; }
-#content .tab-strip { height: 20px ; padding: 0 5px 2px 5px ; font-size: 12px ; }
+#content .tab-strip { height: 21px ; padding: 0 5px 2px 5px ; font-size: 12px ; }
 #content .tab-strip .tab { height: 14px ; margin-top: -1px ; padding: 2px 6px ; z-index: 5 ; border-radius: 0 0 5px 5px ; }
 #content .tab-strip .tab { background: #f0f0f0 ; color: #808080 ; }
 #content .tab-strip .tab.active { background: white ; color: #444 ; border-top: none ; }
@@ -21,3 +21,10 @@
 .growl-footnote .growl-message { height: 100% ; overflow-y: auto ; display: flex ; flex-direction: column ; }
 .growl-footnote .growl-message .content { flex-grow: 1 ; padding: 0 5px 0 5px ; text-align: justify ; }
 .growl-footnote .growl-message p { margin-top: 4px ; }
+
+/* FUDGE! We "erase" the bottom border of the content doc just for the active tab by moving the tab up by 1px,
+ * and overlaying the border line. However, at certain zoom levels, it moves up by an extra pixel (rounding off
+ * of fractional pixels?), which is really annoying if the content has a colored background. We fudge around this
+ * by adding a blank space of 1px at the bottom of the content doc :-/
+ */
+#content .tabbed-page .wrapper { margin-bottom: 1px ; }

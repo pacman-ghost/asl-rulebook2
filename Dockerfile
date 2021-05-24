@@ -51,8 +51,8 @@ COPY setup.py requirements.txt requirements-dev.txt LICENSE.txt ./
 RUN pip3 install --editable .
 
 # install the config files
-COPY docker/config/ ./asl_rulebook2/webapp/config/
 COPY asl_rulebook2/webapp/config/logging.yaml.example ./asl_rulebook2/webapp/config/logging.yaml
+COPY docker/config/ ./asl_rulebook2/webapp/config/
 
 # create a new user
 RUN useradd --create-home app

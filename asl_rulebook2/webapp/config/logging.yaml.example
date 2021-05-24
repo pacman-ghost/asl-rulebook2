@@ -17,26 +17,26 @@ handlers:
         mode: "w"
 
 root:
-    level: "WARNING"
+    level: "ERROR"
     handlers: [ "console", "file" ]
 loggers:
     werkzeug:
-        level: "WARNING"
+        level: "ERROR"
         handlers: [ "console", "file" ]
         propagate: 0
     startup:
-        level: "WARNING"
+        level: "ERROR"
         handlers: [ "console", "file" ]
         propagate: 0
     search:
-        level: "WARNING"
+        level: "ERROR"
         handlers: [ "console", "file" ]
         propagate: 0
     prepare:
-        level: "WARNING"
+        level: "ERROR"
         handlers: [ "console", "file" ]
         propagate: 0
     control_tests:
-        level: "WARNING"
+        level: "ERROR"
         handlers: [ "console", "file" ]
         propagate: 0

@@ -6,3 +6,6 @@ pikepdf==2.5.2
 python-socketio==5.2.1
 pyyaml==5.4.1
 click==7.1.2
+
+# NOTE: This is needed for socketio when using the "threading" async mode.
+simple-websocket==0.2.0

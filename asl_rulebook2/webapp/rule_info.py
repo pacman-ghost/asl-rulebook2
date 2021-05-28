@@ -38,7 +38,7 @@ def init_qa( startup_msgs, logger ):
     def load_qa( fname ):
         """Load the Q+A entries from a data file."""
         logger.info( "Loading Q+A: %s", fname )
-        qa_entries = load_data_file( fname, "Q+A", False, logger, startup_msgs.warning )
+        qa_entries = load_data_file( fname, "Q+A", "json", logger, startup_msgs.warning )
         if qa_entries is None:
             return
         for key, entries in qa_entries.items():
@@ -69,7 +69,7 @@ def init_qa( startup_msgs, logger ):
     fname = os.path.join( base_dir, "fixups.json" )
     if os.path.isfile( fname ):
         logger.info( "Loading Q+A fixups: %s", fname )
-        fixups = load_data_file( fname, "fixups", False, logger, startup_msgs.warning )
+        fixups = load_data_file( fname, "fixups", "json", logger, startup_msgs.warning )
         if fixups:
             for qa_entries in qa.values():
                 for qa_entry in qa_entries:
@@ -84,7 +84,7 @@ def init_qa( startup_msgs, logger ):
     fname = os.path.join( base_dir, "sources.json" )
     if os.path.isfile( fname ):
         logger.info( "Loading Q+A sources: %s", fname )
-        sources = load_data_file( fname, "sources", False, logger, startup_msgs.warning )
+        sources = load_data_file( fname, "sources", "json", logger, startup_msgs.warning )
         if sources:
             logger.info( "- Loaded %s.", plural(len(sources),"source","sources") )
 
@@ -162,7 +162,7 @@ def init_errata( startup_msgs, logger ):
     fname = os.path.join( base_dir, "fixups.json" )
     if os.path.isfile( fname ):
         logger.info( "Loading errata fixups: %s", fname )
-        fixups = load_data_file( fname, "fixups", False, logger, startup_msgs.warning )
+        fixups = load_data_file( fname, "fixups", "json", logger, startup_msgs.warning )
         if fixups:
             for ruleid in _errata:
                 for anno in _errata[ruleid]:
@@ -173,7 +173,7 @@ def init_errata( startup_msgs, logger ):
     fname = os.path.join( base_dir, "sources.json" )
     if os.path.isfile( fname ):
         logger.info( "Loading errata sources: %s", fname )
-        sources = load_data_file( fname, "sources", False, logger, startup_msgs.warning )
+        sources = load_data_file( fname, "sources", "json", logger, startup_msgs.warning )
         if sources:
             logger.info( "- Loaded %s.", plural(len(sources),"source","sources") )
 
@@ -190,7 +190,7 @@ def init_errata( startup_msgs, logger ):
 def _load_anno( fname, atype, save_loc, logger, startup_msgs ):
     """Load annotations from a data file."""
     logger.info( "Loading %s: %s", atype, fname )
-    anno_entries = load_data_file( fname, atype, False, logger, startup_msgs.warning )
+    anno_entries = load_data_file( fname, atype, "json", logger, startup_msgs.warning )
     if not anno_entries:
         return
     for anno in anno_entries:

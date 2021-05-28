@@ -1,10 +1,11 @@
 """ Manage the content documents. """
 
 import os
+import io
 import re
 from collections import defaultdict
 
-from flask import jsonify, send_file, url_for, abort
+from flask import Response, jsonify, send_file, url_for, abort
 
 from asl_rulebook2.webapp import app
 from asl_rulebook2.webapp.utils import load_data_file, slugify
@@ -72,6 +73,7 @@ def load_content_sets( startup_msgs, logger ):
                 logger.warn( "Didn't find targets file: %s", fname )
         load_file( fname_stem+".chapters", content_doc, "chapters", startup_msgs.warning )
         load_file( fname_stem+".vo-notes", content_doc, "vo-notes", startup_msgs.warning )
+        load_file( fname_stem+".css", content_doc, "css", startup_msgs.warning, ftype="text" )
         if load_file( fname_stem+".footnotes", content_doc, "footnotes", startup_msgs.warning ):
             # update the footnote index
             # NOTE: The front-end doesn't care about what chapter a footnote belongs to,
@@ -110,12 +112,12 @@ def load_content_sets( startup_msgs, logger ):
                     chapter[ rtype ] = url_for( "get_chapter_resource", chapter_id=chapter_id, rtype=rtype )
         return content_doc
 
-    def load_file( rel_fname, save_loc, key, on_error, binary=False ):
+    def load_file( rel_fname, save_loc, key, on_error, ftype="json" ):
         fname = os.path.join( data_dir, rel_fname )
         if not os.path.isfile( fname ):
             return False
         # load the specified file
-        data = load_data_file( fname, key, binary, logger, on_error )
+        data = load_data_file( fname, key, ftype, logger, on_error )
         if data is None:
             return False
         # save the file data
@@ -342,6 +344,22 @@ def get_footnotes():
     return jsonify( _footnote_index )
 
 # ---------------------------------------------------------------------
+
+@app.route( "/content/css" )
+def get_content_css():
+    """Return the custom CSS for each content doc."""
+    buf = io.StringIO()
+    fname = os.path.join( os.path.dirname(__file__), "data/ASL Rulebook.css" )
+    with open( fname, "r", encoding="utf-8" ) as fp:
+        print( "/* ASL Rulebook */", file=buf )
+        print( fp.read().strip(), file=buf )
+    for cset in _content_sets.values():
+        for cdoc in cset["content_docs"].values():
+            if "css" in cdoc:
+                print( file=buf )
+                print( "/* {} */".format( cdoc["title"] ), file=buf )
+                print( cdoc["css"].strip(), file=buf )
+    return Response( buf.getvalue(), mimetype="text/css" )
 
 @app.route( "/chapter/<chapter_id>/<rtype>" )
 def get_chapter_resource( chapter_id, rtype ):

@@ -38,7 +38,7 @@ def init_asop( startup_msgs, logger ):
 
     # load the ASOP index
     fname = os.path.join( _asop_dir, "index.json" )
-    _asop = load_data_file( fname, "ASOP index", False, logger, startup_msgs.error )
+    _asop = load_data_file( fname, "ASOP index", "json", logger, startup_msgs.error )
     if not _asop:
         return None, None, None
 

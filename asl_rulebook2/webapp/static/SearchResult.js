@@ -157,7 +157,7 @@ gMainApp.component( "index-sr", {
                 let pos = ruleid.indexOf( "_" ) ;
                 if ( pos > 0 )
                     return ruleid.substring( 0, pos ) ; // e.g. "KGS_CG3" -> "KGS"
-                let match = ruleid.match( /^[A-Z]+/ ) ;
+                let match = ruleid.match( /^[A-Za-z]+/ ) ;
                 if ( match ) {
                     let chapterId = match[0] ;
                     if ( chapterId.substring( chapterId.length-2 ) == "CG" )

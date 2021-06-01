@@ -44,7 +44,8 @@ export function findTargets( ruleid, csetId )
 export function isRuleid( val )
 {
     // check if the value looks like a ruleid
-    return val.match( /^[A-Z]+_?(\.|CG)?\d/ ) ;
+    // NOTE: "S" is for Fight For Seoul e.g. "FfS_S1" or "SmR_S2.3".
+    return val.match( /^[A-Za-z]+_?(\.|CG|S)?\d/ ) ;
 }
 
 export function getASOPChapterIdFromSectionId( sectionId )

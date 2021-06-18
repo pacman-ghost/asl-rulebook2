@@ -35,7 +35,7 @@ def init_webapp( webapp, webdriver, **options ):
     }
 
     # load the webapp
-    webapp.control_tests.set_app_config_val( "BLOCKING_FIXUP_CONTENT", True )
+    webapp.control_tests.set_app_config_val( "BLOCKING_STARTUP_TASKS", True )
     webdriver.get( make_webapp_main_url( options ) )
     _wait_for_webapp()
 

@@ -1,6 +1,7 @@
 """ Manage the search engine. """
 
 import os
+import threading
 import sqlite3
 import json
 import re
@@ -17,12 +18,12 @@ import lxml.html
 
 from asl_rulebook2.utils import plural
 from asl_rulebook2.webapp import app
-import asl_rulebook2.webapp.startup as webapp_startup
 from asl_rulebook2.webapp.content import tag_ruleids
 from asl_rulebook2.webapp.utils import make_config_path, make_data_path, split_strip
 
 _sqlite_path = None
 _fts_index = None
+_fixup_content_lock = threading.Lock()
 
 _logger = logging.getLogger( "search" )
 
@@ -76,11 +77,11 @@ def search() :
         _logger.info( "- %s: %s", key, val )
 
     # run the search
-    # NOTE: We can't use the search index nor in-memory data structures if the "fix content" thread
-    # is still running (and possible updating them). However, the tasks running in that thread
-    # relinquish the lock regularly, to give the user a chance to jump in and grab it here, if they
-    # want to do a search while that thread is still running.
-    with webapp_startup.fixup_content_lock:
+    # NOTE: We can't use the search index nor in-memory data structures if the startup tasks thread
+    # is still running (and possible updating them, as it fixes up content). However, the tasks running
+    # in that thread relinquish the lock regularly, to give the user a chance to jump in and grab it here,
+    # if they want to do a search while that thread is still running.
+    with _fixup_content_lock:
         try:
             return _do_search( args )
         except Exception as exc: #pylint: disable=broad-except
@@ -507,8 +508,8 @@ def _init_content_sets( conn, curs, content_sets, logger ):
         _tag_ruleids_in_field( index_entry, "subtitle", cset_id )
         _tag_ruleids_in_field( index_entry, "content", cset_id )
         return index_entry
-    from asl_rulebook2.webapp.startup import add_fixup_content_task
-    add_fixup_content_task( "index searchable content",
+    from asl_rulebook2.webapp.startup import _add_startup_task
+    _add_startup_task( "index searchable content",
         lambda: _fixup_searchable_content( sr_type, fixup_index_entry, make_fields )
     )
 
@@ -556,8 +557,8 @@ def _init_qa( curs, qa, logger ):
             for answer in content.get( "answers", [] ):
                 _tag_ruleids_in_field( answer, 0, cset_id )
         return qa_entry
-    from asl_rulebook2.webapp.startup import add_fixup_content_task
-    add_fixup_content_task( "Q+A searchable content",
+    from asl_rulebook2.webapp.startup import _add_startup_task
+    _add_startup_task( "Q+A searchable content",
         lambda: _fixup_searchable_content( sr_type, fixup_qa, make_fields )
     )
 
@@ -602,8 +603,8 @@ def _do_init_anno( curs, anno, atype ):
         anno = _fts_index[ sr_type ][ rowid ]
         _tag_ruleids_in_field( anno, "content", cset_id )
         return anno
-    from asl_rulebook2.webapp.startup import add_fixup_content_task
-    add_fixup_content_task( atype+" searchable content",
+    from asl_rulebook2.webapp.startup import _add_startup_task
+    _add_startup_task( atype+" searchable content",
         lambda: _fixup_searchable_content( sr_type, fixup_anno, make_fields )
     )
 
@@ -655,8 +656,8 @@ def _init_asop( curs, asop, asop_preambles, asop_content, logger ):
         return entry
     def make_fields( entry ):
         return { "content": entry }
-    from asl_rulebook2.webapp.startup import add_fixup_content_task
-    add_fixup_content_task( "ASOP searchable content", fixup_content )
+    from asl_rulebook2.webapp.startup import _add_startup_task
+    _add_startup_task( "ASOP searchable content", fixup_content )
 
 def _extract_section_entries( content ):
     """Separate out each entry from the section's content."""
@@ -802,7 +803,7 @@ def _fixup_searchable_content( sr_type, fixup_row, make_fields ):
         # minimum amount of time.
         new_row = fixup_row( row[0], row[1] )
 
-        with webapp_startup.fixup_content_lock:
+        with _fixup_content_lock:
             # NOTE: The make_fields() callback will usually be accessing the fields we want to fixup,
             # so we need to protect them with the lock.
             fields = make_fields( new_row )
@@ -834,10 +835,10 @@ def _tag_ruleids_in_field( obj, key, cset_id ):
         # they have been loaded, so the only thread-safety we need to worry about is when we read
         # the original value from an object, and when we update it with a new value. The actual process
         # of tagging ruleid's in a piece of content is done outside the lock, since it's quite slow.
-        with webapp_startup.fixup_content_lock:
+        with _fixup_content_lock:
             val = obj[key]
         new_val = tag_ruleids( val, cset_id )
-        with webapp_startup.fixup_content_lock:
+        with _fixup_content_lock:
             obj[key] = new_val
         # FUDGE! Give other threads a chance to run :-/
         global _last_sleep_time

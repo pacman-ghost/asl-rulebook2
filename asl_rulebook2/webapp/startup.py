@@ -5,6 +5,7 @@ import datetime
 import threading
 import logging
 import traceback
+import enum
 from collections import defaultdict
 
 from flask import jsonify
@@ -18,11 +19,20 @@ from asl_rulebook2.webapp.utils import parse_int
 
 _capabilities = None
 
-fixup_content_lock = threading.Lock()
-_fixup_content_tasks = None
+_startup_tasks = None
 
 _logger = logging.getLogger( "startup" )
 _startup_msgs = None
+
+# ---------------------------------------------------------------------
+
+class StartupStatusEnum( enum.IntEnum ): #pylint: disable=missing-class-docstring
+    NOT_STARTED = 0
+    STARTED = 1
+    TASKS_RUNNING = 2
+    COMPLETED = -1
+
+_startup_status = StartupStatusEnum.NOT_STARTED
 
 # ---------------------------------------------------------------------
 
@@ -34,10 +44,11 @@ def init_webapp():
     """
 
     # initialize
-    global _startup_msgs, _capabilities, _fixup_content_tasks
+    global _startup_status, _startup_msgs, _capabilities, _startup_tasks
+    _startup_status = StartupStatusEnum.STARTED
     _startup_msgs = StartupMsgs()
     _capabilities = {}
-    _fixup_content_tasks = []
+    _startup_tasks = []
 
     # initialize the webapp
     content_sets = load_content_sets( _startup_msgs, _logger )
@@ -67,26 +78,29 @@ def init_webapp():
     # eventually start to be returned as search results. We could do this process once, and save the results
     # in a file, then reload everything at startup, which will obviously be much faster, but we then have to
     # figure out when that file needs to be rebuolt :-/
-    if app.config.get( "BLOCKING_FIXUP_CONTENT" ):
+    if app.config.get( "BLOCKING_STARTUP_TASKS" ):
         # NOTE: It's useful to do this synchronously when running the test suite, since if the tests
         # need the linkified ruleid's, they can't start until the fixup has finished (and if they don't
         # it won't really matter, since there will be so little data, this process will be fast).
-        _do_fixup_content( False )
+        _do_startup_tasks( False )
     else:
-        threading.Thread( target=_do_fixup_content, args=(True,) ).start()
+        threading.Thread( target=_do_startup_tasks, args=(True,) ).start()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-def add_fixup_content_task( ctype, func ):
-    """Register a function to fixup content after startup has finished."""
-    if app.config.get( "DISABLE_FIXUP_CONTENT" ):
+def _add_startup_task( ctype, func ):
+    """Register a function to run at startup."""
+    if app.config.get( "DISABLE_STARTUP_TASKS" ):
         return
-    _fixup_content_tasks.append( ( ctype, func ) )
+    _startup_tasks.append( ( ctype, func ) )
 
-def _do_fixup_content( delay ):
-    """Run each task to fixup content."""
+def _do_startup_tasks( delay ):
+    """Run each registered startup task."""
 
-    if not _fixup_content_tasks:
+    # initialize
+    global _startup_status
+    if not _startup_tasks:
+        _startup_status = StartupStatusEnum.COMPLETED
         return
 
     # FUDGE! If we start processing straight away, the main PDF loads very slowly because of us :-/,
@@ -97,25 +111,28 @@ def _do_fixup_content( delay ):
     # very slow loads. To work around this, _tag_ruleids_in_field() sleeps periodically, to give
     # other threads a chance to run. The PDF's load a bit slowly, but it's acceptable.
     if delay:
-        delay = parse_int( app.config.get( "FIXUP_CONTENT_DELAY" ), 5 )
+        delay = parse_int( app.config.get( "STARTUP_TASKS_DELAY" ), 5 )
         time.sleep( delay )
 
-    # process each fixup task
-    _logger.info( "Processing fixup tasks..." )
+    # process each startup task
+    _startup_status = StartupStatusEnum.TASKS_RUNNING
+    _logger.info( "Processing startup tasks..." )
     start_time = time.time()
-    for task_no, (ctype, func) in enumerate( _fixup_content_tasks ):
-        _logger.debug( "Fixing up %s (%d/%d)...", ctype, 1+task_no, len(_fixup_content_tasks) )
+    for task_no, (ctype, func) in enumerate( _startup_tasks ):
+        _logger.debug( "Running startup task '%s' (%d/%d)...", ctype, 1+task_no, len(_startup_tasks) )
         start_time2 = time.time()
         try:
             msg = func()
         except Exception as ex: #pylint: disable=broad-except
-            _logger.error( "Couldn't fixup %s: %s\n%s", ctype, ex, traceback.format_exc() )
+            _logger.error( "Startup task '%s' failed: %s\n%s", ctype, ex, traceback.format_exc() )
             continue
         elapsed_time = datetime.timedelta( seconds = int( time.time() - start_time2 ) )
-        _logger.debug( "- Finished fixing up %s (%s): %s", ctype, elapsed_time, msg )
+        _logger.debug( "- Finished startup task '%s' (%s): %s", ctype, elapsed_time, msg )
 
+    # finish up
     elapsed_time = datetime.timedelta( seconds = int( time.time() - start_time ) )
-    _logger.info( "All fixup tasks completed (%s).", elapsed_time )
+    _logger.info( "All startup tasks completed (%s).", elapsed_time )
+    _startup_status = StartupStatusEnum.COMPLETED
 
 # ---------------------------------------------------------------------
 
@@ -148,6 +165,13 @@ def get_app_config():
 def get_startup_msgs():
     """Return any messages issued during startup."""
     return jsonify( _startup_msgs.msgs )
+
+@app.route( "/startup-status" )
+def get_startup_status():
+    """Return the current startup status."""
+    return jsonify( {
+        "status": _startup_status
+    } )
 
 # ---------------------------------------------------------------------
 

@@ -1,5 +1,5 @@
 import { gMainApp, gAppConfig, gContentDocs, gEventBus, gUrlParams } from "./MainApp.js" ;
-import { getJSON, getURL, linkifyAutoRuleids, getASOPChapterIdFromSectionId, showWarningMsg } from "./utils.js" ;
+import { getJSON, getURL, linkifyAutoRuleids, getASOPChapterIdFromSectionId, showWarningMsg, makeImageUrl } from "./utils.js" ;
 
 // --------------------------------------------------------------------
 
@@ -8,6 +8,7 @@ gMainApp.component( "nav-pane", {
     props: [ "asop" ],
     data() { return {
         ruleInfo: [],
+        startupTasksImageUrl: makeImageUrl( "loading.gif" ),
     } ; },
 
     template: `
@@ -26,6 +27,7 @@ gMainApp.component( "nav-pane", {
         </tabbed-page>
     </tabbed-pages>
     <div id="watermark" />
+    <img :src=startupTasksImageUrl id="startup-tasks-loading" title="Preparing searchable content..." />
     <rule-info :ruleInfo=ruleInfo @close=closeRuleInfo />
 </div>`,
 

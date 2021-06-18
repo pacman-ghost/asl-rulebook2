@@ -70,6 +70,9 @@ gMainApp.component( "main-app", {
         $( "body" ).bind( "keydown", "alt+c", function( evt ) { selectNav( "chapters" ) ; evt.preventDefault() ; } ) ;
         $( "body" ).bind( "keydown", "alt+a", function( evt ) { selectNav( "asop" ) ; evt.preventDefault() ; } ) ;
 
+        // monitor the backend startup process
+        this.startupTimerId = setInterval( this.checkStartupStatus, 1*1000 ) ;
+
         // initialze the webapp
         Promise.all( [
             this.getAppConfig(),
@@ -273,6 +276,25 @@ gMainApp.component( "main-app", {
             // notify everyone that startup has completed
             this.isLoaded = true ;
             gEventBus.emit( "app-loaded" ) ;
+        },
+
+        checkStartupStatus() {
+            // check the backend startup status
+            getJSON( gGetStartupStatusUrl ).then( (resp) => { //eslint-disable-line no-undef
+                if ( resp.status < 0 ) {
+                    // startup has finished
+                    $( "#startup-tasks-loading" ).fadeOut() ;
+                    clearInterval( this.startupTimerId ) ;
+                    this.startupTimerId = -1 ;
+                } else if ( resp.status == 2 ) {
+                    // startup is in progress
+                    // NOTE: We don't show the loading spinner for STARTED, since for most users, the startup process
+                    // will be fast, and we don't want to show the spinner at all.
+                    $( "#startup-tasks-loading" ).show() ;
+                }
+            } ).catch( (errorMsg) => { //eslint-disable-line no-unused-vars
+                // NOTE: We occasionally get an error on the first call, but we can probably ignore errors here.
+            } ) ;
         },
 
         onEscapePressed() {

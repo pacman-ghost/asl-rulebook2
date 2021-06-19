@@ -64,6 +64,12 @@ def pytest_addoption( parser ):
         help="Enable the prepare tests."
     )
 
+    # add test options
+    parser.addoption(
+        "--force-cached-searchdb", action="store_true", dest="force_cached_searchdb", default=False,
+        help="Force the search database to be built from a cached version."
+    )
+
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def pytest_configure( config ):
@@ -128,6 +134,11 @@ def _make_webapp():
         app.config.pop( "DATA_DIR", None )
         app.config.pop( "WEBAPP_INITIAL_QUERY_STRING", None )
         app.config.pop( "DISABLE_FIXUP_CONTENT", None )
+        app.config.pop( "CACHED_SEARCHDB", None )
+        if _pytest_options.force_cached_searchdb:
+            app.config[ "FORCE_CACHED_SEARCHDB" ] = True
+        else:
+            app.config.pop( "FORCE_CACHED_SEARCHDB", None )
         app.config[ "IGNORE_MISSING_DATA_FILES" ] = True
         # check if we will be running the prepare tests
         if _pytest_options.enable_prepare:

@@ -13,6 +13,7 @@ function main
     ERRATA_DIR=
     USER_ANNO_FILE=
     ASOP_DIR=
+    CACHED_SEARCHDB=
     IMAGE_TAG=latest
     CONTAINER_NAME=asl-rulebook2
     DETACH=
@@ -25,7 +26,7 @@ function main
         print_help
         exit 0
     fi
-    params="$(getopt -o p:d:t: -l port:,data:,qa:,errata:,annotations:,asop:,tag:,name:,detach,no-build,build-network:,control-tests-port:,help --name "$0" -- "$@")"
+    params="$(getopt -o p:d:t: -l port:,data:,qa:,errata:,annotations:,asop:,cached-searchdb:,tag:,name:,detach,no-build,build-network:,control-tests-port:,help --name "$0" -- "$@")"
     if [ $? -ne 0 ]; then exit 1; fi
     eval set -- "$params"
     while true; do
@@ -47,6 +48,9 @@ function main
                 shift 2 ;;
             --asop )
                 ASOP_DIR=$2
+                shift 2 ;;
+            --cached-searchdb )
+                CACHED_SEARCHDB=$2
                 shift 2 ;;
             -t | --tag )
                 IMAGE_TAG=$2
@@ -134,6 +138,20 @@ function main
         ASOP_DIR_VOLUME="--volume $target:$mpoint"
     fi
 
+    # check the cached search database file
+    if [ -n "$CACHED_SEARCHDB" ]; then
+        target=$( get_target FILE "$CACHED_SEARCHDB" )
+        if [ -z "$target" ]; then
+            # NOTE: It's acceptable for the file to not exist (if we are generating the cached database for
+            # the first time), but it has to be present for Docker to mount it :-/
+            target=$( realpath --no-symlinks "$CACHED_SEARCHDB" )
+            touch "$target"
+        fi
+        mpoint=/tmp/searchdb-cached.db
+        CACHED_SEARCHDB_VOLUME="--volume $target:$mpoint"
+        CACHED_SEARCHDB_ENV="--env DOCKER_CACHED_SEARCHDB=$mpoint"
+    fi
+
     # check if testing has been enabled
     if [ -n "$CONTROL_TESTS_PORT" ]; then
         CONTROL_TESTS_PORT_BUILD="--build-arg CONTROL_TESTS_PORT=$CONTROL_TESTS_PORT"
@@ -165,6 +183,7 @@ function main
         $ERRATA_DIR_VOLUME \
         $ASOP_DIR_VOLUME \
         $USER_ANNO_VOLUME \
+        $CACHED_SEARCHDB_VOLUME $CACHED_SEARCHDB_ENV \
         $DETACH \
         asl-rulebook2:$IMAGE_TAG \
         2>&1 \
@@ -201,17 +220,18 @@ function print_help {
     cat <<EOM
   Build and launch the "asl-rulebook2" container.
 
-    -p  --port          Web server port number.
-    -d  --data          Data directory.
-        --qa            Q+A+ directory (default = \$DATA/q+a/)
-        --errata        Errata directory (default = \$DATA/errata/)
-        --annotations   User-defined annotations (default = \$DATA/annotations.json)
-        --asop          ASOP directory (default = \$DATA/asop/)
+    -p  --port              Web server port number.
+    -d  --data              Data directory.
+        --qa                Q+A+ directory (default = \$DATA/q+a/)
+        --errata            Errata directory (default = \$DATA/errata/)
+        --annotations       User-defined annotations (default = \$DATA/annotations.json)
+        --asop              ASOP directory (default = \$DATA/asop/)
+        --cached-searchdb   Cached search index database (for faster startup).
 
-    -t  --tag           Docker image tag.
-        --name          Docker container name.
-    -d  --detach        Detach from the container and let it run in the background.
-        --no-build      Launch the container as-is (i.e. without rebuilding the image first).
+    -t  --tag       Docker image tag.
+        --name      Docker container name.
+    -d  --detach    Detach from the container and let it run in the background.
+        --no-build  Launch the container as-is (i.e. without rebuilding the image first).
 EOM
 }
 

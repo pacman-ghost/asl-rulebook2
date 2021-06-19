@@ -27,40 +27,49 @@ def init_asop( startup_msgs, logger ):
     # get the data directory
     data_dir = app.config.get( "DATA_DIR" )
     if not data_dir:
-        return None, None, None
+        return None, None, None, None
     dname = os.path.join( data_dir, "asop/" )
     if not os.path.isdir( dname ):
-        return None, None, None
+        return None, None, None, None
     _asop_dir = dname
     fname = os.path.join( _asop_dir, "asop.css" )
     if os.path.isfile( fname ):
         user_css_url = url_for( "get_asop_file", path="asop.css" )
 
+    # initialize
+    asop_fnames = []
+
     # load the ASOP index
     fname = os.path.join( _asop_dir, "index.json" )
     _asop = load_data_file( fname, "ASOP index", "json", logger, startup_msgs.error )
     if not _asop:
-        return None, None, None
+        return None, None, None, None
+    asop_fnames.append( fname )
 
     # load the ASOP content
     for chapter in _asop.get( "chapters", [] ):
         chapter_id = chapter[ "chapter_id" ]
         # load the chapter preamble
-        preamble = _render_template( chapter_id + "-0.html" )
+        fname, preamble = _render_template( chapter_id + "-0.html" )
         if preamble:
             _asop_preambles[chapter_id] = preamble
+            asop_fnames.append( fname )
         # load the content for each section
         for section_no, section in enumerate( chapter.get( "sections", [] ) ):
             section_id = "{}-{}".format( chapter_id, 1+section_no )
             section[ "section_id" ] = section_id
-            content = _render_template( section_id + ".html" )
-            _asop_section_content[ section_id ] = content
+            fname, content = _render_template( section_id + ".html" )
+            if content:
+                _asop_section_content[ section_id ] = content
+                asop_fnames.append( fname )
 
     # load the ASOP footer
-    footer = _render_template( "footer.html" )
+    fname, footer = _render_template( "footer.html" )
     _footer = tag_ruleids( footer, None )
+    if _footer:
+        asop_fnames.append( fname )
 
-    return _asop, _asop_preambles, _asop_section_content
+    return _asop, _asop_preambles, _asop_section_content, asop_fnames
 
 # ---------------------------------------------------------------------
 
@@ -72,7 +81,7 @@ def get_asop():
 @app.route( "/asop/intro" )
 def get_asop_intro():
     """Return the ASOP intro."""
-    resp = _render_template( "intro.html" )
+    _, resp = _render_template( "intro.html" )
     if not resp:
         return "No ASOP intro."
     return resp
@@ -110,13 +119,13 @@ def get_asop_file( path ):
 def _render_template( fname ):
     """Render an ASOP template."""
     if not _asop_dir:
-        return None
+        return None, None
     fname = safe_join( _asop_dir, fname )
     if not os.path.isfile( fname ):
-        return None
+        return None, None
     args = {
         "ASOP_BASE_URL": url_for( "get_asop_file", path="" ),
     }
     args.update( _asop.get( "template_args", {} ) )
     with open( fname, "r" ) as fp:
-        return render_template_string( fp.read(), **args )
+        return fname, render_template_string( fp.read(), **args )

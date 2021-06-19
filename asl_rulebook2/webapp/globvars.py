@@ -24,6 +24,9 @@ def on_request():
         # However, we don't want this call to trigger initialization, since the tests will often want to
         # configure the remote webapp before loading the main page.
         return
+    if request.path == "/ping":
+        # NOTE: The test suite pings the server to detect when it's up.
+        return
     with _init_lock:
         global _init_done
         if not _init_done or (request.path == "/" and request.args.get("reload")):

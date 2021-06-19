@@ -1,5 +1,6 @@
 """ Manage the startup process. """
 
+import os
 import time
 import datetime
 import threading
@@ -54,20 +55,24 @@ def init_webapp():
     content_sets = load_content_sets( _startup_msgs, _logger )
     if content_sets:
         _capabilities[ "content-sets" ] = True
-    qa = init_qa( _startup_msgs, _logger )
+    qa, qa_fnames = init_qa( _startup_msgs, _logger )
     if qa:
         _capabilities[ "qa" ] = True
-    errata = init_errata( _startup_msgs, _logger )
+    errata, errata_fnames = init_errata( _startup_msgs, _logger )
     if errata:
         _capabilities[ "errata" ] = True
-    user_anno = init_annotations( _startup_msgs, _logger )
+    user_anno, user_anno_fname = init_annotations( _startup_msgs, _logger )
     if user_anno:
         _capabilities[ "user-anno" ] = True
-    asop, asop_preambles, asop_content = init_asop( _startup_msgs, _logger )
+    asop, asop_preambles, asop_content, asop_fnames = init_asop( _startup_msgs, _logger )
     if asop:
         _capabilities[ "asop" ] = True
     init_search(
-        content_sets, qa, errata, user_anno, asop, asop_preambles, asop_content,
+        content_sets,
+        qa, qa_fnames,
+        errata, errata_fnames,
+        user_anno, user_anno_fname,
+        asop, asop_preambles, asop_content, asop_fnames,
         _startup_msgs, _logger
     )
 
@@ -110,7 +115,10 @@ def _do_startup_tasks( delay ):
     # if the user reloads the page, or tries to load another PDF, they will have the same problem of
     # very slow loads. To work around this, _tag_ruleids_in_field() sleeps periodically, to give
     # other threads a chance to run. The PDF's load a bit slowly, but it's acceptable.
-    if delay:
+    # NOTE: If there is a cached search database, things are very fast and so we don't need to delay.
+    fname = app.config.get( "CACHED_SEARCHDB" )
+    have_cached_searchdb = fname and os.path.isfile( fname ) and os.path.getsize( fname ) > 0
+    if delay and not have_cached_searchdb:
         delay = parse_int( app.config.get( "STARTUP_TASKS_DELAY" ), 5 )
         time.sleep( delay )
 
@@ -119,7 +127,7 @@ def _do_startup_tasks( delay ):
     _logger.info( "Processing startup tasks..." )
     start_time = time.time()
     for task_no, (ctype, func) in enumerate( _startup_tasks ):
-        _logger.debug( "Running startup task '%s' (%d/%d)...", ctype, 1+task_no, len(_startup_tasks) )
+        _logger.debug( "Running startup task (%d/%d): %s", 1+task_no, len(_startup_tasks), ctype )
         start_time2 = time.time()
         try:
             msg = func()
@@ -127,7 +135,8 @@ def _do_startup_tasks( delay ):
             _logger.error( "Startup task '%s' failed: %s\n%s", ctype, ex, traceback.format_exc() )
             continue
         elapsed_time = datetime.timedelta( seconds = int( time.time() - start_time2 ) )
-        _logger.debug( "- Finished startup task '%s' (%s): %s", ctype, elapsed_time, msg )
+        msg = ": {}".format( msg ) if msg else "."
+        _logger.debug( "- Finished startup task (%s)%s", elapsed_time, msg )
 
     # finish up
     elapsed_time = datetime.timedelta( seconds = int( time.time() - start_time ) )

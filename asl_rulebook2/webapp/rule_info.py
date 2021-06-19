@@ -30,7 +30,7 @@ def init_qa( startup_msgs, logger ):
     # get the data directory
     data_dir = app.config.get( "DATA_DIR" )
     if not data_dir:
-        return None
+        return None, None
     base_dir = os.path.join( data_dir, "q+a" )
     _qa_images_dir = os.path.join( base_dir, "images" )
 
@@ -50,11 +50,13 @@ def init_qa( startup_msgs, logger ):
         logger.info( "- Loaded %s.", plural(n,"entry","entries") )
 
     # load the Q+A entries
+    qa_fnames = []
     fspec = os.path.join( base_dir, "*.json" )
     for fname in sorted( glob.glob( fspec ) ):
         if os.path.basename( fname ) in ("sources.json", "fixups.json"):
             continue
         load_qa( fname )
+        qa_fnames.append( fname )
 
     # build an index of the Q+A entries
     for qa_entries in qa.values():
@@ -109,7 +111,7 @@ def init_qa( startup_msgs, logger ):
             for u in usage:
                 logger.debug( "-   %s (%s) = %d", sources.get(u[0],"???"), u[0], u[1] )
 
-    return qa
+    return qa, qa_fnames
 
 # ---------------------------------------------------------------------
 
@@ -123,14 +125,16 @@ def init_annotations( startup_msgs, logger ):
     # get the data directory
     data_dir = app.config.get( "DATA_DIR" )
     if not data_dir:
-        return None
+        return None, None
 
     # load the user-defined annotations
     fname = os.path.join( data_dir, "annotations.json" )
     if os.path.isfile( fname ):
         _load_anno( fname, "annotations", _user_anno, logger, startup_msgs )
+    else:
+        fname = None
 
-    return _user_anno
+    return _user_anno, fname
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -148,15 +152,17 @@ def init_errata( startup_msgs, logger ):
     # get the data directory
     data_dir = app.config.get( "DATA_DIR" )
     if not data_dir:
-        return None
+        return None, None
     base_dir = os.path.join( data_dir, "errata" )
 
     # load the errata
+    errata_fnames = []
     fspec = os.path.join( base_dir, "*.json" )
     for fname in sorted( glob.glob( fspec ) ):
         if os.path.basename( fname ) in ("sources.json", "fixups.json"):
             continue
         _load_anno( fname, "errata", _errata, logger, startup_msgs )
+        errata_fnames.append( fname )
 
     # apply any fixups
     fname = os.path.join( base_dir, "fixups.json" )
@@ -183,7 +189,7 @@ def init_errata( startup_msgs, logger ):
             if "source" in anno:
                 anno["source"] = sources.get( anno["source"], anno["source"] )
 
-    return _errata
+    return _errata, errata_fnames
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 

@@ -39,3 +39,13 @@ All the files should have the same base filename e.g.
 This is described [here](../asl_rulebook2/webapp/tests/fixtures/full/).
 
 *NOTE: If you add Q+A, there is a tool in `$/asl_rulebook2/bin/qa-helper/` to help with the process.*
+
+### Caching the searchable content
+
+As you add more content, program startup will use more and more CPU (as it converts rule ID's to clickable links), and while the program will still come up and be functional quickly, rule ID's will take longer to become clickable, and this processing may affect other things running on your computer.
+
+To alleviate this, you can specify a file to cache the results of this work:
+- add a `CACHED_SEARCHDB` settings to your `site.cfg` file (if running from source)
+- add a `--cached-searchdb` parameter when running `run-container.sh` (if running using Docker)
+
+The program will still do the full startup processing the first time this cache file is built, and any time the data files change, but otherwise, startup will read the cached results from this file, and will be significantly faster.

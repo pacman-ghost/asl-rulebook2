@@ -1,8 +1,11 @@
 """ Manage the search engine. """
 
 import os
+import shutil
 import threading
 import sqlite3
+import hashlib
+import io
 import json
 import re
 import itertools
@@ -18,10 +21,12 @@ import lxml.html
 
 from asl_rulebook2.utils import plural
 from asl_rulebook2.webapp import app
+from asl_rulebook2.webapp import startup as webapp_startup
 from asl_rulebook2.webapp.content import tag_ruleids
 from asl_rulebook2.webapp.utils import make_config_path, make_data_path, split_strip
 
-_sqlite_path = None
+_searchdb_fname = None
+_cached_searchdb_fname = None
 _fts_index = None
 _fixup_content_lock = threading.Lock()
 
@@ -101,7 +106,7 @@ def _do_search( args ):
         raise RuntimeError( "Missing query string." )
     fts_query_string, search_terms = _make_fts_query_string( query_string )
     _logger.debug( "FTS query string: %s", fts_query_string )
-    conn = sqlite3.connect( _sqlite_path )
+    conn = sqlite3.connect( _searchdb_fname )
     def highlight( n ):
          # NOTE: highlight() is an FTS extension function, and takes column numbers :-/
         return "highlight(searchable,{},'{}','{}')".format( n, _BEGIN_HIGHLIGHT, _END_HIGHLIGHT )
@@ -418,27 +423,111 @@ def _adjust_sort_order( results ):
 
 # ---------------------------------------------------------------------
 
-def init_search( content_sets, qa, errata, user_anno, asop, asop_preambles, asop_content, startup_msgs, logger ):
+def init_search( content_sets, #pylint: disable=too-many-arguments
+    qa, qa_fnames,
+    errata, errata_fnames,
+    user_anno, user_anno_fname,
+    asop, asop_preambles, asop_content, asop_fnames,
+    startup_msgs, logger
+):
     """Initialize the search engine."""
 
     # initialize
     global _fts_index
     _fts_index = { "index": {}, "qa": {}, "errata": {}, "user-anno": {}, "asop-entry": {} }
 
-    # initialize the database
-    global _sqlite_path
-    _sqlite_path = app.config.get( "SQLITE_PATH" )
-    if not _sqlite_path:
+    # locate the database
+    global _searchdb_fname
+    _searchdb_fname = app.config.get( "SEARCHDB" )
+    if not _searchdb_fname:
         # FUDGE! We should be able to create a shared, in-memory database using this:
         #   file::XYZ:?mode=memory&cache=shared
         # but it doesn't seem to work (on Linux) and ends up creating a file with this name :-/
         # We manually create a temp file, which has to have the same name each time, so that we don't
         # keep creating a new database each time we start up. Sigh...
-        _sqlite_path = os.path.join( tempfile.gettempdir(), "asl-rulebook2.searchdb" )
-    if os.path.isfile( _sqlite_path ):
-        os.unlink( _sqlite_path )
-    logger.info( "Creating the search index: %s", _sqlite_path )
-    conn = sqlite3.connect( _sqlite_path )
+        _searchdb_fname = os.path.join( tempfile.gettempdir(), "asl-rulebook2.searchdb" )
+
+    def init_searchdb():
+        _init_searchdb( content_sets,
+            qa, qa_fnames,
+            errata, errata_fnames,
+            user_anno, user_anno_fname,
+            asop, asop_preambles, asop_content, asop_fnames,
+            logger
+        )
+
+    # check if we should force the database to be built from a cached version
+    # NOTE: This should only be done for running tests (to ensure that database was built correctly).
+    if app.config.get( "FORCE_CACHED_SEARCHDB" ):
+        # initialize the database using a new cache file (this will force the creation of the cached version)
+        fname = os.path.join( tempfile.gettempdir(), "asl-rulebook2.searchdb-forced_cache" )
+        if os.path.isfile( fname ):
+            os.unlink( fname )
+        app.config[ "CACHED_SEARCHDB" ] = fname
+        assert webapp_startup._startup_tasks == [] #pylint: disable=protected-access
+        init_searchdb()
+        webapp_startup._do_startup_tasks( False ) #pylint: disable=protected-access
+        webapp_startup._startup_tasks = [] #pylint: disable=protected-access
+        # NOTE: When we continue on from here, the database will be initialized again, using the cached version.
+
+    # initialize the database
+    init_searchdb()
+
+    # load the search config
+    load_search_config( startup_msgs, logger )
+
+def _init_searchdb( content_sets, #pylint: disable=too-many-arguments
+    qa, qa_fnames,
+    errata, errata_fnames,
+    user_anno, user_anno_fname,
+    asop, asop_preambles, asop_content, asop_fnames,
+    logger
+):
+    """Initialize the search database."""
+
+    # NOTE: Building the database can be a slow process if there is a lot of content (e.g. Q+A), since we are
+    # runnning many regex's over them, to identify ruleid's that should be converted to links. So, we offer
+    # the option to take a copy of the database after it has been built, and use that the next time we run.
+    # However, the initialization process is complicated, and we can't just use that cached database (e.g. because
+    # we also need to update in-memory objects), so instead, we build the database in the normal way, but where
+    # we would normally run the regex's, we instead grab the result from the cached database, and update
+    # the in-memory objects as required (see _fixup_searchable_content()). This gives significantly faster times
+    # for the startup tasks:
+    #                   rebuild cached
+    #   vm-linux-dev2   2:04    0:01
+    #   Raspberry Pi 4  4:11    0:01
+    #   Banana Pi       17:59   0:08
+
+    # check if there is a cached database
+    global _cached_searchdb_fname
+    _cached_searchdb_fname = None
+    fname = app.config.get( "CACHED_SEARCHDB" )
+    # NOTE: We treat an empty file as being not present since files must exist to be able to mount them
+    # into Docker (run-container.sh creates the file if it is being created for this first time).
+    if fname and os.path.isfile( fname ) and os.path.getsize( fname ) > 0:
+        # yup - compare the file hashes
+        logger.debug( "Checking cached search database: %s", fname )
+        with sqlite3.connect( fname ) as conn:
+            conn.row_factory = sqlite3.Row
+            curs = conn.cursor()
+            query = curs.execute( "SELECT * from file_hash" )
+            old_file_hashes = [ dict(row) for row in query ]
+            logger.debug( "- cached hashes:\n%s", _dump_file_hashes( old_file_hashes, prefix="  " ) )
+            curr_file_hashes = _make_file_hashes(
+                content_sets, qa_fnames, errata_fnames, user_anno_fname, asop_fnames
+            )
+            logger.debug( "- curr. hashes:\n%s", _dump_file_hashes( curr_file_hashes, prefix="  " ) )
+            if old_file_hashes == curr_file_hashes:
+                # the file hashes are the same - flag that we should use the cached database
+                logger.info( "Using cached search database: %s", fname )
+                _cached_searchdb_fname = fname
+
+    # initialize the database
+    if os.path.isfile( _searchdb_fname ):
+        os.unlink( _searchdb_fname )
+    logger.info( "Creating the search index: %s", _searchdb_fname )
+    conn = sqlite3.connect( _searchdb_fname )
+    conn.execute( "PRAGMA journal = memory" )
     # NOTE: Storing everything in a single table allows FTS to rank search results based on
     # the overall content, and also lets us do AND/OR queries across all searchable content.
     conn.execute(
@@ -448,7 +537,6 @@ def init_search( content_sets, qa, errata, user_anno, asop, asop_preambles, asop
 
     # initialize the search index
     logger.info( "Building the search index..." )
-    conn.execute( "DELETE FROM searchable" )
     curs = conn.cursor()
     if content_sets:
         _init_content_sets( conn, curs, content_sets, logger )
@@ -462,8 +550,64 @@ def init_search( content_sets, qa, errata, user_anno, asop, asop_preambles, asop
         _init_asop( curs, asop, asop_preambles, asop_content, logger )
     conn.commit()
 
-    # load the search config
-    load_search_config( startup_msgs, logger )
+    # save the file hashes
+    logger.info( "Calculating file hashes..." )
+    conn.execute( "CREATE TABLE file_hash ( ftype, fname, hash )" )
+    file_hashes = _make_file_hashes(
+        content_sets, qa_fnames, errata_fnames, user_anno_fname, asop_fnames
+    )
+    for fh in file_hashes:
+        logger.debug( "- %s/%s = %s", fh["ftype"], fh["fname"], fh["hash"] )
+        conn.execute( "INSERT INTO file_hash"
+            " ( ftype, fname, hash )"
+            " VALUES ( :ftype, :fname, :hash )",
+            fh
+        )
+    conn.commit()
+
+    # register a task for post-fixup processing
+    fname = app.config.get( "CACHED_SEARCHDB" )
+    if fname:
+        def on_post_fixup():
+            # check if the database was built using the cached version
+            if _cached_searchdb_fname:
+                # yup - validate what we built
+                _check_searchdb( logger )
+            else:
+                # nope - save a copy of what we built (for next time)
+                # NOTE: While VACUUM INTO is nice, it doesn't seem to work inside a Docker container,
+                # and we can't use it anyway, since it may change rowid's :-(
+                # NOTE: While SQLite sometimes creates additional files associated with the database:
+                #   https://sqlite.org/tempfiles.html
+                # I don't think any of these cases apply here, and we can just copy the database file itself.
+                logger.info( "Saving a copy of the search database: %s", fname )
+                shutil.copyfile( _searchdb_fname, fname )
+        from asl_rulebook2.webapp.startup import _add_startup_task
+        _add_startup_task( "post-fixup processing", on_post_fixup )
+
+def _check_searchdb( logger ):
+    """Compare the newly-built search database with the cached one."""
+
+    with sqlite3.connect( _searchdb_fname ) as conn, sqlite3.connect( _cached_searchdb_fname ) as conn2:
+
+        # check the number of rows
+        nrows = _get_row_count( conn, "searchable" )
+        nrows2 = _get_row_count( conn2, "searchable" )
+        if nrows != nrows2:
+            logger.error( "Searchable row count mismatch: got %d, expected %d", nrows, nrows2 )
+
+        # check the row content
+        query = "SELECT rowid, * FROM searchable ORDER BY rowid"
+        curs = conn.execute( query )
+        curs2 = conn2.execute( query )
+        for _ in range( nrows ):
+            row = curs.fetchone()
+            row2 = curs2.fetchone()
+            if row != row2:
+                logger.error( "Search row mismatch:\n- got: %s\n- expected: %s", row, row2 )
+
+    # NOTE: It would be nice to show an error balloon if we detected any problems here, but since
+    # we are running in a startup task, it's too late (the UI will have already called $/startup-msgs).
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -477,10 +621,13 @@ def _init_content_sets( conn, curs, content_sets, logger ):
         }
 
     # add the index entries to the search index
+    # IMPORTANT! The insert order must be stable (so that we can match rows in the cached database by rowid).
     sr_type = "index"
-    for cset in content_sets.values():
+    for cset_id in sorted( content_sets.keys() ):
+        cset = content_sets[ cset_id ]
         logger.info( "- Adding index file: %s", cset["index_fname"] )
         nrows = 0
+        assert isinstance( cset["index"], list )
         for index_entry in cset["index"]:
             rulerefs = _RULEREF_SEPARATOR.join( r.get("caption","") for r in index_entry.get("rulerefs",[]) )
             # NOTE: We should really strip content before adding it to the search index, otherwise any HTML tags
@@ -503,14 +650,14 @@ def _init_content_sets( conn, curs, content_sets, logger ):
     assert len(_fts_index[sr_type]) == _get_row_count( conn, "searchable" )
 
     # register a task to fixup the content
-    def fixup_index_entry( rowid, cset_id ):
+    def fixup_row( rowid, cset_id ):
         index_entry = _fts_index[ sr_type ][ rowid ]
         _tag_ruleids_in_field( index_entry, "subtitle", cset_id )
         _tag_ruleids_in_field( index_entry, "content", cset_id )
         return index_entry
     from asl_rulebook2.webapp.startup import _add_startup_task
-    _add_startup_task( "index searchable content",
-        lambda: _fixup_searchable_content( sr_type, fixup_index_entry, make_fields )
+    _add_startup_task( "fixup index searchable content",
+        lambda: _fixup_searchable_content( sr_type, fixup_row, make_fields )
     )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -530,18 +677,32 @@ def _init_qa( curs, qa, logger ):
             buf.append( _QA_FIELD_SEPARATOR.join( buf2 ) )
         return {
             "title": qa_entry.get( "caption" ),
-            "content":_QA_CONTENT_SEPERATOR.join( buf ),
+            "content": _QA_CONTENT_SEPERATOR.join( buf ),
         }
+
+    def unload_fields( qa_entry, fields ):
+        """Unload the Q+A entry's fields from the cached search database."""
+        qa_entry["caption"] = fields["title"]
+        contents = fields["content"].split( _QA_CONTENT_SEPERATOR )
+        for content_no, content in enumerate( contents ):
+            fields = content.split( _QA_FIELD_SEPARATOR )
+            if fields[0] != _NO_QA_QUESTION:
+                qa_entry["content"][content_no]["question"] = fields[0]
+            for field_no in range( 1, len(fields) ):
+                qa_entry["content"][content_no]["answers"][field_no-1][0] = fields[ field_no ]
 
     logger.info( "- Adding the Q+A." )
     nrows = 0
     sr_type = "qa"
-    for qa_entries in qa.values():
+    # IMPORTANT! The insert order must be stable (so that we can match rows in the cached database by rowid).
+    for qa_key in sorted( qa.keys() ):
+        qa_entries = qa[ qa_key ]
+        assert isinstance( qa_entries, list )
         for qa_entry in qa_entries:
             fields = make_fields( qa_entry )
             curs.execute(
                 "INSERT INTO searchable ( sr_type, title, content ) VALUES ( ?, ?, ? )", (
-                    sr_type, fields["title"], fields["content"]
+                sr_type, fields["title"], fields["content"]
             ) )
             _fts_index[sr_type][ curs.lastrowid ] = qa_entry
             qa_entry["_fts_rowid"] = curs.lastrowid
@@ -549,7 +710,7 @@ def _init_qa( curs, qa, logger ):
     logger.info( "  - Added %s.", plural(nrows,"Q+A entry","Q+A entries"),  )
 
     # register a task to fixup the content
-    def fixup_qa( rowid, cset_id ):
+    def fixup_row( rowid, cset_id ):
         qa_entry = _fts_index[ sr_type ][ rowid ]
         _tag_ruleids_in_field( qa_entry, "caption", cset_id )
         for content in qa_entry.get( "content", [] ):
@@ -558,8 +719,8 @@ def _init_qa( curs, qa, logger ):
                 _tag_ruleids_in_field( answer, 0, cset_id )
         return qa_entry
     from asl_rulebook2.webapp.startup import _add_startup_task
-    _add_startup_task( "Q+A searchable content",
-        lambda: _fixup_searchable_content( sr_type, fixup_qa, make_fields )
+    _add_startup_task( "fixup Q+A searchable content",
+        lambda: _fixup_searchable_content( sr_type, fixup_row, make_fields, unload_fields=unload_fields )
     )
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -585,9 +746,11 @@ def _do_init_anno( curs, anno, atype ):
         }
 
     # add the annotations to the search index
+    # IMPORTANT! The insert order must be stable (so that we can match rows in the cached database by rowid).
     nrows = 0
     sr_type = atype
-    for ruleid in anno:
+    for ruleid in sorted( anno, key=str ):
+        assert isinstance( anno[ruleid], list )
         for a in anno[ruleid]:
             fields = make_fields( a )
             curs.execute(
@@ -599,13 +762,13 @@ def _do_init_anno( curs, anno, atype ):
             nrows += 1
 
     # register a task to fixup the content
-    def fixup_anno( rowid, cset_id ):
+    def fixup_row( rowid, cset_id ):
         anno = _fts_index[ sr_type ][ rowid ]
         _tag_ruleids_in_field( anno, "content", cset_id )
         return anno
     from asl_rulebook2.webapp.startup import _add_startup_task
-    _add_startup_task( atype+" searchable content",
-        lambda: _fixup_searchable_content( sr_type, fixup_anno, make_fields )
+    _add_startup_task( "fixup {} searchable content".format( atype ),
+        lambda: _fixup_searchable_content( sr_type, fixup_row, make_fields )
     )
 
     return nrows
@@ -619,6 +782,7 @@ def _init_asop( curs, asop, asop_preambles, asop_content, logger ):
     sr_type = "asop-entry"
     fixup_sections = []
     nentries = 0
+    # IMPORTANT! The insert order must be stable (so that we can match rows in the cached database by rowid).
     for chapter in asop.get( "chapters", [] ):
         for section in chapter.get( "sections", [] ):
             content = asop_content.get( section["section_id"] )
@@ -631,6 +795,7 @@ def _init_asop( curs, asop, asop_preambles, asop_content, logger ):
             # so that we can return them as individual search results). Each database row points
             # to the parent section, and the section has a list of FTS rows for its child entries.
             section[ "_fts_rowids" ] = []
+            assert isinstance( entries, list )
             for entry in entries:
                 curs.execute(
                     "INSERT INTO searchable ( sr_type, content ) VALUES ( ?, ? )", (
@@ -643,21 +808,45 @@ def _init_asop( curs, asop, asop_preambles, asop_content, logger ):
 
     # register a task to fixup the content
     def fixup_content():
-        _fixup_searchable_content( sr_type, fixup_entry, make_fields )
+        _fixup_searchable_content( sr_type, fixup_row, make_fields )
         # we also need to fixup the in-memory data structures
-        cset_id = None
-        for chapter_id in asop_preambles:
-            _tag_ruleids_in_field( asop_preambles, chapter_id, cset_id )
-        for section in fixup_sections:
-            _tag_ruleids_in_field( asop_content, section["section_id"], cset_id )
-    def fixup_entry( rowid, cset_id ):
+        if _cached_searchdb_fname is None:
+            cset_id = None
+            # NOTE: ASOP sections are divided up into individual entries, and each entry stored as a separate
+            # searchable row, which means that we would have to reconstitute the sections from these rows
+            # when they are read back from a cached database. While it's maybe possible to do this, it's safer
+            # to just stored the fixed-up sections verbatim.
+            with sqlite3.connect( _searchdb_fname ) as conn:
+                conn.execute( "CREATE TABLE fixedup_asop_preamble ( chapter_id, content )" )
+                conn.execute( "CREATE TABLE fixedup_asop_section ( section_id, content )" )
+                for chapter_id in asop_preambles:
+                    _tag_ruleids_in_field( asop_preambles, chapter_id, cset_id )
+                    conn.execute( "INSERT INTO fixedup_asop_preamble ( chapter_id, content ) VALUES ( ?, ? )", (
+                        chapter_id, asop_preambles[chapter_id]
+                    ) )
+                for section in fixup_sections:
+                    section_id = section["section_id"]
+                    _tag_ruleids_in_field( asop_content, section_id, cset_id )
+                    conn.execute( "INSERT INTO fixedup_asop_section ( section_id, content ) VALUES ( ?, ? )", (
+                        section_id, asop_content[section_id]
+                    ) )
+                conn.commit()
+        else:
+            # restore the fixed-up ASOP content into the in-memory objects
+            with sqlite3.connect( _cached_searchdb_fname ) as conn:
+                for row in conn.execute( "SELECT chapter_id, content FROM fixedup_asop_preamble" ):
+                    asop_preambles[ row[0] ] = row[1]
+                for row in conn.execute( "SELECT section_id, content FROM fixedup_asop_section" ):
+                    asop_content[ row[0] ] = row[1]
+
+    def fixup_row( rowid, cset_id ):
         entry = _fts_index[ sr_type ][ rowid ].pop()
         entry = tag_ruleids( entry, cset_id )
         return entry
     def make_fields( entry ):
         return { "content": entry }
     from asl_rulebook2.webapp.startup import _add_startup_task
-    _add_startup_task( "ASOP searchable content", fixup_content )
+    _add_startup_task( "fixup ASOP searchable content", fixup_content )
 
 def _extract_section_entries( content ):
     """Separate out each entry from the section's content."""
@@ -676,6 +865,54 @@ def _extract_section_entries( content ):
         # than not seeing anything at all.
         return [ content ]
     return entries
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+def _make_file_hashes( content_sets, qa_fnames, errata_fnames, user_anno_fname, asop_fnames ):
+    """Generate hashes for the files that are used to populate the search index."""
+
+    file_hashes = []
+    def add_file( fh_type, fname ):
+        with open( fname, "rb" ) as fp:
+            hashval = hashlib.md5( fp.read() ).hexdigest()
+        file_hashes.append( {
+            "ftype": fh_type,
+            "fname": os.path.basename( fname ),
+            "hash": hashval
+        } )
+
+    # add each file to the table
+    if content_sets:
+        for cset_id, cset in content_sets.items():
+            add_file( "index:{}".format(cset_id), cset["index_fname"] )
+    if qa_fnames:
+        for fname in qa_fnames:
+            add_file( "q+a", fname )
+    if errata_fnames:
+        for fname in errata_fnames:
+            add_file( "errata", fname )
+    if user_anno_fname:
+        add_file( "user-anno", user_anno_fname )
+    if asop_fnames:
+        for fname in asop_fnames:
+            add_file( "asop", fname )
+
+    file_hashes.sort(
+        key = lambda row: ( row["ftype"], row["fname"] )
+    )
+    return file_hashes
+
+def _dump_file_hashes( file_hashes, prefix="" ):
+    """Dump file hashes."""
+    if not file_hashes:
+        return ""
+    max_ftype_len = max( len(fh["ftype"]) for fh in file_hashes )
+    max_fname_len = max( len(fh["fname"]) for fh in file_hashes )
+    fmt = prefix + "{ftype:<%d} | {fname:<%d} | {hash}" % ( max_ftype_len, max_fname_len )
+    buf = io.StringIO()
+    for fh in file_hashes:
+        print( fmt.format( **fh ), file=buf )
+    return buf.getvalue().rstrip()
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -780,41 +1017,42 @@ def load_search_config( startup_msgs, logger ):
 
 # ---------------------------------------------------------------------
 
-def _fixup_searchable_content( sr_type, fixup_row, make_fields ):
+def _fixup_searchable_content( sr_type, fixup_row, make_fields, unload_fields=None ):
     """Fixup the searchable content for the specified search result type."""
 
-    # locate the rows we're going to fixup
-    # NOTE: Then searchable table never changes after it has been built, so we don't need the lock.
-    conn = sqlite3.connect( _sqlite_path )
+    # initialize
+    conn = sqlite3.connect( _searchdb_fname )
+    conn.row_factory = sqlite3.Row
     curs = conn.cursor()
-    query = curs.execute( "SELECT rowid, cset_id, title, subtitle, content FROM searchable WHERE sr_type=?",
-        ( sr_type, )
-    )
-    content_rows = list( query.fetchall() )
+
+    # check if we have a cached database to retrieve values from
+    cached_searchdb_conn = None
+    if _cached_searchdb_fname:
+        cached_searchdb_conn = sqlite3.connect( _cached_searchdb_fname )
+        cached_searchdb_conn.row_factory = sqlite3.Row
 
     # update the searchable content in each row
     nrows = 0
     last_commit_time = time.time()
-    for row in content_rows:
+    query = conn.execute( "SELECT rowid, cset_id FROM searchable WHERE sr_type=?",
+        ( sr_type, )
+    )
+    for row in query:
 
-        # NOTE: The fixup_row() callback will usually be using _tag_ruleids_in_field(), which manages
-        # the lock; otherwise the callback needs to do it itself. We don't want to invoke this callback
-        # inside the lock since it can be quite slow; _tag_ruleids_in_field() holds the lock for the
-        # minimum amount of time.
-        new_row = fixup_row( row[0], row[1] )
+        # prepare the row
+        row = dict( row )
+        nrows += 1
 
-        with _fixup_content_lock:
-            # NOTE: The make_fields() callback will usually be accessing the fields we want to fixup,
-            # so we need to protect them with the lock.
-            fields = make_fields( new_row )
-            # NOTE: We update the row inside the lock to prevent "database is locked" errors, if the user
-            # tries to do a search while this is happening.
-            query = "UPDATE searchable SET {} WHERE rowid={}".format(
-                ", ".join( "{}=?".format( f ) for f in fields ),
-                row[0]
-            )
-            curs.execute( query, tuple(fields.values()) )
-            nrows += 1
+        # fixup the searchable row
+        if cached_searchdb_conn:
+            # find the corresponding row in the cached database
+            # IMPORTANT! This relies on the 2 rows having the same rowid.
+            cached_row = dict( cached_searchdb_conn.execute(
+                "SELECT * FROM searchable WHERE rowid=?", (row["rowid"],)
+            ).fetchone() )
+            _restore_cached_searchable_row( row, sr_type, make_fields, unload_fields, cached_row, curs )
+        else:
+            _fixup_searchable_row( row, fixup_row, make_fields, curs )
 
         # commit the changes regularly (so that they are available to the front-end)
         if time.time() - last_commit_time >= 1:
@@ -826,25 +1064,91 @@ def _fixup_searchable_content( sr_type, fixup_row, make_fields ):
 
     return plural( nrows, "row", "rows" )
 
+def _fixup_searchable_row( row, fixup_row, make_fields, curs ):
+    """Fix up a single row in the searchable table."""
+
+    # NOTE: The fixup_row() callback will usually be using _tag_ruleids_in_field(), which manages
+    # the lock; otherwise the callback needs to do it itself. We don't want to invoke this callback
+    # inside the lock since it can be quite slow; _tag_ruleids_in_field() holds the lock for the
+    # minimum amount of time.
+    new_row = fixup_row( row["rowid"], row["cset_id"] )
+
+    with _fixup_content_lock:
+
+        # NOTE: The make_fields() callback will usually be accessing the fields we want to fixup,
+        # so we need to protect them with the lock.
+        fields = make_fields( new_row )
+
+        # NOTE: We update the row inside the lock to prevent "database is locked" errors, if the user
+        # tries to do a search while this is happening.
+        query = "UPDATE searchable SET {} WHERE rowid={}".format(
+            ", ".join( "{}=?".format( f ) for f in fields ),
+            row["rowid"]
+        )
+        curs.execute( query, tuple(fields.values()) )
+
+def _restore_cached_searchable_row( row, sr_type, make_fields, unload_fields, cached_row, curs ):
+    """Restore a searchable row from the cached database."""
+
+    # get the in-memory object corresponding to the next searchable row
+    obj = _fts_index[ sr_type ][ row["rowid"] ]
+    fields = make_fields( obj )
+
+    # figure out which fields need to be updated
+    if sr_type == "asop-entry":
+        # flag that the content field in the searchable row needs to be updated
+        assert list( fields.keys() ) == [ "content" ]
+        update_fields = { "content": cached_row["content"] }
+        # NOTE: We can't update the in-memory ASOP sections here (since the searchable rows contain
+        # individual section entries that have been separated out - see _extract_section_entries()),
+        # so we do this in the "fixup asop" task.
+    else:
+        update_fields = [
+            f for f in fields
+            if obj.get( f ) != cached_row[f]
+        ]
+
+    # update the fields
+    if update_fields:
+        # NOTE: We need to update the in-memory objects to support $/rule-info.
+        if sr_type in ("errata", "qa", "user-anno"):
+            if unload_fields:
+                # let the caller update the in-memory object
+                unload_fields( obj, { f: cached_row[f] for f in fields } )
+            else:
+                # update the in-memory object ourself
+                for field in update_fields:
+                    obj[ field ] = cached_row[ field ]
+        # update the searchable row
+        with _fixup_content_lock:
+            query = "UPDATE searchable SET {} WHERE rowid={}".format(
+                ", ".join( "{}=?".format( f ) for f in update_fields ),
+                row["rowid"]
+            )
+            curs.execute( query, tuple(
+                cached_row[f] for f in update_fields
+            ) )
+
 _last_sleep_time = 0
 
 def _tag_ruleids_in_field( obj, key, cset_id ):
     """Tag ruleid's in an optional field."""
-    if isinstance( key, int ) or key in obj:
-        # NOTE: The data structures we use to manage all the in-memory objects never change after
-        # they have been loaded, so the only thread-safety we need to worry about is when we read
-        # the original value from an object, and when we update it with a new value. The actual process
-        # of tagging ruleid's in a piece of content is done outside the lock, since it's quite slow.
-        with _fixup_content_lock:
-            val = obj[key]
-        new_val = tag_ruleids( val, cset_id )
-        with _fixup_content_lock:
-            obj[key] = new_val
-        # FUDGE! Give other threads a chance to run :-/
-        global _last_sleep_time
-        if time.time() - _last_sleep_time > 1:
-            time.sleep( 0.1 )
-            _last_sleep_time = time.time()
+    if not isinstance( key, int ) and key not in obj:
+        return
+    # NOTE: The data structures we use to manage all the in-memory objects never change after
+    # they have been loaded, so the only thread-safety we need to worry about is when we read
+    # the original value from an object, and when we update it with a new value. The actual process
+    # of tagging ruleid's in a piece of content is done outside the lock, since it's quite slow.
+    with _fixup_content_lock:
+        val = obj[key]
+    new_val = tag_ruleids( val, cset_id )
+    with _fixup_content_lock:
+        obj[key] = new_val
+    # FUDGE! Give other threads a chance to run :-/
+    global _last_sleep_time
+    if time.time() - _last_sleep_time > 1:
+        time.sleep( 0.1 )
+        _last_sleep_time = time.time()
 
 def _get_row_count( conn, table_name ):
     """Get the number of rows in a table."""

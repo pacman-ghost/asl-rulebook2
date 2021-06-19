@@ -66,6 +66,7 @@ for _key, _val in app.config.items():
 
 # load any config from environment variables (e.g. set in the Docker container)
 _set_config_from_env( "DATA_DIR" )
+_set_config_from_env( "CACHED_SEARCHDB" )
 
 # initialize logging
 _fname = os.path.join( CONFIG_DIR, "logging.yaml" )

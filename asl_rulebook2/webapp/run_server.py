@@ -75,7 +75,7 @@ def main( bind_addr, data_dir, force_init_delay, flask_debug ):
     if force_init_delay > 0:
         def _start_server():
             time.sleep( force_init_delay )
-            url = "http://{}:{}/ping".format( host, port )
+            url = "http://{}:{}".format( host, port )
             _ = urllib.request.urlopen( url )
         threading.Thread( target=_start_server, daemon=True ).start()
 

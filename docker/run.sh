@@ -2,4 +2,5 @@
 
 # run the webapp server
 python3 /app/asl_rulebook2/webapp/run_server.py \
-    --addr 0.0.0.0
+    --addr 0.0.0.0 \
+    --force-init-delay 30

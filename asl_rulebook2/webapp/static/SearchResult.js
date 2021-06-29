@@ -20,10 +20,12 @@ gMainApp.component( "index-sr", {
       :class=makeBorderColor() class="caption"
     >
         <collapser @click=onToggleRulerefs ref="collapser" />
-        <img v-if=iconUrl :src=iconUrl :style="{cursor: this.primaryTarget ? 'pointer' : null}"
-          @click=onClickIcon
-          class="icon"
-        />
+        <div class="icon-wrapper">
+            <img v-if=iconUrl :src=iconUrl :style="{cursor: this.primaryTarget ? 'pointer' : null}"
+              @click=onClickIcon
+              class="icon"
+            />
+        </div>
         <span v-if=sr.title v-html=sr.title :style="{cursor: this.primaryTarget ? 'pointer' : null}"
           @click=onClickIcon
           class="title"

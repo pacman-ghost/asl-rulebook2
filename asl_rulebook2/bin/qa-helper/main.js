@@ -1,6 +1,8 @@
 var gQuestionImageUrl = "../../webapp/static/images/question.png" ;
 var gAnswerImageUrl = "../../webapp/static/images/answer.png" ;
 
+var QA_SOURCE = "ps" ;
+
 // --------------------------------------------------------------------
 
 $(document).ready( function() {
@@ -133,12 +135,12 @@ function updatePreviews()
         if ( question ) {
             jsonContent.push( [
                 '    { "question": "' + safeJson(question) + '",',
-                '      "answers": [ [ "' + safeJson(answer) + '", "sr" ] ]',
+                '      "answers": [ [ "' + safeJson(answer) + '", "' + QA_SOURCE + '" ] ]',
                 '    }'
             ].join( "\n" ) ) ;
         } else {
             jsonContent.push( [
-                '    { "answers": [ [ "' + safeJson(answer) + '", "sr" ] ]',
+                '    { "answers": [ [ "' + safeJson(answer) + '", "' + QA_SOURCE + '" ] ]',
                 '    }'
             ].join( "\n" ) ) ;
         }

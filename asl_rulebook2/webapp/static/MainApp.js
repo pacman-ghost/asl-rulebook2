@@ -269,7 +269,7 @@ gMainApp.component( "main-app", {
                 }
             }
             // update the UI
-            $( "#watermark" ).css( "opacity", 0.15 ) ;
+            $( "#watermark" ).css( "opacity", 0.1 ) ;
             this.$nextTick( () => {
                 $( "#query-string" ).focus() ; // nb: because autofocus on the <input> doesn't work :-/
             } ) ;

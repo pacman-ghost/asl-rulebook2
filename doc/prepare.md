@@ -21,7 +21,7 @@ The first step is to extract the information we need from the eASLRB PDF.
         --save-vo-notes /tmp/prepared/ASL\ Rulebook.vo-notes \
         --progress
 ```
-This extracts the information we need, and saves it in the 4 data files.
+This extracts the information we need, and saves it in the 5 data files.
 
 ### Prepare the PDF
 
@@ -53,7 +53,7 @@ This rotates any landscape pages, so that the browser shows pages at the correct
 
 ### Using the prepared files
 
-You should now have 5 files (the 4 extracted data files, plus the fixed-up PDF), which can be passed in to the program e.g.
+You should now have 6 files (the 5 extracted data files, plus the fixed-up PDF), which can be passed in to the program e.g.
 ```
     ./run-container.sh \
         --port 5020 \

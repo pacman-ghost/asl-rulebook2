@@ -6,7 +6,7 @@ To add rules for a module already referenced by the ASLRB index (e.g. RB or BR:T
 
 Then, write a targets file `ASL Rulebook (xxx).targets`, that describes where each rule lives within the PDF. As an example, take a look at the `ASL Rulebook.targets` file that was extracted for you.
 
-*NOTE: Only the page number is required, the X/Y position on the page is optional.*
+*NOTE: For each rule, only the page number is required; the X/Y position on the page is optional.*
 
 Finally, bookmarks need to be created in the PDF for each rule, so that the program can jump directly to each rule:
 ```
@@ -16,7 +16,7 @@ Finally, bookmarks need to be created in the PDF for each rule, so that the prog
         --yoffset 5 \
         --output /tmp/xxx-prepared.pdf
 ```
-Save the prepared file as `ASL Rulebook (xxx).pdf`, and the targets file, in your data directory, and restart the server.
+Save the prepared file as `ASL Rulebook (xxx).pdf` in your data directory, together with the targets file, then restart the server.
 
 Optionally, you can also provide:
 - a `ASL Rulebook (xxx).chapters` file (to be able to browse the PDF in the *Chapters* panel)

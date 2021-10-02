@@ -20,6 +20,12 @@ ul ul ul { list-style-image: url(../images/bullet3.png) ; }
 .auto-ruleid { color: red ; }
 .auto-ruleid:hover { background: #ffffcc ; }
 span.pre { font-family: monospace ; }
+blockquote {
+    margin: .5em 1em .75em 1em ; padding: 5px 5px 5px 15px ;
+    border: 1px solid #ddd ; background: #fffff0 ;
+    background-image: url( "../images/blockquote.png" ) ; background-position: 2px 5px ; background-repeat: no-repeat ;
+    font-style: italic ;
+}
 
  /* notification balloons */
 #growls-br { bottom: 0 ; right: 0 ; max-height: 40% ; }

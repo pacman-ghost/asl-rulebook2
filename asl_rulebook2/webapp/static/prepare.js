@@ -309,7 +309,7 @@ gPrepareApp.component( "download-panel", {
     </div>
     <div class="info">
         You can edit these files directly, if you want to make changes.
-        <p> If you want to make changes permanent (so they happen if you redo this preparation process), check out the files in <span class="pre">$/asl_rulebook2/extract//data/</span>. </p>
+        <p> If you want to make changes permanent (so they happen if you redo this preparation process), check out the files in <span class="pre">$/asl_rulebook2/extract/data/</span>. </p>
     </div>
 </div>`,
 

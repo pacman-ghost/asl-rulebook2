@@ -7,9 +7,8 @@
 
 #watermark {
     position: absolute ; right: -25px ; bottom: 2px;
-    width: 200px ; height: 200px ;
+    width: 208px ; height: 219px ;
     background: url(../images/watermark.png) left bottom no-repeat ; background-size: 100% ;
-    transform: scaleX(-1) ;
     opacity: 0 ; z-index: -99 ;
     transition: opacity 10s ;
 }

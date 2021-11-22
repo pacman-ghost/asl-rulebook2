@@ -218,9 +218,21 @@
     ]
 },
 
+"SquadEquivalent": {
+    "new_title": "Squad Equivalent"
+},
+
 "Stacking Limits": {
     "replace": [
         [ "[Inspecting: see Right of Inspection: (Before Play: A2.9) (During Play: A12.16) (Pillboxes: B30.7)]", "[Inspecting: see Right of Inspection (Before Play): A2.9] [Inspecting: see Right of Inspection (During Play): A12.16] [Inspecting: see Right of Inspection (Pillboxes): B30.7]" ]
+    ]
+},
+
+"Stall": {
+    "replace": [
+        [ "givenina", "given in a" ],
+        [ "ChapterH", "Chapter H" ],
+        [ " ifa ", " if a " ]
     ]
 },
 

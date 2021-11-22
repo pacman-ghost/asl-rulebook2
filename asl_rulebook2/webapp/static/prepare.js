@@ -140,7 +140,7 @@ gPrepareApp.component( "upload-panel", {
             Click on the button, and select your copy of MMP's eASLRB.
             <div class="info"> You <u>must</u> use the <a href="https://www.wargamevault.com/product/344879/Electronic-Advanced-Squad-Leader-Rulebook" target="_blank">offical MMP eASLRB</a>. <br>
                 A scan of a printed rulebook <u>will not work</u>!
-                <p> You should use v1.05 of the eASLRB PDF (normal version, not the "inherited zoom" version). Other versions <i>may</i> work, but may have warnings and/or errors. </p>
+                <p> You should use v1.07 of the eASLRB PDF (normal version, not the "inherited zoom" version). Other versions <i>may</i> work, but may have warnings and/or errors. </p>
             </div>
         </div>
     </div>

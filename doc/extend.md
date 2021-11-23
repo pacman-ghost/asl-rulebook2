@@ -19,6 +19,7 @@ Finally, bookmarks need to be created in the PDF for each rule, so that the prog
 Save the prepared file as `ASL Rulebook (xxx).pdf` in your data directory, together with the targets file, then restart the server.
 
 Optionally, you can also provide:
+
 - a `ASL Rulebook (xxx).chapters` file (to be able to browse the PDF in the *Chapters* panel)
 - a `ASL Rulebook (xxx).footnotes` file (if the rules have any footnotes).
 
@@ -29,6 +30,7 @@ To add a chapter icon and background, create files `XXX-icon.png` and `XXX-backg
 To add rules for a module not already referenced by the ASLRB index, the process is the same as above, but you also need to write a `.index` file. As an example, take a look at the `ASL Rulebook.index` file that was extracted for you.
 
 All the files should have the same base filename e.g.
+
 - kgs.index
 - kgs.pdf
 - kgs.targets
@@ -45,6 +47,7 @@ This is described [here](../asl_rulebook2/webapp/tests/fixtures/full/).
 As you add more content, program startup will use more and more CPU (as it converts rule ID's to clickable links), and while the program will still come up and be functional quickly, rule ID's will take longer to become clickable, and this processing may affect other things running on your computer.
 
 To alleviate this, you can specify a file to cache the results of this work:
+
 - add a `CACHED_SEARCHDB` settings to your `site.cfg` file (if running from source)
 - add a `--cached-searchdb` parameter when running `run-container.sh` (if running using Docker)
 

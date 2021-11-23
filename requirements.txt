@@ -5,6 +5,7 @@ flask-socketio==5.1.1
 eventlet==0.33.0
 pyyaml==5.4.1
 lxml==4.6.2
+markdown==3.3.6
 click==7.1.2
 
 pdfminer.six==20201018

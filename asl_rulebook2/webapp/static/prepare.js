@@ -31,7 +31,7 @@ gPrepareApp.component( "prepare-app", {
             It will take around 10-15 minutes.
         </p>
         <p> If there are problems, you can try to prepare your data files manually,
-            as described <a href="https://github.com/pacman-ghost/asl-rulebook2/blob/master/doc/prepare.md" target="_blank">here</a>.
+            as described <a href="/doc/prepare.md" target="_blank">here</a>.
         </p>
     </div>
     <div v-show=fatalErrorMsg id="fatal-error" >
@@ -185,11 +185,18 @@ gPrepareApp.component( "progress-panel", {
     data() { return {
         socketIOClient: null,
         statusBlocks: [],
+        isDone: false,
     } ; },
 
     template: `
 <div id="progress-panel">
     <status-block v-for="sb in statusBlocks" :statusBlock=sb :key=sb />
+    <div v-if="!isDone" class="loading">
+        <img src="/static/images/loading.gif" />
+        <div style="margin-top:3px;">
+            While you're waiting, you can <br> check out the features <a href="/doc/features/index.html" target="_blank">here</a>.
+        </div>
+    </div>
 </div>`,
 
     created() {
@@ -202,10 +209,9 @@ gPrepareApp.component( "progress-panel", {
 
         initSocketIOClient() {
             // initialize the socketio client
-            let done = false ;
             this.socketIOClient = io.connect() ; //eslint-disable-line no-undef
             this.socketIOClient.on( "disconnect", () => {
-                if ( ! done )
+                if ( ! this.isDone )
                     this.$emit( "fatal", "The server has gone away. Please restart it, then reload this page." ) ;
             } ) ;
             this.socketIOClient.on( "status", (msg) => { this.addStatusBlock( msg ) ; } ) ;
@@ -213,7 +219,7 @@ gPrepareApp.component( "progress-panel", {
             this.socketIOClient.on( "warning", (msg) => { this.addProgressMsg( "warning", msg ) ; } ) ;
             this.socketIOClient.on( "error", (msg) => { this.addProgressMsg( "error", msg ) ; } ) ;
             this.socketIOClient.on( "done", (downloadUrl) => {
-                done = true ;
+                this.isDone = true ;
                 gProgressPanel.addStatusBlock( "All done." ) ;
                 this.socketIOClient.disconnect() ;
                 this.socketIOClient = null ;

@@ -47,6 +47,7 @@ RUN if [ -n "$CONTROL_TESTS_PORT" ]; then \
 # install the application
 WORKDIR /app
 COPY asl_rulebook2/ ./asl_rulebook2/
+COPY doc/ ./doc/
 COPY setup.py requirements.txt requirements-dev.txt LICENSE.txt ./
 RUN pip3 install --editable .
 

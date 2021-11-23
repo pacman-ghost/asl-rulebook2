@@ -41,6 +41,9 @@ def get_control_tests():
     def get_port():
         """Get the configured gRPC service port."""
         # NOTE: The Docker container configures this setting via an environment variable.
+        # NOTE: It would be nice to default this to -1, so that pytest will work out-of-the-box,
+        # without the user having to do anything, but since this endpoint can be used to
+        # mess with the server, we don't want it active by default.
         return app.config.get( "CONTROL_TESTS_PORT", os.environ.get("CONTROL_TESTS_PORT") )
 
     # check if the test control service should be made available

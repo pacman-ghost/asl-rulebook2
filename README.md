@@ -12,23 +12,19 @@ With [some work](doc/extend.md), you can also:
 - include your own annotations
 - include the ASOP, complete with clickable links to each rule
 
-*NOTE: This project integrates with my other [`asl-articles`](https://github.com/pacman-ghost/asl-articles) project, so that if an article references a rule, it becomes a clickable link that will open a browser showing that rule.*
+*NOTE: The program requires Firefox; Chrome doesn't support a key feature it needs.*
+
+*NOTE: This project integrates with my other [`asl-articles`](https://github.com/pacman-ghost/asl-articles) project, so that if an article references a rule, it becomes a clickable link that will open a browser showing that rule. The [`vasl-templates`](https://github.com/pacman-ghost/vasl-templates) project can also be configured to allow vehicles and ordnance to open their corresponding Chapter H entries.*
 
 ### Installation
 
 After cloning the repo, you can either:
-- run it using Docker (recommended, run `./run-container.sh`)
+- run it using Docker (recommended, run `./run-container.sh --port 5020`)
 - run it from source (requires Python 3.8.7, install the module, run `asl_rulebook2/webapp/run_server.py`)
 
-*NOTE: Run either command with no arguments to get help.*
+*NOTE: Run either command with `--help` to get help.*
 
-Run either command with a `--port` argument, then connect to the server in a browser e.g.
-
-``` ./run-container.sh --port 5020 ```
-
-Then open `http://localhost:5020`.
-
-*NOTE: The program requires Firefox; Chrome doesn't really support a key feature it needs.*
+Then connect to the server in a browser at `http://localhost:5020`.
 
 A few things need to be set up before the program can be used; the webapp will guide you through the process.
 

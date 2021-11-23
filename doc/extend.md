@@ -36,9 +36,9 @@ All the files should have the same base filename e.g.
 - kgs.targets
 - etc...
 
-### Adding Q+A, errata, user annoations, ASOP
+### Adding Q+A, errata, user annotations, ASOP
 
-This is described [here](../asl_rulebook2/webapp/tests/fixtures/full/).
+This is described in `$/asl_rulebook2/webapp/tests/fixtures/full/`.
 
 *NOTE: If you add Q+A, there is a tool in `$/asl_rulebook2/bin/qa-helper/` to help with the process.*
 

@@ -49,13 +49,12 @@ Finally, we need to fixup some issues in the PDF:
         --output /tmp/prepared/ASL\ Rulebook.pdf \
         --progress
 ```
-This rotates any landscape pages, so that the browser shows pages at the correct width (without a horizontal scrollbar).
+This rotates any landscape pages, so that the browser shows pages at the correct width (without a horizontal scrollbar), and optimizes the PDF for use in a browser.
 
 ### Using the prepared files
 
 You should now have 6 files (the 5 extracted data files, plus the fixed-up PDF), which can be passed in to the program e.g.
 ```
     ./run-container.sh \
-        --port 5020 \
         --data /tmp/prepared/
 ```

@@ -116,7 +116,7 @@ def init_qa( startup_msgs, logger ):
 # ---------------------------------------------------------------------
 
 def init_annotations( startup_msgs, logger ):
-    """Initialize the user-defined annoations."""
+    """Initialize the user-defined annotations."""
 
     # initialize
     global _user_anno

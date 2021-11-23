@@ -2,6 +2,8 @@
 """ Fixup issues in the MMP eASLRB. """
 
 import os
+import threading
+import time
 
 from pikepdf import Pdf, Page, OutlineItem, Encryption, make_page_destination
 import click
@@ -10,7 +12,7 @@ from asl_rulebook2.utils import log_msg_stderr
 
 # ---------------------------------------------------------------------
 
-def fixup_mmp_pdf( fname, output_fname, fix_zoom, optimize_web, rotate, log=None ):
+def fixup_mmp_pdf( fname, output_fname, fix_zoom, optimize_web, rotate, log=None, relinq=None ):
     """Fixup the MMP eASLRB PDF."""
 
     # NOTE: v1.03 had problems with links within the PDF being of type /Fit rather than /XYZ,
@@ -91,15 +93,28 @@ def fixup_mmp_pdf( fname, output_fname, fix_zoom, optimize_web, rotate, log=None
 
         # save the updated PDF
         log_msg( "progress", "Saving the fixed-up PDF..." )
-        # NOTE: Setting a blank password will encrypt the file, but doesn't require the user to enter a password
-        # when opening the file (but it will be marked as "SECURE" in the UI).
+        # NOTE: Setting a blank password will encrypt the file, but doesn't require the user
+        # to enter a password when opening the file (but it will be marked as "SECURE" in the UI).
         enc = Encryption( owner="", user="" )
-        def save_progress( pct ):
-            if pct > 0 and pct % 10 == 0:
-                log_msg( "verbose", "- Saved {}%.", pct )
-        pdf.save( output_fname, encryption=enc, linearize=optimize_web,
-            progress = save_progress
+        # NOTE: We can't log progress messages if we're being run from the webapp, since log_msg()
+        # will try to relinquish the CPU, but it will be in the wrong thread. We could disable this,
+        # but it's more trouble than it's worth.
+        thread = SavePdfThread( pdf,
+            output_fname, enc, optimize_web,
+            log_msg = None if relinq else log_msg
         )
+        thread.start()
+        pass_no = 0
+        while True:
+            if thread.done:
+                break
+            pass_no += 1
+            if relinq:
+                relinq( "Saving PDF: {}".format( pass_no ), delay=1 )
+            else:
+                time.sleep( 1 )
+        if thread.exc:
+            raise thread.exc
 
         # compare the file sizes
         old_size = os.path.getsize( fname )
@@ -111,6 +126,40 @@ def fixup_mmp_pdf( fname, output_fname, fix_zoom, optimize_web, rotate, log=None
             log_msg( "verbose", "The updated PDF file is about {}% {} than the original file.",
                 abs(ratio), "larger" if ratio > 0 else "smaller"
             )
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+class SavePdfThread( threading.Thread ):
+    """Save the PDF in a background thread."""
+
+    def __init__( self, pdf, fname, enc, optimize_web, log_msg ):
+        # initialize
+        super().__init__( daemon=True )
+        self.pdf = pdf
+        self.fname = fname
+        self.enc = enc
+        self.optimize_web = optimize_web
+        self._log_msg = log_msg
+        # initialize
+        self.done = False
+        self.exc = None
+
+    def run( self ):
+        """Run the worker thread."""
+        try:
+            self.pdf.save( self.fname,
+                encryption=self.enc, linearize=self.optimize_web,
+                progress=self._log_progress
+            )
+        except Exception as ex: #pylint: disable=broad-except
+            self.exc = ex
+        finally:
+            self.done = True
+
+    def _log_progress( self, pct ):
+        """Log progress."""
+        if self._log_msg and pct > 0 and pct % 10 == 0:
+            self._log_msg( "verbose", "- Saved {}%.", pct )
 
 # ---------------------------------------------------------------------
 

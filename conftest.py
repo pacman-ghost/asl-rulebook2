@@ -13,6 +13,7 @@ import pytest
 from flask import url_for
 
 from asl_rulebook2.webapp import app
+from asl_rulebook2.webapp.run_server import run_server
 from asl_rulebook2.webapp.tests.control_tests import ControlTests
 from asl_rulebook2.webapp.tests.utils import wait_for
 
@@ -140,11 +141,6 @@ def _make_webapp():
         else:
             app.config.pop( "FORCE_CACHED_SEARCHDB", None )
         app.config[ "IGNORE_MISSING_DATA_FILES" ] = True
-        # check if we will be running the prepare tests
-        if _pytest_options.enable_prepare:
-            # yup - initialize the socketio server
-            from asl_rulebook2.webapp.run_server import init_prepare_socketio
-            init_prepare_socketio( app )
         # NOTE: We run the server thread as a daemon so that it won't prevent the tests from finishing
         # when they're done. However, this makes it difficult to know when to shut the server down,
         # and, in particular, clean up the gRPC service. We send an EndTests message at the end of each test,
@@ -152,7 +148,7 @@ def _make_webapp():
         # or otherwise finish eearly before they get a chance to send the EndTests message), but we can
         # live with it.
         thread = threading.Thread(
-            target = lambda: app.run( host="0.0.0.0", port=_FLASK_WEBAPP_PORT, use_reloader=False ),
+            target = lambda: run_server( "0.0.0.0", _FLASK_WEBAPP_PORT, False ),
             daemon = True
         )
         thread.start()

@@ -23,7 +23,12 @@ _COMPRESSION_CHOICES = [
 
 # ---------------------------------------------------------------------
 
-def prepare_pdf( pdf_file, title, targets_fname, vo_notes_fname, yoffset, output_fname, compression, gs_path, log_msg ):
+def prepare_pdf( pdf_file,
+    title, targets_fname, vo_notes_fname, yoffset,
+    output_fname, compression,
+    gs_path,
+    log_msg, relinq=None
+):
     """Prepare the MMP eASLRB PDF."""
 
     # load the targets
@@ -47,7 +52,7 @@ def prepare_pdf( pdf_file, title, targets_fname, vo_notes_fname, yoffset, output
                 pdf_file
             ]
             start_time = time.time()
-            subprocess.run( args, check=True )
+            _run_subprocess( args, "compression", relinq )
             elapsed_time = time.time() - start_time
             log_msg( "timestamp", "- Elapsed time: {}".format(
                 datetime.timedelta( seconds=int(elapsed_time) ) )
@@ -101,11 +106,38 @@ def prepare_pdf( pdf_file, title, targets_fname, vo_notes_fname, yoffset, output
         args.extend( [ "-f", pdf_file ] )
         args.append( pdfmarks_file.name )
         start_time = time.time()
-        subprocess.run( args, check=True )
+        _run_subprocess( args, "pdfmarks", relinq )
         elapsed_time = time.time() - start_time
         log_msg( "timestamp", "- Elapsed time: {}".format(
             datetime.timedelta( seconds=int(elapsed_time) ) )
         )
+
+# ---------------------------------------------------------------------
+
+def _run_subprocess( args, caption, relinq ):
+    """Run an external process."""
+    proc = subprocess.Popen( args )
+    try:
+        pass_no = 0
+        while True:
+            pass_no += 1
+            # check if the external process has finished
+            rc = proc.poll()
+            if rc is not None:
+                # yup - check its exit code
+                if rc != 0:
+                    raise RuntimeError( "Sub-process \"{}\" failed: rc={}".format( caption, rc ) )
+                break
+            # delay for a bit before checking again
+            if relinq:
+                relinq( "Waiting for {}: {}".format( caption, pass_no ), delay=1 )
+            else:
+                time.sleep( 1 )
+    except ( Exception, KeyboardInterrupt ):
+        # NOTE: We want to kill the child process if something goes wrong, and while it's not
+        # 100%-guaranteed that we will get here (e.g. if we get killed), it's good enuf.
+        proc.terminate()
+        raise
 
 # ---------------------------------------------------------------------
 

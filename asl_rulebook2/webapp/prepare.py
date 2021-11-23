@@ -1,9 +1,7 @@
 """ Analyze the MMP eASLRB PDF and prepare the data files. """
 
-import threading
 import zipfile
 import io
-import time
 import base64
 import traceback
 import logging
@@ -33,21 +31,20 @@ def prepare_data_files():
     download_url = url_for( "download_prepared_data" )
 
     # initialize the socketio server
+    # NOTE: We wait until the client tells us to start processing (instead of when the POST data arrives),
+    # since it might not be ready to receive events, and miss the first few.
     sio = globvars.socketio_server
-    if not sio:
-        raise RuntimeError( "The socketio server has not been started." )
     @sio.on( "start" )
-    def on_start( data ): #pylint: disable=unused-variable,unused-argument
-        # start the worker thread that prepares the data files
-        # NOTE: We don't do this when the POST request comes in, but wait until the client
-        # tells us it's ready (otherwise, it might miss the first event or two).
-        def worker():
-            try:
-                _do_prepare_data_files( args, download_url )
-            except Exception as ex: #pylint: disable=broad-except
-                _logger.error( "PREPARE ERROR: %s\n%s", ex, traceback.format_exc() )
-                globvars.socketio_server.emit( "error", str(ex) )
-        threading.Thread( target=worker, daemon=True ).start()
+    def on_start(): #pylint: disable=unused-variable
+        # NOTE: We used to do this in a background thread (when we were using the Flask development server),
+        # but flask-socketio + eventlet handles concurrency differently, and we now do it synchronously,
+        # and periodically relinquish the CPU, so that we remain responsive (otherwise the client pings timeout,
+        # and it disconnects).
+        try:
+            _do_prepare_data_files( args, download_url )
+        except Exception as ex: #pylint: disable=broad-except
+            _logger.error( "PREPARE ERROR: %s\n%s", ex, traceback.format_exc() )
+            globvars.socketio_server.emit( "error", str(ex) )
 
     return "ok"
 
@@ -100,6 +97,11 @@ def _do_prepare_data_files( args, download_url ):
                 msg = msg[2:]
             sio.emit( msg_type, msg )
             msg_types.add( msg_type )
+            # NOTE: There's no particular significance in relinquishing the CPU here, but this function
+            # is called regularly during processing, so it's a convenient place to do it.
+            # This function also gets passed into the low-level extract code (as a logging handler),
+            # which results in that code also relinquishing at regular intervals.
+            _relinq( msg )
 
         # NOTE: The plan was to allow the user to change the default parameters in the UI,
         # but this can be done (ahem) later. For now, if they really need to change something,
@@ -143,7 +145,8 @@ def _do_prepare_data_files( args, download_url ):
                 targets_file.name, vo_notes_file.name, 5,
                 prepared_file.name, "ebook",
                 gs_path,
-                log_msg
+                log_msg,
+                relinq = _relinq
             )
 
         # fixup the PDF
@@ -153,7 +156,8 @@ def _do_prepare_data_files( args, download_url ):
             fixup_mmp_pdf( prepared_file.name,
                 fixedup_file.name,
                 False, True, True,
-                log_msg
+                log_msg,
+                relinq = _relinq
             )
             # read the final PDF data
             with open( fixedup_file.name, "rb" ) as fp:
@@ -178,6 +182,10 @@ def _do_prepare_data_files( args, download_url ):
 
     # NOTE: We don't bother shutting down the socketio server, since the user
     # has to restart the server, using the newly-prepared data files.
+
+def _relinq( msg=None, delay=0 ): #pylint: disable=unused-argument
+    """Relinquish the CPU (to keep the webapp server responsive)."""
+    globvars.socketio_server.sleep( delay )
 
 # ---------------------------------------------------------------------
 
@@ -215,5 +223,5 @@ def _test_progress( npasses=100, status=10, warnings=None, errors=None, delay=0.
             sio.emit( "error", "Progress {}: error".format( 1+i ) )
         else:
             sio.emit( "progress", "Progress {}.".format( 1+i ) )
-        time.sleep( float( delay ) )
+        _relinq( delay=float(delay) )
     sio.emit( "done" )

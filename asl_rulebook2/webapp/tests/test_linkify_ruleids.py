@@ -85,9 +85,9 @@ def test_errata( webdriver, webapp ):
     init_webapp( webapp, webdriver )
 
     # test ruleid's in an errata's search result
-    results = _do_search( "errata", True )
+    results = _do_search( "errata", False )
     assert len(results) == 2
-    sr_elem = find_children( "#search-results .sr" )[ 1 ]
+    sr_elem = find_children( "#search-results .sr" )[ 0 ]
     _check_ruleid( find_child(".caption",sr_elem), ("asl-rulebook!","A3.8") )
     _dismiss_rule_info_popup()
     _check_ruleid( find_child(".content",sr_elem), ("asl-rulebook!","A.2") )
@@ -98,7 +98,7 @@ def test_errata( webdriver, webapp ):
         ( ".content", ("asl-rulebook!","A.2") )
     ]
     for sel, target in expected:
-        _do_search( "errata", False )
+        _do_search( "errata attached", False )
         sr_elem = find_child( "#rule-info .rule-info" )
         _check_ruleid( find_child(sel,sr_elem), target )
         _dismiss_rule_info_popup()

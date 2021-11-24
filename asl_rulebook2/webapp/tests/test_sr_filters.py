@@ -73,8 +73,8 @@ def test_sr_filtering( webdriver, webapp ):
 
     # test filtering errata search results
     do_test( "errata", "errata", [
-        { "sr_type": "index", "title": "CCPh" },
         { "sr_type": "anno", "caption": "A3.8" },
+        { "sr_type": "index", "title": "CCPh" },
     ] )
 
     # test filtering ASOP search results

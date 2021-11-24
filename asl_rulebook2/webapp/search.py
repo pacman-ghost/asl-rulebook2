@@ -381,15 +381,16 @@ def _adjust_sort_order( results ):
     """Adjust the sort order of the search results."""
 
     results2 = []
-    def extract_sr( func ):
+    def extract_sr( func, force=False ):
         # move results that pass the filter function to the new list
         i = 0
         while True:
             if i >= len(results):
                 break
-            # NOTE: We never prefer small entries (i.e .have no ruleref's)
-            # e.g. those that only contain a "see also".
-            if func( results[i] ) and len(results[i].get("rulerefs",[])) > 0:
+            # NOTE: We don't want to prefer useless entries e.g. those that only contain a "see also".
+            nruleids = len( results[i].get( "ruleids", [] ) )
+            nrulerefs = len( results[i].get( "rulerefs", [] ) )
+            if func( results[i] ) and ( force or nruleids > 0 or nrulerefs > 0 ):
                 results2.append( results[i] )
                 del results[i]
             else:
@@ -414,6 +415,21 @@ def _adjust_sort_order( results ):
     # prefer search results that have a match in the subtitle
     extract_sr(
         lambda sr: _BEGIN_HIGHLIGHT in get(sr,"subtitle")
+    )
+    # prefer user annotations
+    extract_sr(
+        lambda sr: get(sr,"sr_type") == "user-anno",
+        force = True
+    )
+    # prefer errata
+    extract_sr(
+        lambda sr: get(sr,"sr_type") == "errata",
+        force = True
+    )
+    # prefer rules
+    extract_sr(
+        lambda sr: get(sr,"sr_type") == "index",
+        force = True
     )
 
     # include any remaining search results

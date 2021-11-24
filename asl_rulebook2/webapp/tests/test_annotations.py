@@ -15,20 +15,20 @@ def test_full_errata( webapp, webdriver ):
     check_sr_filters( [ "index", "errata" ] )
 
     # bring up the errata and check it in the search results
-    results = do_search( "test" )
+    results = do_search( "erratum" )
     expected = {
         "sr_type": "anno",
         "caption": "E1",
         "icon": "errata.png",
-        "content": "This is a ((test)) erratum.",
+        "content": "This is a test ((erratum)).",
         "source": "Test Fixture"
     }
-    assert len(results) == 2
+    assert len(results) == 1
     result = results[0]
     assert result == expected
 
     # bring up the errata in the rule info popup and check it there
-    find_child( "#search-results .ruleid a" ).click()
+    find_child( "#search-results .auto-ruleid" ).click()
     anno = _unload_rule_info_anno()
     expected = {
         "caption": "E1",

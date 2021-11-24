@@ -33,6 +33,7 @@ code { display: block ; margin: 5px 0 5px 20px ; }
     padding: 10px ;
     background: #f0f0f0 ;
     font-size: 80% ; font-style: italic ; text-align: center ;
+    transition: opacity 5s ;
 }
 
 #download-panel {

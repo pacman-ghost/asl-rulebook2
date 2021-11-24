@@ -185,13 +185,15 @@ gPrepareApp.component( "progress-panel", {
     data() { return {
         socketIOClient: null,
         statusBlocks: [],
-        isDone: false,
+        isDone: false, isError: false
     } ; },
 
+    // FUDGE! Opening the PDF is synchronous, which makes the webserver unresponsive while it's happening,
+    // so we delay showing the "features" link to the user until we get past that point.
     template: `
 <div id="progress-panel">
     <status-block v-for="sb in statusBlocks" :statusBlock=sb :key=sb />
-    <div v-if="!isDone" class="loading">
+    <div v-if="!isDone && !isError" :style="{ opacity: statusBlocks.length >= 3 ? 1 : 0 }" class="loading">
         <img src="/static/images/loading.gif" />
         <div style="margin-top:3px;">
             While you're waiting, you can <br> check out the features <a href="/doc/features/index.html" target="_blank">here</a>.
@@ -211,8 +213,10 @@ gPrepareApp.component( "progress-panel", {
             // initialize the socketio client
             this.socketIOClient = io.connect() ; //eslint-disable-line no-undef
             this.socketIOClient.on( "disconnect", () => {
-                if ( ! this.isDone )
+                if ( ! this.isDone ) {
                     this.$emit( "fatal", "The server has gone away. Please restart it, then reload this page." ) ;
+                    this.isError = true ;
+                }
             } ) ;
             this.socketIOClient.on( "status", (msg) => { this.addStatusBlock( msg ) ; } ) ;
             this.socketIOClient.on( "progress", (msg) => { this.addProgressMsg( "info", msg ) ; } ) ;

@@ -40,4 +40,7 @@ setup(
     data_files = [
         ( "asl-rulebook2", ["LICENSE.txt"] ),
     ],
+    entry_points = {
+        "console_scripts": "asl-rulebook2 = asl_rulebook2.webapp.run_server:main",
+    }
 )

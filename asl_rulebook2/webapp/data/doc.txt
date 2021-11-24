@@ -1,0 +1,3 @@
+The doc/ symlink is to allow documents in the root doc/ directory to be served, even if this package has been installed in non-editable mode (i.e. into site-packages).
+
+See get_doc() for more details.

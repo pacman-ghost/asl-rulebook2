@@ -20,7 +20,7 @@ from asl_rulebook2.webapp import app, globvars
 @click.option( "--force-init-delay", default=0, help="Force the webapp to initialize (#seconds delay)." )
 @click.option( "--debug","flask_debug", is_flag=True, default=False, help="Run Flask in debug mode." )
 def main( bind_addr, data_dir, force_init_delay, flask_debug ):
-    """Run the webapp server."""
+    """Run the asl-rulebook2 webapp server."""
 
     # initialize
     flask_port = None

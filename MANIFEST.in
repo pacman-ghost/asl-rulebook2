@@ -1,0 +1,9 @@
+recursive-include asl_rulebook2/webapp/config *.*
+recursive-include asl_rulebook2/webapp/data *.*
+recursive-include asl_rulebook2/webapp/static *.*
+recursive-include asl_rulebook2/webapp/templates *.*
+recursive-include asl_rulebook2/extract/data *.*
+
+recursive-include asl_rulebook2/webapp/tests/fixtures *.*
+
+recursive-include asl_rulebook2/bin *.*

@@ -31,7 +31,9 @@ def init_asop( startup_msgs, logger ):
     dname = os.path.join( data_dir, "asop/" )
     if not os.path.isdir( dname ):
         return None, None, None, None
-    _asop_dir = dname
+    # NOTE: We need to resolve symlinks, since we use send_from_directory() to serve files, and it doesn't allow
+    # symlinks that point outside of the base directory (e.g. asop/ in the "full" fixtures data set).
+    _asop_dir = os.path.realpath( dname )
     fname = os.path.join( _asop_dir, "asop.css" )
     if os.path.isfile( fname ):
         user_css_url = url_for( "get_asop_file", path="asop.css" )

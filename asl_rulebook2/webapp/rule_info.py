@@ -32,7 +32,7 @@ def init_qa( startup_msgs, logger ):
     if not data_dir:
         return None, None
     base_dir = os.path.join( data_dir, "q+a" )
-    _qa_images_dir = os.path.join( base_dir, "images" )
+    _qa_images_dir = os.path.abspath( os.path.join( base_dir, "images" ) )
 
     qa = {}
     def load_qa( fname ):

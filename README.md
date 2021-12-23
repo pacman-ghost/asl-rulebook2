@@ -3,7 +3,7 @@
 <img align="right" src="doc/features/images/asl-rulebook2.small.png">
 This program lets you search through the ASL Rulebook index, and jump directly to the rules you're looking for.
 
-Click [here](doc/features/) for more details.
+Click [here](https://htmlpreview.github.io/?https://github.com/pacman-ghost/asl-rulebook2/blob/master/doc/features/index.html) for more details.
 <br clear="all">
 
 With [some work](doc/extend.md), you can also:

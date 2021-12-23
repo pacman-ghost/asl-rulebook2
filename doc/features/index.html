@@ -1,12 +1,9 @@
 <!DOCTYPE html>
-<!-- IMPORTANT! This needs to be on the gh-pages branch to be viewable as HTML! :-/
-        FIXME! Or we might be able to do in the repo's Settings.
--->
 <html lang="en">
 
 <head>
 <meta charset="utf-8">
-<title> ASL Rulebook 2 features </title>
+<title> ASL Rulebook 2 </title>
 <link rel="stylesheet" type="text/css" href="imageZoom/jquery.imageZoom.css" />
 <link rel="stylesheet" type="text/css" href="global.css" />
 </head>
@@ -14,7 +11,9 @@
 <body>
 
 <p> <img src="images/search-heat.png" class="imageZoom" style="float:right;width:40%;margin-left:1em;">
-<h2> Basic features </h2>
+<h2> ASL Rulebook 2
+<a href="https://github.com/pacman-ghost/asl-rulebook2/releases" target="_blank"><img src="images/download.png" style="height:0.75em;"></a>
+</h2>
 <p> Out-of-the-box, this program gives you full-text search over the ASLRB index.
 <p> It will jump to the exact position in the eASLRB PDF for a rule when you click on a search result.
 <p> And if the rule has any associated footnotes, these will be shown in a popup.
@@ -26,7 +25,7 @@
 
 
 <p> <img src="images/search-cellar.png" class="imageZoom" style="float:right;width:40%;margin-left:1em;">
-<h2> Adding rules for other modules </h2>
+<h3> Adding rules for other modules </h3>
 <p> Once you've got the program up and running, you can then think about extending it. It's a lot of work, but the results are insanely cool!
 <p> To the right, I've searched for <em>"cellar"</em>, and the program has found results from <em>Red Barricades</em>. The rules for this are referenced in the ASLRB index, but the content is not yet in the MMP eASLRB.
 <p> However, I've installed a PDF scan of the rules, plus information about where each rule is within that PDF (a <em>"targets file"</em>), and so when I click on a search result, it seamlessly opens the <em>Red Barricades</em> PDF and jumps to that rule.
@@ -43,7 +42,7 @@ You can also include third-party modules that are not referenced in the ASLRB in
 
 
 <p> <img src="images/ruleinfo-encircled.png" class="imageZoom" style="float:right;width:30%;margin-left:1em;">
-<h2> Showing Q+A and errata </h2>
+<h3> Showing Q+A and errata </h3>
 Q+A and errata can also be included. This is a <em>lot</em> of work, but the results are amazing. If you click on a rule that has Q+A and/or errata associated with it, they will be shown, alongside the rule you're looking for.
 <p> Here, I've searched for <em>"encircled"</em>, and the program has automatically shown Q+A and errata for rule <span class="ruleid">A7.7</span>.
 <div class="info"> Note that this errata is actually obsolete, since it's already been incorporated into the current MMP eASLRB, but it's shown here as an example. </div>
@@ -56,14 +55,14 @@ Going back to the search results, you can see these Q+A entries included in ther
 
 
 <p> <img src="images/user-anno.png" class="imageZoom" style="float:left;width:30%;margin-right:1em;">
-<h2> User annotations </h2>
+<h3> User annotations </h3>
 You can also add your own notes to the search engine.
 <p> Here, I've added a note about what <em>Majority Squad Type</em> means, and a link back to the Game Squad post that talks about it.
 <br clear="all">
 
 
 <p> <img src="images/asop.png" class="imageZoom" style="float:right;width:40%;margin-left:1em;">
-<h2> Advanced Sequence Of Play </h2>
+<h3> Advanced Sequence Of Play </h3>
 Finally, the ASOP can also be included, with clickable links to each of the referenced rules.
 <p> ASOP entries are also included in search results: <br>
 <img src="images/asop-sr.png" class="imageZoom" style="margin:1em 0 0 2em;width:30%;">
